@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Weather | AgriSmart</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/weather.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>AgriSmart</span>
+        </div>
+
+        <nav class="nav-links">
+
+            <a href="index.html">Home</a>
+
+        
+
+        </nav>
+
+        <button class="profile-btn">
+            Farmer
+        </button>
+
+    </header>
+
+
+    <!-- ================= WEATHER PAGE ================= -->
+
+    <main class="weather-page">
+
+        <!-- Page Heading -->
+
+        <div class="weather-heading">
+
+            <h1>Weather Information</h1>
+
+            <p>
+                Check weather conditions and make better farming decisions.
+            </p>
+
+        </div>
+
+
+        <!-- ================= LOCATION ================= -->
+
+  <!-- ================= LOCATION SEARCH ================= -->
+
+<section class="location-section">
+
+    <label for="location">
+        📍 Search Location
+    </label>
+
+    <div class="location-search">
+
+        <input
+            type="text"
+            id="location"
+            placeholder="Enter city, village or location"
+        >
+
+        <button id="searchWeather" type="button" aria-label="Search">
+            🔍
+        </button>
+
+
+    </div>
+    <div id="suggestions"></div>
+
+</section>
+
+
+        <!-- ================= CURRENT WEATHER ================= -->
+
+        <section class="current-weather">
+
+            <div class="current-main">
+
+                <span class="weather-icon">☀️</span>
+
+                <div>
+                    <h2>28°C</h2>
+                    <p>Partly Cloudy</p>
+                </div>
+
+            </div>
+
+
+            <div class="weather-details">
+
+                <div class="weather-detail">
+                    <span>💧</span>
+                    <div>
+                        <small>Humidity</small>
+                        <strong>72%</strong>
+                    </div>
+                </div>
+
+
+                <div class="weather-detail">
+                    <span>💨</span>
+                    <div>
+                        <small>Wind Speed</small>
+                        <strong>12 km/h</strong>
+                    </div>
+                </div>
+
+
+                <div class="weather-detail">
+                    <span>🌧️</span>
+                    <div>
+                        <small>Rainfall</small>
+                        <strong>10 mm</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= 5 DAY FORECAST ================= -->
+
+        <section class="forecast-section">
+
+            <h2>5-Day Forecast</h2>
+
+            <div class="forecast-container">
+
+
+                <div class="forecast-card">
+
+                    <h3>Mon</h3>
+
+                    <span class="forecast-icon">☀️</span>
+
+                    <strong>30°C</strong>
+
+                    <p>24°C</p>
+
+                    <small>🌧️ 10%</small>
+
+                </div>
+
+
+                <div class="forecast-card">
+
+                    <h3>Tue</h3>
+
+                    <span class="forecast-icon">🌦️</span>
+
+                    <strong>28°C</strong>
+
+                    <p>23°C</p>
+
+                    <small>🌧️ 35%</small>
+
+                </div>
+
+
+                <div class="forecast-card">
+
+                    <h3>Wed</h3>
+
+                    <span class="forecast-icon">🌧️</span>
+
+                    <strong>27°C</strong>
+
+                    <p>22°C</p>
+
+                    <small>🌧️ 65%</small>
+
+                </div>
+
+
+                <div class="forecast-card">
+
+                    <h3>Thu</h3>
+
+                    <span class="forecast-icon">☁️</span>
+
+                    <strong>29°C</strong>
+
+                    <p>23°C</p>
+
+                    <small>🌧️ 25%</small>
+
+                </div>
+
+
+                <div class="forecast-card">
+
+                    <h3>Fri</h3>
+
+                    <span class="forecast-icon">☀️</span>
+
+                    <strong>31°C</strong>
+
+                    <p>24°C</p>
+
+                    <small>🌧️ 15%</small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= FARMING ADVICE ================= -->
+
+        <section class="farming-advice">
+
+            <h2>🌱 Farming Advice</h2>
+
+            <div class="advice-container">
+
+                <div class="advice-card">
+                    <span>💧</span>
+                    <div>
+                        <h3>Irrigation</h3>
+                        <p>Recommended</p>
+                    </div>
+                </div>
+
+
+                <div class="advice-card">
+                    <span>🌧️</span>
+                    <div>
+                        <h3>Rain Alert</h3>
+                        <p>Rain expected tomorrow</p>
+                    </div>
+                </div>
+
+
+                <div class="advice-card">
+                    <span>🛡️</span>
+                    <div>
+                        <h3>Crop Protection</h3>
+                        <p>Protect crops from excess moisture.</p>
+                    </div>
+                </div>
+
+
+                <div class="advice-card">
+                    <span>🌾</span>
+                    <div>
+                        <h3>Farm Activity</h3>
+                        <p>Morning is suitable for farm activities.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ADDITIONAL INFORMATION ================= -->
+
+        <section class="additional-info">
+
+            <h2>📊 Additional Information</h2>
+
+            <div class="additional-container">
+
+                <div class="additional-card">
+                    <span>🌅</span>
+                    <small>Sunrise</small>
+                    <strong>6:12 AM</strong>
+                </div>
+
+
+                <div class="additional-card">
+                    <span>🌇</span>
+                    <small>Sunset</small>
+                    <strong>6:48 PM</strong>
+                </div>
+
+
+                <div class="additional-card">
+                    <span>📈</span>
+                    <small>Pressure</small>
+                    <strong>1012 hPa</strong>
+                </div>
+
+
+                <div class="additional-card">
+                    <span>👁️</span>
+                    <small>Visibility</small>
+                    <strong>8 km</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+    <script src="js/weather.js"></script>
+
+
+</body>
+
+</html>

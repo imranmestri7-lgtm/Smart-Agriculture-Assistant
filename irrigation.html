@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Irrigation | AgriSmart</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/irrigation.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <header class="navbar">
+
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>AgriSmart</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+       
+        </nav>
+
+        <button class="profile-btn">Farmer</button>
+
+    </header>
+
+
+    <!-- Main Page -->
+    <main class="irrigation-page">
+
+        <!-- Hero Section -->
+        <section class="irrigation-hero">
+
+            <div class="irrigation-hero-content">
+
+                <div class="hero-badge">
+                    💧 Smart Agriculture
+                </div>
+
+                <h1>
+                    Smart Irrigation
+                    <span>Management</span>
+                </h1>
+
+                <p>
+                    Make better irrigation decisions using soil,
+                    weather and crop conditions.
+                </p>
+
+                <button class="hero-btn" id="startIrrigationButton">
+                    Check Irrigation →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- Irrigation Form -->
+        <section class="irrigation-section">
+
+            <div class="irrigation-card">
+
+                <div class="section-heading">
+
+                    <span class="section-number">01</span>
+
+                    <div>
+                        <h2>Irrigation Information</h2>
+
+                        <p>
+                            Enter your field conditions to check
+                            irrigation requirements.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <!-- Crop -->
+                    <div class="form-group">
+
+                        <label for="crop">
+                            🌾 Select Crop
+                        </label>
+
+                        <select id="crop">
+                            <option value="">Select your crop</option>
+                            <option>Rice</option>
+                            <option>Wheat</option>
+                            <option>Cotton</option>
+                            <option>Sugarcane</option>
+                            <option>Maize</option>
+                            <option>Soybean</option>
+                            <option>Tomato</option>
+                            <option>Potato</option>
+                        </select>
+
+                    </div>
+
+
+                    <!-- Soil Moisture -->
+                    <div class="form-group">
+
+                        <label for="soilMoisture">
+                            💧 Soil Moisture (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="soilMoisture"
+                            min="0"
+                            max="100"
+                            placeholder="e.g. 35"
+                        >
+
+                    </div>
+
+
+                    <!-- Temperature -->
+                    <div class="form-group">
+
+                        <label for="temperature">
+                            🌡️ Temperature (°C)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="temperature"
+                            placeholder="e.g. 28"
+                        >
+
+                    </div>
+
+
+                    <!-- Humidity -->
+                    <div class="form-group">
+
+                        <label for="humidity">
+                            ☁️ Humidity (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="humidity"
+                            min="0"
+                            max="100"
+                            placeholder="e.g. 65"
+                        >
+
+                    </div>
+
+
+                    <!-- Rainfall -->
+                    <div class="form-group">
+
+                        <label for="rainfall">
+                            🌧️ Recent Rainfall (mm)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="rainfall"
+                            min="0"
+                            placeholder="e.g. 10"
+                        >
+
+                    </div>
+
+
+                    <!-- Location -->
+                    <div class="form-group">
+
+                        <label for="location">
+                            📍 Location
+                        </label>
+
+                        <select id="location">
+
+                            <option value="">
+                                Select location
+                            </option>
+
+                            <option>Maharashtra</option>
+                            <option>Karnataka</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Other</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Action Button -->
+                <div class="form-action">
+
+                    <button
+                        class="check-irrigation-btn"
+                        id="checkIrrigationButton"
+                    >
+                        💧 Check Irrigation Requirement
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Result Placeholder -->
+        <section class="irrigation-result" id="irrigationResult">
+
+            <div class="result-card">
+
+                <div class="result-icon">
+                    💧
+                </div>
+
+                <h2>Irrigation Recommendation</h2>
+
+                <p>
+                    Your irrigation recommendation will appear here
+                    after the irrigation system is connected.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- Smart Irrigation Benefits -->
+        <section class="benefits-section">
+
+            <div class="section-title">
+
+                <span>WHY SMART IRRIGATION?</span>
+
+                <h2>
+                    Use Water More Efficiently
+                </h2>
+
+                <p>
+                    Smart irrigation helps farmers make
+                    informed water management decisions.
+                </p>
+
+            </div>
+
+
+            <div class="benefits-container">
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        💧
+                    </div>
+
+                    <h3>Save Water</h3>
+
+                    <p>
+                        Reduce unnecessary water usage
+                        by understanding soil moisture.
+                    </p>
+
+                </div>
+
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        🌱
+                    </div>
+
+                    <h3>Healthy Crops</h3>
+
+                    <p>
+                        Provide crops with suitable
+                        amounts of water.
+                    </p>
+
+                </div>
+
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        🌦️
+                    </div>
+
+                    <h3>Weather Based</h3>
+
+                    <p>
+                        Consider rainfall and weather
+                        conditions for better decisions.
+                    </p>
+
+                </div>
+
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        📊
+                    </div>
+
+                    <h3>Data Driven</h3>
+
+                    <p>
+                        Use field data to support
+                        irrigation planning.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- How It Works -->
+        <section class="how-it-works">
+
+            <div class="section-title">
+
+                <span>HOW IT WORKS</span>
+
+                <h2>
+                    Smart Irrigation Process
+                </h2>
+
+            </div>
+
+
+            <div class="process-container">
+
+                <div class="process-step">
+
+                    <div class="process-number">
+                        01
+                    </div>
+
+                    <h3>Enter Field Data</h3>
+
+                    <p>
+                        Provide crop, soil moisture
+                        and weather information.
+                    </p>
+
+                </div>
+
+
+                <div class="process-step">
+
+                    <div class="process-number">
+                        02
+                    </div>
+
+                    <h3>Analyze Conditions</h3>
+
+                    <p>
+                        The system analyzes the
+                        available field conditions.
+                    </p>
+
+                </div>
+
+
+                <div class="process-step">
+
+                    <div class="process-number">
+                        03
+                    </div>
+
+                    <h3>Get Recommendation</h3>
+
+                    <p>
+                        Receive an irrigation
+                        recommendation.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/irrigation.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Farmer Assistant | AgriSmart</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/farmer.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>AgriSmart</span>
+        </div>
+
+        <button class="profile-btn">
+            👨‍🌾 Farmer
+        </button>
+
+    </header>
+
+
+    <!-- FARMER ASSISTANT -->
+    <main class="farmer-page">
+
+        <!-- PAGE HEADER -->
+        <section class="assistant-header">
+
+            <div class="assistant-icon">
+                🤖
+            </div>
+
+            <div>
+                <h1>Farmer Assistant</h1>
+
+                <p>
+                    Your smart farming assistant for better agricultural decisions.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- CHATBOT -->
+       
+<section class="chatbot-container">
+
+    <!-- CHAT HEADER -->
+    <div class="chat-header">
+
+        <div class="chat-profile">
+
+            <div class="chat-avatar">
+                🤖
+            </div>
+
+            <div class="chat-profile-info">
+                <h2>AgriSmart Assistant</h2>
+                <span class="online-status">
+                    <i></i> Online
+                </span>
+            </div>
+
+        </div>
+
+        <div class="language-selector">
+
+            <label for="language">🌐</label>
+
+            <select id="language">
+                <option value="en">English</option>
+                <option value="mr">मराठी</option>
+                <option value="hi">हिंदी</option>
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHAT AREA -->
+    <div class="chat-area" id="chatArea">
+
+        <!-- AI MESSAGE -->
+        <div class="message assistant-message">
+
+            <div class="message-avatar">
+                🤖
+            </div>
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    AgriSmart AI
+                </div>
+
+                <p>Hello Farmer! 👋</p>
+
+                <p>
+                    I am your AgriSmart Assistant.
+                    I can help you with crops, irrigation,
+                    weather, plant diseases and farming guidance.
+                </p>
+
+                <span class="message-time">
+                    Just now
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+
+            <button>🌾 Crop Recommendation</button>
+
+            <button>💧 Irrigation Advice</button>
+
+            <button>🍃 Disease Detection</button>
+
+            <button>🌦️ Weather Information</button>
+
+            <button>🌱 Fertilizer Recommendation</button>
+
+            <button>🐛 Pest Management</button>
+
+            <button>📊 Market Prices</button>
+
+            <button>🌍 Soil Health</button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHAT INPUT -->
+<div class="chat-input-area">
+
+    <button class="add-button" title="Add">
+        +
+    </button>
+    
+
+    <input
+        type="text"
+        id="messageInput"
+        placeholder="Ask anything"
+    >
+
+    <button class="think-button" id="thinkButton">
+        🧠 <span>Think</span>
+    </button>
+
+    <button class="mic-button" id="voiceButton" title="Voice Input">
+        🎙️
+    </button>
+
+    <button class="voice-send-button" id="sendButton" title="Voice">
+        <span>〽</span>
+    </button>
+
+</div>
+<div class="add-menu" id="addMenu">
+
+    <button type="button" id="uploadLeaf">
+        🍃 Upload Leaf Image
+    </button>
+
+    <button type="button" id="uploadFile">
+        📎 Upload File
+    </button>
+
+    <button type="button" id="openCamera">
+        📷 Use Camera
+    </button>
+
+</div>
+
+</section>
+
+
+            <!-- SMART FARMING SUPPORT -->
+            <section class="assistant-features">
+
+                <div class="section-title">
+
+                    <span>
+                        SMART FARMING SUPPORT
+                    </span>
+
+                    <h2>
+                        What Can I Help You With?
+                    </h2>
+
+                    <p>
+                        Get useful farming guidance through one smart assistant.
+                    </p>
+
+                </div>
+
+
+                <!-- SIX FEATURE CARDS -->
+                <div class="feature-grid">
+
+
+                    <!-- CARD 1 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            🌾
+                        </div>
+
+                        <h3>
+                            Crop Recommendation
+                        </h3>
+
+                        <p>
+                            Get crop suggestions based on soil and environmental conditions.
+                        </p>
+
+                    </div>
+
+
+                    <!-- CARD 2 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            💧
+                        </div>
+
+                        <h3>
+                            Irrigation Advice
+                        </h3>
+
+                        <p>
+                            Get guidance about when and how much to irrigate your crop.
+                        </p>
+
+                    </div>
+
+
+                    <!-- CARD 3 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            🍃
+                        </div>
+
+                        <h3>
+                            Disease Detection
+                        </h3>
+
+                        <p>
+                            Analyze crop disease information and get treatment guidance.
+                        </p>
+
+                    </div>
+
+
+                    <!-- CARD 4 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            🌦️
+                        </div>
+
+                        <h3>
+                            Weather Information
+                        </h3>
+
+                        <p>
+                            Understand weather conditions for better farming decisions.
+                        </p>
+
+                    </div>
+
+
+                    <!-- CARD 5 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            🌱
+                        </div>
+
+                        <h3>
+                            Fertilizer Recommendation
+                        </h3>
+
+                        <p>
+                            Get fertilizer guidance according to crop and soil conditions.
+                        </p>
+
+                    </div>
+
+
+                    <!-- CARD 6 -->
+                    <div class="assistant-feature-card">
+
+                        <div class="feature-icon">
+                            🐛
+                        </div>
+
+                        <h3>
+                            Pest Management
+                        </h3>
+
+                        <p>
+                            Get information about common pests and their management.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+<script src="js/farmer.js"></script>
+</body>
+
+</html>

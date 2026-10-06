@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Disease Detection | AgriSmart</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/disease.css">
+
+</head>
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo">
+
+            <span class="logo-icon">🌱</span>
+
+            <span>AgriSmart</span>
+
+        </div>
+
+
+        <nav class="nav-links">
+
+            <a href="index.html">Home</a>
+
+            
+
+        </nav>
+
+
+        <button class="profile-btn">
+            Farmer
+        </button>
+
+    </header>
+
+
+
+    <!-- ================= PAGE ================= -->
+
+    <main class="disease-page">
+
+
+        <!-- ================= HERO ================= -->
+
+        <section class="disease-hero">
+
+
+            <div class="hero-image">
+
+
+                <img src="images/farmer.jpg" alt="Farmer scanning plant" class="leaf-example">
+
+            </div>
+
+
+            <div class="hero-overlay"></div>
+
+
+            <div class="hero-content">
+
+                <span class="hero-badge">
+                    🌿 AI-Powered Agriculture
+                </span>
+
+
+                <h1>
+                    Plant Disease Detection
+                </h1>
+
+
+                <p>
+                    Upload or capture a crop leaf image
+                    and let our AI system help identify
+                    possible plant diseases.
+                </p>
+
+
+                <a
+                    href="#scanner"
+                    class="hero-button">
+
+                    Start Disease Scan →
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= SCANNER ================= -->
+
+        <section
+            class="scanner-section"
+            id="scanner">
+
+
+            <div class="scanner-card">
+
+
+                <!-- Scanner Heading -->
+
+                <div class="scanner-heading">
+
+
+                    <span class="scanner-icon">
+                        📸
+                    </span>
+
+
+                    <div>
+
+                        <span class="small-title">
+                            SMART SCANNER
+                        </span>
+
+
+                        <h2>
+                            Disease Scanner
+                        </h2>
+
+
+                        <p>
+                            Provide a clear image of the
+                            affected leaf.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Crop Selection -->
+
+                <div class="form-group">
+
+                    <label for="crop">
+
+                        🍃 Crop
+
+                        <span>
+                            (Optional)
+                        </span>
+
+                    </label>
+
+
+                    <select id="crop">
+
+                        <option value="">
+                            Select Crop
+                        </option>
+
+                        <option value="tomato">
+                            Tomato
+                        </option>
+
+                        <option value="potato">
+                            Potato
+                        </option>
+
+                        <option value="rice">
+                            Rice
+                        </option>
+
+                        <option value="wheat">
+                            Wheat
+                        </option>
+
+                        <option value="maize">
+                            Maize
+                        </option>
+
+                        <option value="cotton">
+                            Cotton
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- Upload Area -->
+
+                <div class="upload-area">
+
+
+                    <img
+                        src="images/disease2.jpg"
+                        alt="Diseased crop leaf"
+                        class="leaf-example"
+                    >
+
+
+                    <div class="upload-content">
+
+
+                        <div class="upload-icon">
+                            📁
+                        </div>
+
+
+                        <h3>
+                            Add Leaf Image
+                        </h3>
+
+
+                        <p>
+                            Choose a clear image of
+                            the affected leaf.
+                        </p>
+
+
+                        <!-- Upload -->
+
+                        <label
+                            for="leafImage"
+                            class="upload-btn">
+
+                            📁 Upload Image
+
+                        </label>
+
+
+                        <input
+                            type="file"
+                            id="leafImage"
+                            accept="image/*"
+                            hidden
+                        >
+
+
+                        <span class="or-text">
+                            OR
+                        </span>
+
+
+                        <!-- Camera -->
+
+                        <button
+                            type="button"
+                            class="camera-btn"
+                            id="cameraButton">
+
+                            📷 Use Camera
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Image Preview -->
+
+                <div
+                    class="image-preview"
+                    id="imagePreview"
+                    style="display:none;">
+
+                    <img
+                        id="previewImage"
+                        src=""
+                        alt="Selected leaf image"
+                    >
+
+
+                    <div>
+
+                        <h3>
+                            Image Ready
+                        </h3>
+
+
+                        <p>
+                            Your leaf image is ready
+                            for analysis.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Camera -->
+
+                <div
+                    class="camera-container"
+                    id="cameraContainer"
+                    style="display:none;">
+
+
+                    <video
+                        id="camera"
+                        autoplay
+                        playsinline>
+                    </video>
+
+
+                    <div class="camera-buttons">
+
+
+                        <button
+                            type="button"
+                            id="captureButton"
+                            class="capture-btn">
+
+                            📸 Capture Leaf
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="closeCameraButton"
+                            class="close-camera-btn">
+
+                            ✕ Close Camera
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Analyze -->
+
+                <button
+                    type="button"
+                    class="analyze-btn"
+                    id="analyzeButton">
+
+                    🔍 Analyze Disease
+
+                </button>
+
+
+                <p class="analysis-note">
+
+                    Your image will be analyzed using
+                    the AI disease detection system.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= TIPS ================= -->
+
+        <section class="tips-section">
+
+
+            <div class="info-card">
+
+
+                <div class="section-title">
+
+                    <span>📸</span>
+
+
+                    <div>
+
+                        <span class="small-title">
+                            BETTER RESULTS
+                        </span>
+
+
+                        <h2>
+                            Tips for Better Detection
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="tips-container">
+
+
+                    <div class="tip-item">
+
+                        <span>☀️</span>
+
+                        <h3>
+                            Good Lighting
+                        </h3>
+
+                        <p>
+                            Take the photo in clear
+                            natural light.
+                        </p>
+
+                    </div>
+
+
+                    <div class="tip-item">
+
+                        <span>🍃</span>
+
+                        <h3>
+                            Focus on Leaf
+                        </h3>
+
+                        <p>
+                            Make sure the affected leaf
+                            is clearly visible.
+                        </p>
+
+                    </div>
+
+
+                    <div class="tip-item">
+
+                        <span>📷</span>
+
+                        <h3>
+                            Clear Image
+                        </h3>
+
+                        <p>
+                            Avoid blurry or low-quality
+                            photos.
+                        </p>
+
+                    </div>
+
+
+                    <div class="tip-item">
+
+                        <span>🔍</span>
+
+                        <h3>
+                            Show Symptoms
+                        </h3>
+
+                        <p>
+                            Capture spots or damage
+                            clearly.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= EARLY DETECTION ================= -->
+
+        <section class="early-detection-section">
+
+
+            <div class="info-card">
+
+
+                <div class="section-title">
+
+                    <span>🌱</span>
+
+
+                    <div>
+
+                        <span class="small-title">
+                            PROTECT YOUR CROP
+                        </span>
+
+
+                        <h2>
+                            Why Early Detection?
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="benefits-container">
+
+
+                    <div class="benefit-item">
+
+                        <div class="benefit-icon">
+                            🔍
+                        </div>
+
+
+                        <h3>
+                            Identify Problems Early
+                        </h3>
+
+
+                        <p>
+                            Detect possible diseases before
+                            they spread throughout the crop.
+                        </p>
+
+                    </div>
+
+
+                    <div class="benefit-item">
+
+                        <div class="benefit-icon">
+                            💊
+                        </div>
+
+
+                        <h3>
+                            Get Suitable Guidance
+                        </h3>
+
+
+                        <p>
+                            Understand possible treatment
+                            and management practices.
+                        </p>
+
+                    </div>
+
+
+                    <div class="benefit-item">
+
+                        <div class="benefit-icon">
+                            🛡️
+                        </div>
+
+
+                        <h3>
+                            Protect Your Crop
+                        </h3>
+
+
+                        <p>
+                            Take timely action and reduce
+                            the risk of disease spreading.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= FARMER ASSISTANT ================= -->
+
+        <section class="assistant-info-section">
+
+
+            <div class="assistant-card">
+
+
+                <div class="assistant-icon">
+                    🤖
+                </div>
+
+
+                <div class="assistant-content">
+
+
+                    <span class="small-title">
+                        SMART FARMER ASSISTANT
+                    </span>
+
+
+                    <h2>
+                        Get Your Disease Guidance
+                        Through Farmer Assistant
+                    </h2>
+
+
+                    <p>
+                        After disease analysis, the
+                        Farmer Assistant will provide
+                        disease information, symptoms,
+                        treatment and prevention guidance.
+                    </p>
+
+                </div>
+
+
+                <div class="assistant-arrow">
+                    →
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= SCAN AGAIN ================= -->
+
+        <section class="scan-again-section">
+
+
+            <button
+                type="button"
+                class="scan-again-btn"
+                id="scanAgainButton">
+
+                🔄 Scan Another Leaf
+
+            </button>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- JavaScript -->
+
+    <script src="js/disease.js"></script>
+
+</body>
+
+</html>

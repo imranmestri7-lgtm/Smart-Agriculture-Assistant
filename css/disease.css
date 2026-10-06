@@ -1,0 +1,1041 @@
+/* =====================================================
+   AGRISMART - PREMIUM DISEASE DETECTION UI
+   ===================================================== */
+
+
+/* ================= PAGE ================= */
+
+.disease-page {
+    background: #f5f8f5;
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+.disease-page * {
+    box-sizing: border-box;
+}
+
+
+/* ================= HERO ================= */
+
+.disease-hero {
+    position: relative;
+    min-height: 520px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.hero-image {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(5, 35, 15, 0.88),
+        rgba(5, 35, 15, 0.58),
+        rgba(5, 35, 15, 0.20)
+    );
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 1100px;
+    color: white;
+    padding: 70px 20px;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 9px 16px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+}
+
+.disease-hero h1 {
+    max-width: 650px;
+    margin: 0;
+    font-size: 52px;
+    line-height: 1.08;
+    font-weight: 750;
+    letter-spacing: -1px;
+}
+
+.disease-hero p {
+    max-width: 620px;
+    margin: 20px 0 28px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #edf5ed;
+}
+
+.hero-button {
+    display: inline-block;
+    padding: 14px 24px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #21652b;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.25s ease;
+}
+
+.hero-button:hover {
+    transform: translateY(-2px);
+    background: #edf7ee;
+}
+
+
+/* ================= SECTIONS ================= */
+
+.scanner-section,
+.tips-section,
+.early-detection-section,
+.assistant-info-section {
+    width: 100%;
+    max-width: 1120px;
+    margin: auto;
+    padding: 32px 20px;
+}
+
+
+/* ================= SCANNER ================= */
+
+.scanner-card {
+    max-width: 1000px;
+    margin: -45px auto 40px;
+    padding: 30px 38px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e9e2;
+    border-radius: 28px;
+
+    box-shadow: 0 18px 50px rgba(30, 70, 35, 0.12);
+
+    position: relative;
+    z-index: 5;
+}
+
+.scanner-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.scanner-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #e9f6ea;
+    font-size: 25px;
+}
+
+.small-title {
+    display: block;
+    margin-bottom: 6px;
+    color: #4d8a55;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.scanner-heading h2 {
+    margin: 0;
+    color: #1d4723;
+    font-size: 28px;
+}
+
+.scanner-heading p {
+    margin: 7px 0 0;
+    color: #748075;
+    font-size: 14px;
+}
+
+
+/* ================= FORM ================= */
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    color: #344637;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.form-group label span {
+    color: #929b92;
+    font-weight: 400;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1px solid #d2ddd2;
+    border-radius: 11px;
+    outline: none;
+    background: white;
+    color: #405044;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    border-color: #3d9147;
+    box-shadow: 0 0 0 4px rgba(61, 145, 71, 0.09);
+}
+
+
+/* ================= UPLOAD ================= */
+
+.upload-area {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 25px;
+    align-items: center;
+    padding: 20px;
+    border: 2px dashed #c3d4c4;
+    border-radius: 17px;
+    background: #f9fbf9;
+    transition: 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: #5b9e63;
+    background: #f5faf5;
+}
+
+.leaf-example {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    border-radius: 13px;
+}
+
+.upload-content {
+    text-align: center;
+}
+
+.upload-icon {
+    font-size: 38px;
+    margin-bottom: 5px;
+}
+
+.upload-area h3 {
+    margin: 5px 0;
+    color: #315436;
+    font-size: 19px;
+}
+
+.upload-area p {
+    margin: 7px 0 18px;
+    color: #7b867d;
+    font-size: 13px;
+}
+
+
+/* ================= BUTTONS ================= */
+
+.upload-btn,
+.camera-btn,
+.analyze-btn,
+.capture-btn,
+.close-camera-btn,
+.scan-again-btn {
+    border: none;
+    cursor: pointer;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.25s ease;
+}
+
+
+/* Upload */
+
+.upload-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #e4f3e5;
+    color: #287033;
+}
+
+.upload-btn:hover {
+    background: #d5ebd6;
+}
+
+
+/* OR */
+
+.or-text {
+    display: block;
+    margin: 14px 0;
+    color: #a0a8a0;
+    font-size: 12px;
+}
+
+
+/* Camera */
+
+.camera-btn {
+    padding: 12px 20px;
+    background: #2d7135;
+    color: white;
+}
+
+.camera-btn:hover {
+    background: #235b2a;
+    transform: translateY(-1px);
+}
+
+
+/* Analyze */
+
+.analyze-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #21652b;
+    color: white;
+    font-size: 15px;
+}
+
+.analyze-btn:hover {
+    background: #194f21;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(33, 101, 43, 0.20);
+}
+
+.analysis-note {
+    margin: 13px 0 0;
+    text-align: center;
+    color: #899289;
+    font-size: 11px;
+}
+
+
+/* ================= IMAGE PREVIEW ================= */
+
+.image-preview {
+    margin-top: 22px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-radius: 14px;
+    background: #f2f8f2;
+    border: 1px solid #dce8dc;
+}
+
+.image-preview img {
+    width: 110px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.image-preview h3 {
+    margin: 0 0 5px;
+    color: #2e6335;
+    font-size: 16px;
+}
+
+.image-preview p {
+    margin: 0;
+    color: #7b867c;
+    font-size: 13px;
+}
+
+
+/* ================= CAMERA ================= */
+
+.camera-container {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #152016;
+}
+
+.camera-container video {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 11px;
+    display: block;
+    margin-bottom: 18px;
+}
+
+.camera-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.capture-btn {
+    padding: 12px 22px;
+    background: #3c9147;
+    color: white;
+}
+
+.capture-btn:hover {
+    background: #31753a;
+}
+
+.close-camera-btn {
+    padding: 12px 22px;
+    background: #ffffff;
+    color: #444;
+}
+
+.close-camera-btn:hover {
+    background: #eeeeee;
+}
+
+
+/* ================= INFO CARD ================= */
+
+.info-card {
+    background: white;
+    padding: 34px;
+    border-radius: 20px;
+    border: 1px solid #e2e9e2;
+    box-shadow: 0 8px 30px rgba(30, 70, 35, 0.06);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 25px;
+}
+
+.section-title > span {
+    font-size: 27px;
+}
+
+.section-title h2 {
+    margin: 0;
+    color: #234c29;
+    font-size: 24px;
+}
+
+
+/* ================= TIPS ================= */
+
+.tips-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.tip-item {
+    padding: 23px 15px;
+    text-align: center;
+    background: #f7faf7;
+    border: 1px solid #e9efe9;
+    border-radius: 14px;
+    transition: 0.25s ease;
+}
+
+.tip-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(30, 70, 35, 0.08);
+}
+
+.tip-item > span {
+    display: block;
+    font-size: 31px;
+    margin-bottom: 10px;
+}
+
+.tip-item h3 {
+    margin: 0 0 7px;
+    color: #315536;
+    font-size: 15px;
+}
+
+.tip-item p {
+    margin: 0;
+    color: #7b857c;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ================= BENEFITS ================= */
+
+.benefits-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.benefit-item {
+    padding: 28px 20px;
+    text-align: center;
+    background: #f7faf7;
+    border-radius: 15px;
+    border: 1px solid #e7eee7;
+}
+
+.benefit-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e7f4e8;
+    border-radius: 14px;
+    font-size: 25px;
+}
+
+.benefit-item h3 {
+    margin: 0 0 8px;
+    color: #315536;
+    font-size: 17px;
+}
+
+.benefit-item p {
+    margin: 0;
+    color: #7b857c;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* ================= FARMER ASSISTANT ================= */
+
+.assistant-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 30px;
+    border-radius: 19px;
+    background: linear-gradient(
+        135deg,
+        #1d5226,
+        #34763d
+    );
+    color: white;
+    box-shadow: 0 12px 30px rgba(29, 82, 38, 0.18);
+}
+
+.assistant-icon {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 29px;
+}
+
+.assistant-content {
+    flex: 1;
+}
+
+.assistant-content .small-title {
+    color: #cce6cf;
+}
+
+.assistant-content h2 {
+    margin: 0 0 7px;
+    font-size: 21px;
+}
+
+.assistant-content p {
+    max-width: 700px;
+    margin: 0;
+    color: #e2eee3;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.assistant-arrow {
+    font-size: 28px;
+    opacity: 0.8;
+}
+
+
+/* ================= SCAN AGAIN ================= */
+
+.scan-again-section {
+    text-align: center;
+    padding: 10px 20px 45px;
+}
+
+.scan-again-btn {
+    padding: 13px 25px;
+    background: white;
+    color: #2d7135;
+    border: 1px solid #bcd1bd;
+}
+
+.scan-again-btn:hover {
+    background: #edf6ee;
+    transform: translateY(-2px);
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+
+    .disease-hero h1 {
+        font-size: 42px;
+    }
+
+    .upload-area {
+        grid-template-columns: 1fr;
+    }
+
+    .leaf-example {
+        height: 230px;
+    }
+
+    .tips-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .disease-hero {
+        min-height: 470px;
+    }
+
+    .hero-content {
+        padding: 50px 15px;
+    }
+
+    .disease-hero h1 {
+        font-size: 34px;
+    }
+
+    .disease-hero p {
+        font-size: 15px;
+    }
+
+    .scanner-card {
+        margin-top: -35px;
+        padding: 23px;
+        border-radius: 18px;
+    }
+
+    .scanner-heading h2 {
+        font-size: 23px;
+    }
+
+    .info-card {
+        padding: 24px 18px;
+    }
+
+    .tips-container,
+    .benefits-container {
+        grid-template-columns: 1fr;
+    }
+
+    .assistant-card {
+        align-items: flex-start;
+        padding: 23px;
+    }
+
+    .assistant-arrow {
+        display: none;
+    }
+
+    .image-preview {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .camera-buttons {
+        flex-direction: column;
+    }
+
+    .capture-btn,
+    .close-camera-btn {
+        width: 100%;
+    }
+
+}
+
+/* ===== DISEASE SCANNER COMPACT DESIGN ===== */
+
+.scanner-card {
+    max-width: 1000px;
+    margin: 25px auto 55px;
+    padding: 32px 42px;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.10);
+    position: relative;
+    z-index: 5;
+}
+
+.scanner-heading {
+    margin-bottom: 20px;
+}
+
+.scanner-heading h2 {
+    margin: 5px 0 8px;
+    font-size: 32px;
+}
+
+.scanner-heading p {
+    margin: 0;
+}
+
+
+/* Photo Box */
+
+.upload-area {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: #f6faf6;
+    border: 2px dashed #b8d8be;
+
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+
+/* Home Page Style Photo Frame */
+
+.leaf-example {
+    width: 420px;
+    height: 250px;
+
+    object-fit: cover;
+    display: block;
+
+    border-radius: 20px 70px 20px 70px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+
+    transition: transform 0.3s ease;
+}
+
+.leaf-example:hover {
+    transform: scale(1.02);
+}
+
+
+/* Preview Image */
+
+#imagePreview {
+    width: 100%;
+    text-align: center;
+}
+
+#previewImage {
+    width: 420px;
+    height: 250px;
+
+    object-fit: cover;
+
+    border-radius: 20px 70px 20px 70px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .scanner-card {
+        margin: 20px 15px 40px;
+        padding: 25px 20px;
+        border-radius: 22px;
+    }
+
+    .scanner-heading h2 {
+        font-size: 26px;
+    }
+
+  .upload-area {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    background: transparent;
+
+    border-radius: 35px;
+    overflow: hidden;
+}
+
+.leaf-example {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+
+    border-radius: 35px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+.leaf-example:hover {
+    transform: scale(1.02);
+}
+}
+
+/* =================================
+   DISEASE PHOTO - HOME PAGE STYLE
+================================= */
+
+.disease-photo {
+    width: 100%;
+    height: 330px;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 35px;
+
+    margin: 20px 0 25px;
+
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+
+@media (max-width: 650px) {
+
+    .disease-photo {
+        height: 240px;
+        border-radius: 25px;
+    }
+
+    .scanner-card {
+        margin: -30px 15px 35px;
+        padding: 22px;
+    }
+}
+
+
+/* ================================
+   PREMIUM DISEASE HERO
+================================ */
+
+.disease-page {
+    background: #f4f8f5;
+    padding-top: 36px;
+}
+
+/* Main Hero Box */
+.disease-hero {
+    position: relative;
+    width: calc(100% - 100px);
+    max-width: 1500px;
+    height: 625px;
+    margin: 0 auto 55px;
+    border-radius: 34px;
+    overflow: hidden;
+    background: #163d25;
+    box-shadow: 0 18px 45px rgba(20, 60, 35, 0.15);
+}
+
+/* Farmer Image */
+.disease-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Dark Green Overlay */
+.disease-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(4, 45, 22, 0.88) 0%,
+        rgba(4, 45, 22, 0.68) 35%,
+        rgba(4, 45, 22, 0.20) 65%,
+        rgba(4, 45, 22, 0.05) 100%
+    );
+    z-index: 1;
+}
+
+/* Hero Content */
+.disease-hero-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    max-width: 650px;
+    padding-left: 80px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Badge */
+.disease-hero-badge {
+    display: inline-block;
+    padding: 11px 20px;
+    margin-bottom: 24px;
+
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 30px;
+
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Heading */
+.disease-hero h1 {
+    margin: 0 0 25px;
+
+    color: white;
+    font-size: 62px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+/* Description */
+.disease-hero p {
+    max-width: 600px;
+    margin: 0 0 35px;
+
+    color: white;
+    font-size: 21px;
+    line-height: 1.7;
+}
+
+/* Start Scan Button */
+.disease-hero .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 17px 30px;
+
+    color: #166534;
+    background: white;
+
+    border: none;
+    border-radius: 13px;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.disease-hero .hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 900px) {
+
+    .disease-page {
+        padding-top: 20px;
+    }
+
+    .disease-hero {
+        width: calc(100% - 30px);
+        height: 560px;
+        border-radius: 25px;
+    }
+
+    .disease-hero-content {
+        padding: 40px;
+        max-width: 600px;
+    }
+
+    .disease-hero h1 {
+        font-size: 48px;
+    }
+
+    .disease-hero p {
+        font-size: 18px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .disease-hero {
+        width: calc(100% - 20px);
+        height: 600px;
+        margin-bottom: 35px;
+    }
+
+    .disease-hero-content {
+        padding: 30px;
+        justify-content: center;
+    }
+
+    .disease-hero h1 {
+        font-size: 40px;
+    }
+
+    .disease-hero p {
+        font-size: 17px;
+        line-height: 1.5;
+    }
+}

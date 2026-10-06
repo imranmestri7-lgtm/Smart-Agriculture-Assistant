@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+backend/venv/
+
+# Environment variables
+backend/.env
+
+# Uploaded files
+backend/uploads/
+
+# Machine learning models
+ml/models/
+
+# macOS
+.DS_Store

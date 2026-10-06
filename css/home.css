@@ -1,0 +1,531 @@
+/* ================= HOME PAGE ================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f7faf7;
+    color: #1f2937;
+}
+
+
+/* ================= NAVBAR ================= */
+
+.navbar {
+    width: 100%;
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 5%;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5ebe5;
+
+    box-shadow: 0 4px 18px rgba(20, 60, 30, 0.06);
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+
+/* Logo */
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #14532d;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.logo-icon {
+    font-size: 26px;
+}
+
+
+/* Navigation */
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.nav-links a {
+    color: #475569;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: #15803d;
+}
+
+
+/* Farmer Button */
+
+.profile-btn {
+    padding: 9px 17px;
+
+    background: #eff8ef;
+    color: #166534;
+
+    border: 1px solid #cfe4d0;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.2s ease;
+}
+
+.profile-btn:hover {
+    background: #dcfce7;
+}
+
+
+/* ================= HERO ================= */
+
+.hero {
+    width: 92%;
+    max-width: 1350px;
+
+    height: 500px;
+
+    margin: 28px auto;
+
+    display: flex;
+    align-items: center;
+
+    padding: 50px 7%;
+
+    border-radius: 28px;
+
+    overflow: hidden;
+
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(8, 45, 23, 0.82),
+            rgba(8, 45, 23, 0.45),
+            rgba(8, 45, 23, 0.08)
+        ),
+        url("../images/tractorr.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    box-shadow: 0 12px 35px rgba(20, 60, 30, 0.14);
+}
+
+
+/* ================= HERO TEXT ================= */
+
+.hero-content {
+    max-width: 600px;
+
+    margin-left: 0;
+
+    /* Move complete text upward */
+    transform: translateY(-55px);
+}
+
+
+/* Heading */
+.hero-content h1 {
+    color: #ffffff;
+
+    font-size: 52px;
+    font-weight: 800;
+
+    line-height: 1.08;
+
+    margin-bottom: 20px;
+
+    white-space: nowrap;
+}
+
+
+
+/* Description */
+
+.hero-content p {
+    color: #ffffff;
+
+    font-size: 17px;
+
+    font-weight: 500;
+
+    line-height: 1.6;
+
+    margin-bottom: 28px;
+}
+
+
+/* Get Started */
+
+.hero-content button {
+    padding: 13px 26px;
+
+    background: #22a447;
+    color: white;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.hero-content button:hover {
+    background: #16863a;
+    transform: translateY(-2px);
+}
+
+
+
+/* ================= FEATURES ================= */
+
+.features {
+    padding: 70px 7%;
+
+    background: #f7faf7;
+
+    text-align: center;
+}
+
+.features h2 {
+    color: #14532d;
+
+    font-size: 32px;
+
+    margin-bottom: 40px;
+}
+
+
+.feature-container {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 22px;
+}
+
+
+.feature-card {
+    padding: 28px 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5ebe5;
+
+    border-radius: 16px;
+
+    text-align: left;
+
+    box-shadow: 0 6px 20px rgba(20, 60, 30, 0.06);
+
+    transition: 0.25s ease;
+}
+
+
+.feature-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 12px 28px rgba(20, 60, 30, 0.10);
+}
+
+
+.feature-card h3 {
+    color: #166534;
+
+    font-size: 17px;
+
+    margin-bottom: 12px;
+}
+
+
+.feature-card p {
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1000px) {
+
+    .navbar {
+        padding: 0 3%;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .nav-links a {
+        font-size: 12px;
+    }
+
+    .feature-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .navbar {
+        height: auto;
+        min-height: 70px;
+
+        padding: 15px 5%;
+
+        flex-wrap: wrap;
+
+        gap: 15px;
+    }
+
+    .nav-links {
+        width: 100%;
+
+        order: 3;
+
+        justify-content: center;
+
+        flex-wrap: wrap;
+    }
+
+
+    /* Mobile Hero */
+
+    .hero {
+        width: 92%;
+
+        min-height: 500px;
+
+        height: auto;
+
+        padding: 50px 7%;
+    }
+
+
+    /* Mobile Hero Text */
+
+    .hero-content {
+        max-width: 100%;
+
+        margin-left: 0;
+
+        transform: translateY(-25px);
+    }
+
+
+    .hero-content h1 {
+        font-size: 40px;
+    }
+
+
+    .hero-content p {
+        font-size: 16px;
+    }
+
+
+    .feature-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ================= FEATURE CARDS ================= */
+
+.features {
+    padding: 65px 7%;
+    background: #f7faf7;
+    text-align: center;
+}
+
+.features h2 {
+    color: #14532d;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+}
+
+.feature-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+.feature-card {
+    width: 100%;
+    min-height: 170px;
+
+    padding: 25px 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e1ebe3;
+    border-radius: 18px;
+
+    text-align: left;
+
+    box-shadow: 0 8px 25px rgba(20, 60, 30, 0.07);
+
+    transition: all 0.25s ease;
+
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 28px rgba(20, 60, 30, 0.11);
+}
+
+.feature-card h3 {
+    color: #166534;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    margin-bottom: 12px;
+
+    white-space: nowrap;
+}
+
+.feature-card p {
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    margin: 0;
+}
+
+
+/* ================= WHY CHOOSE ================= */
+
+.why-choose {
+    width: 92%;
+    max-width: 1350px;
+
+    margin: 20px auto 70px;
+
+    padding: 55px 7%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 60px;
+
+    background: #ffffff;
+
+    border: 1px solid #e1ebe3;
+    border-radius: 24px;
+
+    box-shadow: 0 8px 25px rgba(20, 60, 30, 0.06);
+}
+
+.why-content {
+    flex: 1;
+}
+
+.why-content h2 {
+    color: #14532d;
+
+    font-size: 32px;
+    font-weight: 800;
+
+    margin-bottom: 16px;
+}
+
+.why-content p {
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+
+    max-width: 500px;
+}
+
+.why-points {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.why-item {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    padding: 18px;
+
+    background: #f7faf7;
+
+    border-radius: 14px;
+
+    border: 1px solid #e5ebe5;
+}
+
+.why-item > span {
+    font-size: 25px;
+}
+
+.why-item h3 {
+    color: #166534;
+
+    font-size: 16px;
+
+    margin-bottom: 6px;
+}
+
+.why-item p {
+    color: #64748b;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}

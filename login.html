@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | AgriSmart</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f4faf3;
+        }
+
+        .auth-page {
+            min-height: calc(100vh - 72px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 22px;
+            border: 1px solid #dce8dc;
+            box-shadow: 0 15px 40px rgba(22, 101, 52, 0.10);
+        }
+
+        .auth-icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            border-radius: 18px;
+            font-size: 30px;
+        }
+
+        .auth-card h1 {
+            margin: 0;
+            text-align: center;
+            color: #14532d;
+            font-size: 30px;
+        }
+
+        .auth-subtitle {
+            margin: 10px 0 30px;
+            text-align: center;
+            color: #718071;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #304936;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px;
+            border: 1px solid #d4ded5;
+            border-radius: 11px;
+            outline: none;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .form-group input:focus {
+            border-color: #55a94e;
+            box-shadow: 0 0 0 4px rgba(85, 169, 78, 0.10);
+        }
+
+        .auth-button {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #18753d, #42a851);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(35, 120, 60, 0.22);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            display: none;
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            display: block;
+            color: #991b1b;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .message.success {
+            display: block;
+            color: #166534;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .auth-footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #718071;
+            font-size: 13px;
+        }
+
+        .auth-footer a {
+            color: #15803d;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .back-home a {
+            color: #64748b;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        .back-home a:hover {
+            color: #15803d;
+        }
+
+        @media (max-width: 600px) {
+            .auth-card {
+                padding: 30px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+
+        <div class="logo">
+            <span class="logo-icon">🌱</span>
+            <span>AgriSmart</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+        </nav>
+
+        <button class="farmer-btn" onclick="window.location.href='login.html'">
+            Farmer
+        </button>
+
+    </header>
+
+
+    <!-- LOGIN -->
+    <main class="auth-page">
+
+        <div class="auth-card">
+
+            <div class="auth-icon">
+                👨‍🌾
+            </div>
+
+            <h1>Welcome Back</h1>
+
+            <p class="auth-subtitle">
+                Login to access your AgriSmart Farmer Assistant.
+            </p>
+
+            <div id="message" class="message"></div>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="auth-button"
+                    id="loginButton"
+                >
+                    Login
+                </button>
+
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account?
+                <a href="register.html">Create Account</a>
+            </div>
+
+            <div class="back-home">
+                <a href="index.html">← Back to Home</a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="js/login.js"></script>
+
+</body>
+
+</html>

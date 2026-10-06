@@ -1,0 +1,1319 @@
+/* =====================================================
+   FARMER ASSISTANT - PREMIUM CSS
+   ===================================================== */
+
+
+/* =====================================================
+   RESET
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   BODY
+   ===================================================== */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f8f5;
+    color: #1f3525;
+}
+
+
+/* =====================================================
+   FARMER PAGE
+   ===================================================== */
+
+.farmer-page {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 45px 25px 80px;
+}
+
+
+/* =====================================================
+   ASSISTANT HEADER
+   ===================================================== */
+
+.assistant-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.assistant-icon {
+    width: 62px;
+    height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8f4ea;
+    border-radius: 18px;
+
+    font-size: 30px;
+}
+
+.assistant-header h1 {
+    font-size: 34px;
+    margin-bottom: 7px;
+    color: #173d22;
+}
+
+.assistant-header p {
+    font-size: 16px;
+    color: #6b7d70;
+}
+
+
+/* =====================================================
+   CHATBOT CONTAINER
+   ===================================================== */
+
+.chatbot-container {
+    width: 100%;
+    max-width: 1000px;
+
+    margin: 0 auto 70px;
+
+    background: #ffffff;
+
+    border: 1px solid #dce8de;
+    border-radius: 24px;
+
+    overflow: hidden;
+
+    box-shadow: 0 18px 45px rgba(27, 70, 38, 0.10);
+}
+
+
+/* =====================================================
+   CHAT HEADER
+   ===================================================== */
+
+.chat-header {
+    width: 100%;
+    min-height: 82px;
+
+    padding: 15px 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #e3ece5;
+
+    background: #ffffff;
+}
+
+
+/* =====================================================
+   CHAT PROFILE
+   ===================================================== */
+
+.chat-profile {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.chat-avatar {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8f4ea;
+    border-radius: 14px;
+
+    font-size: 24px;
+}
+
+.chat-profile h2 {
+    font-size: 17px;
+    color: #203c28;
+    margin-bottom: 4px;
+}
+
+.chat-profile span {
+    font-size: 12px;
+    color: #3f9a54;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   LANGUAGE SELECTOR
+   ===================================================== */
+
+.language-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.language-selector label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #506457;
+}
+
+.language-selector select {
+    width: 150px;
+    height: 48px;
+
+    padding: 0 14px;
+
+    border: 1px solid #cbdccf;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #294832;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    outline: none;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.language-selector select:hover {
+    border-color: #8eb799;
+}
+
+.language-selector select:focus {
+    border-color: #4d915b;
+    box-shadow: 0 0 0 3px rgba(77, 145, 91, 0.12);
+}
+
+
+/* =====================================================
+   CHAT AREA
+   ===================================================== */
+
+.chat-area {
+    min-height: 430px;
+
+    padding: 30px;
+
+    background: #fbfdfb;
+}
+
+
+/* =====================================================
+   CHAT MESSAGE
+   ===================================================== */
+
+.message {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #e8f4ea;
+    border-radius: 12px;
+
+    font-size: 20px;
+}
+
+.message-content {
+    max-width: 650px;
+
+    padding: 15px 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e0e9e2;
+
+    border-radius: 5px 18px 18px 18px;
+
+    box-shadow: 0 5px 18px rgba(35, 70, 42, 0.05);
+}
+
+.message-content p {
+    font-size: 14px;
+    line-height: 1.65;
+
+    color: #4d6052;
+
+    margin-bottom: 7px;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =====================================================
+   QUICK ACTIONS
+   TOP 8 BOXES
+   ===================================================== */
+
+.quick-actions {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 12px;
+
+    margin-top: 25px;
+}
+
+.quick-actions button {
+    min-height: 52px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #dce8de;
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    color: #31543a;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.quick-actions button:hover {
+    transform: translateY(-2px);
+
+    border-color: #8fba97;
+
+    background: #f2f8f3;
+
+    box-shadow: 0 7px 18px rgba(43, 89, 51, 0.08);
+}
+
+
+/* =====================================================
+   CHAT INPUT AREA
+   ===================================================== */
+
+.chat-input-area {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 17px 20px;
+
+    border-top: 1px solid #e1eae3;
+
+    background: #ffffff;
+}
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.chat-input-area input {
+    flex: 1;
+
+    height: 48px;
+
+    padding: 0 16px;
+
+    border: 1px solid #d5e1d8;
+    border-radius: 12px;
+
+    outline: none;
+
+    font-size: 14px;
+
+    color: #263f2d;
+
+    background: #fbfdfb;
+
+    transition: 0.2s ease;
+}
+
+.chat-input-area input::placeholder {
+    color: #9aa99e;
+}
+
+.chat-input-area input:focus {
+    border-color: #6da578;
+
+    background: #ffffff;
+
+    box-shadow: 0 0 0 3px rgba(83, 145, 91, 0.10);
+}
+
+
+/* =====================================================
+   VOICE BUTTON
+   ===================================================== */
+
+.voice-button {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #d5e5d8;
+    border-radius: 12px;
+
+    background: #eef7ef;
+
+    color: #28703a;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.voice-button:hover {
+    transform: translateY(-2px);
+
+    background: #e1f1e4;
+
+    border-color: #9bc4a2;
+}
+
+
+/* =====================================================
+   SEND BUTTON
+   ===================================================== */
+
+.send-button {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #28733a;
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.send-button:hover {
+    transform: translateY(-2px);
+
+    background: #1f6030;
+
+    box-shadow: 0 7px 18px rgba(40, 115, 58, 0.22);
+}
+
+
+/* =====================================================
+   SMART FARMING SUPPORT
+   ===================================================== */
+
+.assistant-features {
+    width: 100%;
+}
+
+
+/* =====================================================
+   SECTION TITLE
+   ===================================================== */
+
+.section-title {
+    text-align: center;
+
+    margin-bottom: 24px;
+}
+
+.section-title span {
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    color: #4d8d59;
+}
+
+.section-title h2 {
+    font-size: 30px;
+
+    color: #193c23;
+
+    margin-bottom: 8px;
+}
+
+.section-title p {
+    font-size: 15px;
+
+    color: #718077;
+}
+
+
+/* =====================================================
+   FEATURE GRID
+   ONLY FOR THE 6 LOWER BOXES
+   ===================================================== */
+
+.feature-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 16px;
+}
+
+
+/* =====================================================
+   FEATURE CARD
+   ===================================================== */
+
+.assistant-feature-card {
+    height: 145px;
+
+    padding: 15px 17px;
+
+    background: #ffffff;
+
+    border: 1px solid #dfe9e1;
+
+    border-radius: 15px;
+
+    transition: all 0.25s ease;
+}
+
+.assistant-feature-card:hover {
+    transform: translateY(-3px);
+
+    border-color: #a8c8ad;
+
+    box-shadow: 0 10px 24px rgba(35, 72, 42, 0.08);
+}
+
+
+/* =====================================================
+   FEATURE ICON
+   ===================================================== */
+
+.assistant-feature-card .feature-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 8px;
+
+    background: #edf7ee;
+
+    border-radius: 10px;
+
+    font-size: 18px;
+}
+
+
+/* =====================================================
+   FEATURE CARD TITLE
+   ===================================================== */
+
+.assistant-feature-card h3 {
+    font-size: 15px;
+
+    color: #294b31;
+
+    margin-bottom: 5px;
+}
+
+
+/* =====================================================
+   FEATURE CARD DESCRIPTION
+   ===================================================== */
+
+.assistant-feature-card p {
+    font-size: 12px;
+
+    line-height: 1.4;
+
+    color: #718077;
+}
+
+
+/* =====================================================
+   TABLET
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .farmer-page {
+        padding: 30px 15px 60px;
+    }
+
+
+    /* Assistant Header */
+
+    .assistant-header {
+        align-items: flex-start;
+    }
+
+    .assistant-icon {
+        width: 52px;
+        height: 52px;
+
+        font-size: 25px;
+    }
+
+    .assistant-header h1 {
+        font-size: 27px;
+    }
+
+    .assistant-header p {
+        font-size: 14px;
+    }
+
+
+    /* Chat Header */
+
+    .chat-header {
+        padding: 14px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 15px;
+    }
+
+
+    /* Language */
+
+    .language-selector {
+        width: 100%;
+
+        display: flex;
+
+        justify-content: space-between;
+    }
+
+    .language-selector select {
+        width: 140px;
+    }
+
+
+    /* Chat Area */
+
+    .chat-area {
+        padding: 20px 15px;
+    }
+
+
+    /* Quick Actions */
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+
+    /* Chat Input */
+
+    .chat-input-area {
+        padding: 12px;
+
+        gap: 7px;
+    }
+
+    .chat-input-area input {
+        min-width: 0;
+    }
+
+    .voice-button,
+    .send-button {
+        width: 44px;
+        height: 44px;
+    }
+
+
+    /* Lower Feature Cards */
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .assistant-feature-card {
+        height: auto;
+        min-height: 125px;
+    }
+
+
+    /* Section Title */
+
+    .section-title h2 {
+        font-size: 25px;
+    }
+
+}
+
+
+
+/* PREMIUM CHATBOT LOOK */
+
+.chatbot-container {
+    background: #ffffff;
+    border: 1px solid #dce8df;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(31, 76, 42, 0.12);
+}
+
+.chat-header {
+    min-height: 88px;
+    padding: 16px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: linear-gradient(135deg, #ffffff, #f5faf6);
+
+    border-bottom: 1px solid #e1ebe3;
+}
+
+.chat-avatar {
+    background: #e5f3e7;
+    border: 1px solid #cfe3d2;
+    box-shadow: 0 6px 15px rgba(50, 110, 63, 0.08);
+}
+
+.chat-area {
+    background: #f8fbf8;
+}
+
+.chat-input-area {
+    background: #ffffff;
+    border-top: 1px solid #e1ebe4;
+}
+
+/* USER MESSAGE - CHATGPT STYLE */
+
+.user-message {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.user-message .message-content {
+    background: #2563eb;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 70%;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.user-message .message-content p {
+    margin: 0;
+    color: white;
+    line-height: 1.5;
+}
+
+.user-message .message-avatar {
+    order: 2;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e8f0ff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+}
+
+
+/* AI MESSAGE */
+
+.assistant-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.assistant-message .message-content {
+    background: #ffffff;
+    color: #1f2937;
+    padding: 12px 16px;
+    border-radius: 18px 18px 18px 4px;
+    max-width: 70%;
+    border: 1px solid #e5e7eb;
+}
+
+.assistant-message .message-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e8f5eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+}
+
+
+/* THINKING */
+
+.thinking-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.thinking-bubble {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 12px 17px;
+    border-radius: 18px 18px 18px 4px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* CHATGPT STYLE INPUT BAR */
+
+.chat-input-area {
+    width: calc(100% - 20px);
+    height: 66px;
+
+    margin: 10px auto 18px;
+    padding: 8px 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    background: #ffffff;
+    border: 1px solid #dedede;
+    border-radius: 34px;
+
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    box-sizing: border-box;
+}
+
+
+/* PLUS BUTTON */
+
+.add-button {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 32px;
+    font-weight: 300;
+
+    color: #202020;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* INPUT */
+
+.chat-input-area input {
+    flex: 1;
+
+    height: 42px;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font-size: 17px;
+    color: #222;
+
+    min-width: 0;
+}
+
+.chat-input-area input::placeholder {
+    color: #999;
+}
+
+
+/* THINK BUTTON */
+
+.think-button {
+    height: 42px;
+
+    padding: 0 12px;
+
+    border: none;
+    background: transparent;
+
+    color: #777;
+
+    font-size: 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+.think-button:hover {
+    background: #f5f5f5;
+    border-radius: 12px;
+}
+
+
+/* MICROPHONE */
+
+.mic-button {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 21px;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* BLUE CIRCLE */
+
+.voice-send-button {
+    width: 46px;
+    height: 46px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #3478ed;
+    color: white;
+
+    font-size: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+
+    transition: 0.2s ease;
+}
+
+.voice-send-button:hover {
+    transform: scale(1.05);
+    background: #2563d8;
+}
+
+.voice-send-button span {
+    font-size: 24px;
+}
+
+
+.thinking-text {
+    font-size: 14px;
+    color: #6b7280;
+    margin-right: 3px;
+}
+
+.thinking-bubble {
+    min-width: 85px;
+}
+
+/* ==========================================
+   PREMIUM QUICK ACTIONS
+   ========================================== */
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin: 22px 0;
+    padding: 0 4px;
+}
+
+.quick-actions button {
+    padding: 10px 15px;
+
+    border: 1px solid #dfe7e1;
+    border-radius: 22px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.04);
+}
+
+.quick-actions button:hover {
+    background: #f0f7f2;
+    border-color: #b9d5c0;
+    color: #166534;
+
+    transform: translateY(-1px);
+}
+
+.quick-actions button:active {
+    transform: scale(0.97);
+}
+
+/* ==========================================
+   CHATGPT STYLE MESSAGE ALIGNMENT
+   ========================================== */
+
+.chat-area {
+    padding: 24px 28px;
+    overflow-y: auto;
+}
+
+
+/* COMMON MESSAGE */
+
+.message {
+    display: flex;
+    width: 100%;
+    margin: 18px 0;
+    box-sizing: border-box;
+}
+
+
+/* AI MESSAGE - LEFT */
+
+.assistant-message {
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+
+/* FARMER MESSAGE - RIGHT */
+
+.user-message {
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 11px;
+}
+
+
+/* AI AVATAR */
+
+.assistant-message .message-avatar {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eaf5ed;
+    border: 1px solid #d5e7d9;
+    border-radius: 50%;
+
+    font-size: 19px;
+}
+
+
+/* FARMER AVATAR */
+
+.user-message .message-avatar {
+    order: 2;
+
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eaf1ff;
+    border: 1px solid #d8e3ff;
+    border-radius: 50%;
+
+    font-size: 19px;
+}
+
+
+/* AI MESSAGE CONTENT */
+
+.assistant-message .message-content {
+    max-width: min(70%, 680px);
+
+    padding: 13px 17px;
+
+    background: #ffffff;
+    color: #1f2937;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 18px 18px 18px 5px;
+
+    line-height: 1.55;
+
+    box-sizing: border-box;
+}
+
+
+/* FARMER BLUE MESSAGE */
+
+.user-message .message-content {
+    max-width: min(70%, 680px);
+
+    padding: 13px 17px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 18px 18px 5px 18px;
+
+    line-height: 1.55;
+
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.14);
+
+    box-sizing: border-box;
+}
+
+
+/* MESSAGE TEXT */
+
+.message-content p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.user-message .message-content p {
+    color: #ffffff;
+}
+
+
+/* THINKING MESSAGE */
+
+.thinking-bubble {
+    min-width: 85px;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 12px 16px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 18px 18px 18px 5px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .chat-area {
+        padding: 18px 14px;
+    }
+
+    .assistant-message .message-content,
+    .user-message .message-content {
+        max-width: 78%;
+    }
+
+    .assistant-message .message-avatar,
+    .user-message .message-avatar {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        font-size: 17px;
+    }
+
+}
+
+.thinking-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    min-width: 85px;
+    padding: 12px 16px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px 18px 18px 5px;
+
+    color: #6b7280;
+}
+
+.thinking-text {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.thinking-bubble .dot {
+    display: inline-block;
+
+    width: 6px;
+    height: 6px;
+
+    background: #777;
+    border-radius: 50%;
+
+    animation: thinkingDot 1.4s infinite ease-in-out;
+}
+
+.thinking-bubble .dot:nth-of-type(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-bubble .dot:nth-of-type(3) {
+    animation-delay: 0.4s;
+}
+
+.thinking-bubble .dot:nth-of-type(4) {
+    animation-delay: 0.6s;
+}
+
+@keyframes thinkingDot {
+
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+    }
+
+    30% {
+        transform: translateY(-4px);
+        opacity: 1;
+    }
+}
+
+
+/* ================================
+   ADD BUTTON POPUP MENU
+================================ */
+
+.add-menu {
+    display: none;
+    position: absolute;
+    bottom: 75px;
+    left: 20px;
+    width: 210px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+}
+
+.add-menu.show {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.add-menu button {
+    width: 100%;
+    padding: 11px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 9px;
+    text-align: left;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.add-menu button:hover {
+    background: #f3f4f6;
+    color: #15803d;
+}
