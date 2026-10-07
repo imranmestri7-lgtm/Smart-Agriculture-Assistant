@@ -119,6 +119,23 @@
             transform: none;
         }
 
+        .secondary-button {
+            width: 100%;
+            height: 45px;
+            margin-top: 10px;
+            border: 1px solid #d4ded5;
+            border-radius: 11px;
+            background: #ffffff;
+            color: #166534;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .secondary-button:hover {
+            background: #f0fdf4;
+        }
+
         .message {
             display: none;
             margin-bottom: 18px;
@@ -140,6 +157,38 @@
             color: #166534;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
+        }
+
+        .otp-section {
+            display: none;
+        }
+
+        .otp-section.show {
+            display: block;
+        }
+
+        .otp-info {
+            margin: -5px 0 18px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .development-otp {
+            display: none;
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: #854d0e;
+            background: #fefce8;
+            border: 1px solid #fde68a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .development-otp strong {
+            font-size: 17px;
+            letter-spacing: 2px;
         }
 
         .auth-footer {
@@ -215,33 +264,25 @@
             <h1>Welcome Back</h1>
 
             <p class="auth-subtitle">
-                Login to access your AgriSmart Farmer Assistant.
+                Login securely using your mobile number and OTP.
             </p>
 
             <div id="message" class="message"></div>
 
+            <!-- MOBILE NUMBER FORM -->
             <form id="loginForm">
 
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="mobileNumber">Mobile Number</label>
 
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
+                        type="tel"
+                        id="mobileNumber"
+                        name="mobileNumber"
+                        placeholder="Enter 10-digit mobile number"
+                        maxlength="10"
+                        inputmode="numeric"
+                        autocomplete="tel"
                         required
                     >
                 </div>
@@ -249,12 +290,62 @@
                 <button
                     type="submit"
                     class="auth-button"
-                    id="loginButton"
+                    id="sendOtpButton"
                 >
-                    Login
+                    Send OTP
                 </button>
 
             </form>
+
+
+            <!-- OTP SECTION -->
+            <div id="otpSection" class="otp-section">
+
+                <div class="form-group">
+                    <label for="otp">Enter OTP</label>
+
+                    <input
+                        type="text"
+                        id="otp"
+                        name="otp"
+                        placeholder="Enter 6-digit OTP"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                    >
+                </div>
+
+                <p class="otp-info">
+                    Enter the 6-digit OTP sent to your mobile number.
+                    The OTP is valid for 5 minutes.
+                </p>
+
+                <!-- DEVELOPMENT ONLY -->
+                <div id="developmentOtp" class="development-otp">
+                    <strong>Development OTP: <span id="otpValue"></span></strong>
+                    <br>
+                    This is shown only during development. In the production
+                    version, the OTP will be sent through SMS.
+                </div>
+
+                <button
+                    type="button"
+                    class="auth-button"
+                    id="verifyOtpButton"
+                >
+                    Verify OTP
+                </button>
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="changeNumberButton"
+                >
+                    Change Mobile Number
+                </button>
+
+            </div>
+
 
             <div class="auth-footer">
                 Don't have an account?
@@ -268,6 +359,7 @@
         </div>
 
     </main>
+
 
     <script src="js/login.js"></script>
 
