@@ -146,6 +146,14 @@
             border: 1px solid #bbf7d0;
         }
 
+        .mobile-info {
+            margin-top: -8px;
+            margin-bottom: 18px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
         .auth-footer {
             margin-top: 25px;
             text-align: center;
@@ -219,66 +227,68 @@
             <h1>Create Account</h1>
 
             <p class="auth-subtitle">
-                Create your AgriSmart farmer account to manage your crops and plant health.
+                Create your AgriSmart farmer account using your mobile number.
             </p>
 
             <div id="message" class="message"></div>
 
             <form id="registerForm">
 
+                <!-- FULL NAME -->
                 <div class="form-group">
-                    <label for="fullName">Full Name</label>
+
+                    <label for="fullName">
+                        Full Name
+                    </label>
 
                     <input
                         type="text"
                         id="fullName"
                         name="full_name"
                         placeholder="Enter your full name"
+                        autocomplete="name"
                         required
                     >
+
                 </div>
 
+
+                <!-- MOBILE NUMBER -->
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+
+                    <label for="mobileNumber">
+                        Mobile Number
+                    </label>
 
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
+                        type="tel"
+                        id="mobileNumber"
+                        name="mobile_number"
+                        placeholder="Enter 10-digit mobile number"
+                        maxlength="10"
+                        inputmode="numeric"
+                        autocomplete="tel"
                         required
                     >
+
                 </div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
+                <p class="mobile-info">
+                    Your mobile number will be used for secure OTP-based login.
+                </p>
 
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Minimum 6 characters"
-                        minlength="6"
-                        required
+
+                <!-- LANGUAGE -->
+                <div class="form-group">
+
+                    <label for="language">
+                        Preferred Language
+                    </label>
+
+                    <select
+                        id="language"
+                        name="preferred_language"
                     >
-                </div>
-
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        placeholder="Re-enter your password"
-                        minlength="6"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="language">Preferred Language</label>
-
-                    <select id="language" name="preferred_language">
 
                         <option value="English">
                             English
@@ -293,8 +303,11 @@
                         </option>
 
                     </select>
+
                 </div>
 
+
+                <!-- REGISTER BUTTON -->
                 <button
                     type="submit"
                     class="auth-button"
@@ -305,18 +318,30 @@
 
             </form>
 
+
             <div class="auth-footer">
+
                 Already have an account?
-                <a href="login.html">Login</a>
+
+                <a href="login.html">
+                    Login
+                </a>
+
             </div>
 
+
             <div class="back-home">
-                <a href="index.html">← Back to Home</a>
+
+                <a href="index.html">
+                    ← Back to Home
+                </a>
+
             </div>
 
         </div>
 
     </main>
+
 
     <script src="js/register.js"></script>
 
