@@ -1,37 +1,78 @@
-const API_BASE_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:5000/api/auth";
 
 const registerForm = document.getElementById("registerForm");
+
+const fullNameInput = document.getElementById("fullName");
+const mobileNumberInput = document.getElementById("mobileNumber");
+const languageInput = document.getElementById("language");
+
 const registerButton = document.getElementById("registerButton");
-const messageBox = document.getElementById("message");
+
+const message = document.getElementById("message");
 
 
-function showMessage(message, type) {
-    messageBox.textContent = message;
-    messageBox.className = `message ${type}`;
+/* --------------------------------------------------
+   SHOW MESSAGE
+-------------------------------------------------- */
+
+function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className = "message " + type;
 }
 
+
+/* --------------------------------------------------
+   CLEAR MESSAGE
+-------------------------------------------------- */
+
+function clearMessage() {
+
+    message.textContent = "";
+    message.className = "message";
+}
+
+
+/* --------------------------------------------------
+   ONLY ALLOW NUMBERS IN MOBILE FIELD
+-------------------------------------------------- */
+
+mobileNumberInput.addEventListener("input", function () {
+
+    this.value = this.value
+        .replace(/\D/g, "")
+        .slice(0, 10);
+
+});
+
+
+/* --------------------------------------------------
+   REGISTER USER
+-------------------------------------------------- */
 
 registerForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
-    const fullName =
-        document.getElementById("fullName").value.trim();
-
-    const email =
-        document.getElementById("email").value.trim();
-
-    const password =
-        document.getElementById("password").value;
-
-    const confirmPassword =
-        document.getElementById("confirmPassword").value;
+    clearMessage();
 
 
-    if (!fullName || !email || !password || !confirmPassword) {
+    const fullName = fullNameInput.value.trim();
+
+    const mobileNumber = mobileNumberInput.value.trim();
+
+    const preferredLanguage = languageInput.value;
+
+
+    /* --------------------------------------------------
+       VALIDATE FULL NAME
+    -------------------------------------------------- */
+
+    if (!fullName) {
 
         showMessage(
-            "Please fill in all required fields.",
+            "Please enter your full name.",
             "error"
         );
 
@@ -39,10 +80,14 @@ registerForm.addEventListener("submit", async function (event) {
     }
 
 
-    if (password.length < 6) {
+    /* --------------------------------------------------
+       VALIDATE MOBILE NUMBER
+    -------------------------------------------------- */
+
+    if (!/^\d{10}$/.test(mobileNumber)) {
 
         showMessage(
-            "Password must contain at least 6 characters.",
+            "Please enter a valid 10-digit mobile number.",
             "error"
         );
 
@@ -50,25 +95,19 @@ registerForm.addEventListener("submit", async function (event) {
     }
 
 
-    if (password !== confirmPassword) {
-
-        showMessage(
-            "Passwords do not match.",
-            "error"
-        );
-
-        return;
-    }
-
+    /* --------------------------------------------------
+       DISABLE BUTTON
+    -------------------------------------------------- */
 
     registerButton.disabled = true;
+
     registerButton.textContent = "Creating Account...";
 
 
     try {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/auth/register`,
+            `${API_URL}/register`,
             {
                 method: "POST",
 
@@ -77,9 +116,13 @@ registerForm.addEventListener("submit", async function (event) {
                 },
 
                 body: JSON.stringify({
+
                     full_name: fullName,
-                    email: email,
-                    password: password
+
+                    mobile_number: mobileNumber,
+
+                    preferred_language: preferredLanguage
+
                 })
             }
         );
@@ -88,42 +131,56 @@ registerForm.addEventListener("submit", async function (event) {
         const data = await response.json();
 
 
+        /* --------------------------------------------------
+           HANDLE BACKEND ERROR
+        -------------------------------------------------- */
+
         if (!response.ok) {
 
-            showMessage(
-                data.message || "Registration failed.",
-                "error"
+            throw new Error(
+                data.message || "Registration failed."
             );
-
-            return;
         }
 
 
+        /* --------------------------------------------------
+           SUCCESS
+        -------------------------------------------------- */
+
         showMessage(
-            "Account created successfully. Redirecting to login...",
+            "Account created successfully! Redirecting to login...",
             "success"
         );
 
+
+        /* --------------------------------------------------
+           REDIRECT TO LOGIN
+        -------------------------------------------------- */
 
         setTimeout(function () {
 
             window.location.href = "login.html";
 
-        }, 1000);
+        }, 1200);
 
 
     } catch (error) {
 
-        console.error("Registration error:", error);
+        console.error(
+            "Registration error:",
+            error
+        );
 
         showMessage(
-            "Unable to connect to the server. Please make sure Flask is running.",
+            error.message ||
+            "Unable to connect to the server.",
             "error"
         );
 
     } finally {
 
         registerButton.disabled = false;
+
         registerButton.textContent = "Create Account";
 
     }
