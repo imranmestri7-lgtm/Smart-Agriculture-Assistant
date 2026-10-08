@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
-import secrets
+from twilio.rest import Client
+import os
 
 from config import get_db_connection
 
@@ -9,18 +9,43 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 # --------------------------------------------------
+# TWILIO CONFIGURATION
+# --------------------------------------------------
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_VERIFY_SERVICE_SID = os.getenv("TWILIO_VERIFY_SERVICE_SID")
+
+
+def get_twilio_client():
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
+        raise Exception("Twilio credentials are not configured")
+
+    return Client(
+        TWILIO_ACCOUNT_SID,
+        TWILIO_AUTH_TOKEN
+    )
+
+
+# --------------------------------------------------
 # HELPER
 # --------------------------------------------------
 def normalize_mobile(mobile):
     mobile = str(mobile or "").strip()
-    mobile = mobile.replace(" ", "").replace("-", "")
+
+    mobile = mobile.replace(" ", "")
+    mobile = mobile.replace("-", "")
 
     if mobile.startswith("+91"):
         mobile = mobile[3:]
+
     elif mobile.startswith("91") and len(mobile) == 12:
         mobile = mobile[2:]
 
     return mobile
+
+
+def mobile_to_e164(mobile):
+    return f"+91{mobile}"
 
 
 # --------------------------------------------------
@@ -44,11 +69,16 @@ def register():
                 "message": "Request body is required"
             }), 400
 
-        full_name = data.get("full_name", "").strip()
-        auth_method = data.get("auth_method", "").strip().lower()
-        preferred_language = data.get(
-            "preferred_language",
-            "English"
+        full_name = str(
+            data.get("full_name", "")
+        ).strip()
+
+        auth_method = str(
+            data.get("auth_method", "")
+        ).strip().lower()
+
+        preferred_language = str(
+            data.get("preferred_language", "English")
         ).strip()
 
         if not full_name:
@@ -81,7 +111,10 @@ def register():
                     "message": "Mobile number is required"
                 }), 400
 
-            if not mobile_number.isdigit() or len(mobile_number) != 10:
+            if (
+                not mobile_number.isdigit()
+                or len(mobile_number) != 10
+            ):
                 return jsonify({
                     "status": "error",
                     "message": "Please enter a valid 10-digit mobile number"
@@ -143,7 +176,10 @@ def register():
         # --------------------------------------------------
         # EMAIL REGISTRATION
         # --------------------------------------------------
-        email = data.get("email", "").strip().lower()
+        email = str(
+            data.get("email", "")
+        ).strip().lower()
+
         password = data.get("password", "")
         confirm_password = data.get("confirm_password", "")
 
@@ -265,7 +301,10 @@ def login():
                 "message": "Request body is required"
             }), 400
 
-        email = data.get("email", "").strip().lower()
+        email = str(
+            data.get("email", "")
+        ).strip().lower()
+
         password = data.get("password", "")
 
         if not email or not password:
@@ -345,7 +384,7 @@ def login():
 
 
 # --------------------------------------------------
-# SEND OTP
+# SEND OTP USING TWILIO VERIFY
 # --------------------------------------------------
 @auth_bp.route("/send-otp", methods=["POST"])
 def send_otp():
@@ -373,12 +412,18 @@ def send_otp():
                 "message": "Mobile number is required"
             }), 400
 
-        if not mobile_number.isdigit() or len(mobile_number) != 10:
+        if (
+            not mobile_number.isdigit()
+            or len(mobile_number) != 10
+        ):
             return jsonify({
                 "status": "error",
                 "message": "Please enter a valid 10-digit mobile number"
             }), 400
 
+        # --------------------------------------------------
+        # CHECK USER
+        # --------------------------------------------------
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
 
@@ -404,36 +449,37 @@ def send_otp():
                 "message": "No account found with this mobile number"
             }), 404
 
-        otp = str(secrets.randbelow(900000) + 100000)
+        # --------------------------------------------------
+        # CHECK TWILIO CONFIGURATION
+        # --------------------------------------------------
+        if not TWILIO_VERIFY_SERVICE_SID:
+            return jsonify({
+                "status": "error",
+                "message": "Twilio Verify Service is not configured"
+            }), 500
 
-        otp_hash = generate_password_hash(otp)
+        # --------------------------------------------------
+        # SEND SMS THROUGH TWILIO VERIFY
+        # --------------------------------------------------
+        twilio_client = get_twilio_client()
 
-        otp_expires_at = (
-            datetime.now() + timedelta(minutes=5)
-        )
-
-        cursor.execute(
-            """
-            UPDATE users
-            SET
-                otp_hash = %s,
-                otp_expires_at = %s
-            WHERE id = %s
-            """,
-            (
-                otp_hash,
-                otp_expires_at,
-                user["id"]
+        verification = (
+            twilio_client
+            .verify
+            .v2
+            .services(TWILIO_VERIFY_SERVICE_SID)
+            .verifications
+            .create(
+                to=mobile_to_e164(mobile_number),
+                channel="sms"
             )
         )
 
-        connection.commit()
-
         return jsonify({
             "status": "success",
-            "message": "OTP generated successfully",
-            "development_otp": otp,
-            "expires_in": 300
+            "message": "OTP sent successfully",
+            "verification_status": verification.status,
+            "expires_in": 600
         }), 200
 
     except Exception as error:
@@ -441,9 +487,11 @@ def send_otp():
         if connection:
             connection.rollback()
 
+        print("Twilio Send OTP Error:", str(error))
+
         return jsonify({
             "status": "error",
-            "message": str(error)
+            "message": "Unable to send OTP. Please try again."
         }), 500
 
     finally:
@@ -456,7 +504,7 @@ def send_otp():
 
 
 # --------------------------------------------------
-# VERIFY OTP
+# VERIFY OTP USING TWILIO VERIFY
 # --------------------------------------------------
 @auth_bp.route("/verify-otp", methods=["POST"])
 def verify_otp():
@@ -488,7 +536,10 @@ def verify_otp():
                 "message": "Mobile number and OTP are required"
             }), 400
 
-        if not mobile_number.isdigit() or len(mobile_number) != 10:
+        if (
+            not mobile_number.isdigit()
+            or len(mobile_number) != 10
+        ):
             return jsonify({
                 "status": "error",
                 "message": "Invalid mobile number"
@@ -500,6 +551,38 @@ def verify_otp():
                 "message": "OTP must contain 6 digits"
             }), 400
 
+        if not TWILIO_VERIFY_SERVICE_SID:
+            return jsonify({
+                "status": "error",
+                "message": "Twilio Verify Service is not configured"
+            }), 500
+
+        # --------------------------------------------------
+        # VERIFY OTP WITH TWILIO
+        # --------------------------------------------------
+        twilio_client = get_twilio_client()
+
+        verification_check = (
+            twilio_client
+            .verify
+            .v2
+            .services(TWILIO_VERIFY_SERVICE_SID)
+            .verification_checks
+            .create(
+                to=mobile_to_e164(mobile_number),
+                code=otp
+            )
+        )
+
+        if verification_check.status != "approved":
+            return jsonify({
+                "status": "error",
+                "message": "Invalid or expired OTP"
+            }), 401
+
+        # --------------------------------------------------
+        # GET USER
+        # --------------------------------------------------
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
 
@@ -510,9 +593,7 @@ def verify_otp():
                 full_name,
                 mobile_number,
                 email,
-                preferred_language,
-                otp_hash,
-                otp_expires_at
+                preferred_language
             FROM users
             WHERE mobile_number = %s
             """,
@@ -526,46 +607,6 @@ def verify_otp():
                 "status": "error",
                 "message": "User not found"
             }), 404
-
-        if not user["otp_hash"]:
-            return jsonify({
-                "status": "error",
-                "message": "Please request a new OTP"
-            }), 400
-
-        if not user["otp_expires_at"]:
-            return jsonify({
-                "status": "error",
-                "message": "OTP has expired. Please request a new OTP"
-            }), 401
-
-        if datetime.now() > user["otp_expires_at"]:
-            return jsonify({
-                "status": "error",
-                "message": "OTP has expired. Please request a new OTP"
-            }), 401
-
-        if not check_password_hash(
-            user["otp_hash"],
-            otp
-        ):
-            return jsonify({
-                "status": "error",
-                "message": "Invalid OTP"
-            }), 401
-
-        cursor.execute(
-            """
-            UPDATE users
-            SET
-                otp_hash = NULL,
-                otp_expires_at = NULL
-            WHERE id = %s
-            """,
-            (user["id"],)
-        )
-
-        connection.commit()
 
         return jsonify({
             "status": "success",
@@ -582,12 +623,11 @@ def verify_otp():
 
     except Exception as error:
 
-        if connection:
-            connection.rollback()
+        print("Twilio Verify OTP Error:", str(error))
 
         return jsonify({
             "status": "error",
-            "message": str(error)
+            "message": "OTP verification failed. Please try again."
         }), 500
 
     finally:
