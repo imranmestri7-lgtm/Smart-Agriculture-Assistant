@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 from config import get_db_connection
 from routes.auth_routes import auth_bp
-
+from routes.disease_routes import disease_bp
 
 app = Flask(__name__)
 
@@ -13,6 +13,8 @@ CORS(app)
 # Register authentication routes
 app.register_blueprint(auth_bp)
 
+# Register crop disease prediction routes
+app.register_blueprint(disease_bp)
 
 @app.route("/")
 def home():
