@@ -43,12 +43,15 @@
             width: 65px;
             height: 65px;
             margin: 0 auto 20px;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             background: #dcfce7;
             border: 1px solid #bbf7d0;
             border-radius: 18px;
+
             font-size: 30px;
         }
 
@@ -67,6 +70,63 @@
             line-height: 1.6;
         }
 
+        .method-title {
+            margin-bottom: 12px;
+            color: #304936;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .method-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .method-option {
+            position: relative;
+        }
+
+        .method-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .method-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            height: 52px;
+
+            border: 1px solid #d4ded5;
+            border-radius: 11px;
+
+            background: #ffffff;
+            color: #475569;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .method-option label:hover {
+            border-color: #55a94e;
+            background: #f0fdf4;
+        }
+
+        .method-option input:checked + label {
+            border-color: #42a851;
+            background: #f0fdf4;
+            color: #166534;
+            box-shadow: 0 0 0 3px rgba(66, 168, 81, 0.10);
+        }
+
         .form-group {
             margin-bottom: 18px;
         }
@@ -74,6 +134,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
+
             color: #304936;
             font-size: 13px;
             font-weight: 700;
@@ -83,12 +144,17 @@
         .form-group select {
             width: 100%;
             height: 50px;
+
             padding: 0 15px;
+
             border: 1px solid #d4ded5;
             border-radius: 11px;
+
             outline: none;
+
             font-size: 14px;
             color: #334155;
+
             background: #ffffff;
         }
 
@@ -101,13 +167,19 @@
         .auth-button {
             width: 100%;
             height: 50px;
+
             margin-top: 8px;
+
             border: none;
             border-radius: 11px;
+
             background: linear-gradient(135deg, #18753d, #42a851);
+
             color: #ffffff;
+
             font-size: 14px;
             font-weight: 800;
+
             cursor: pointer;
             transition: 0.2s ease;
         }
@@ -125,15 +197,19 @@
 
         .message {
             display: none;
+
             margin-bottom: 18px;
             padding: 12px 14px;
+
             border-radius: 10px;
+
             font-size: 13px;
             line-height: 1.5;
         }
 
         .message.error {
             display: block;
+
             color: #991b1b;
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -141,22 +217,17 @@
 
         .message.success {
             display: block;
+
             color: #166534;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
         }
 
-        .mobile-info {
-            margin-top: -8px;
-            margin-bottom: 18px;
-            color: #64748b;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
         .auth-footer {
             margin-top: 25px;
+
             text-align: center;
+
             color: #718071;
             font-size: 13px;
         }
@@ -186,74 +257,133 @@
             color: #15803d;
         }
 
+        .hidden {
+            display: none;
+        }
+
         @media (max-width: 600px) {
+
             .auth-card {
                 padding: 30px 22px;
+            }
+
+            .method-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
+
 <body>
 
-    <!-- NAVBAR -->
-    <header class="navbar">
+<header class="navbar">
 
-        <div class="logo">
-            <span class="logo-icon">🌱</span>
-            <span>AgriSmart</span>
+    <div class="logo">
+        <span class="logo-icon">🌱</span>
+        <span>AgriSmart</span>
+    </div>
+
+    <nav class="nav-links">
+        <a href="index.html">Home</a>
+    </nav>
+
+    <button
+        class="farmer-btn"
+        onclick="window.location.href='login.html'">
+        Farmer
+    </button>
+
+</header>
+
+
+<main class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="auth-icon">
+            🌱
         </div>
 
-        <nav class="nav-links">
-            <a href="index.html">Home</a>
-        </nav>
 
-        <button class="farmer-btn" onclick="window.location.href='login.html'">
-            Farmer
-        </button>
+        <h1>Create Account</h1>
 
-    </header>
+        <p class="auth-subtitle">
+            Choose how you want to create your AgriSmart account.
+        </p>
 
 
-    <!-- REGISTER -->
-    <main class="auth-page">
+        <div id="message" class="message"></div>
 
-        <div class="auth-card">
 
-            <div class="auth-icon">
-                🌱
+        <!-- AUTH METHOD -->
+
+        <div class="method-title">
+            How would you like to register?
+        </div>
+
+
+        <div class="method-options">
+
+            <div class="method-option">
+
+                <input
+                    type="radio"
+                    id="phoneMethod"
+                    name="authMethod"
+                    value="phone"
+                    checked>
+
+                <label for="phoneMethod">
+                    📱 Phone Number
+                </label>
+
             </div>
 
-            <h1>Create Account</h1>
 
-            <p class="auth-subtitle">
-                Create your AgriSmart farmer account using your mobile number.
-            </p>
+            <div class="method-option">
 
-            <div id="message" class="message"></div>
+                <input
+                    type="radio"
+                    id="emailMethod"
+                    name="authMethod"
+                    value="email">
 
-            <form id="registerForm">
+                <label for="emailMethod">
+                    📧 Email
+                </label>
 
-                <!-- FULL NAME -->
-                <div class="form-group">
+            </div>
 
-                    <label for="fullName">
-                        Full Name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="fullName"
-                        name="full_name"
-                        placeholder="Enter your full name"
-                        autocomplete="name"
-                        required
-                    >
-
-                </div>
+        </div>
 
 
-                <!-- MOBILE NUMBER -->
+        <form id="registerForm">
+
+
+            <!-- FULL NAME -->
+
+            <div class="form-group">
+
+                <label for="fullName">
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="fullName"
+                    name="full_name"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required>
+
+            </div>
+
+
+            <!-- PHONE FIELDS -->
+
+            <div id="phoneFields">
+
                 <div class="form-group">
 
                     <label for="mobileNumber">
@@ -267,83 +397,133 @@
                         placeholder="Enter 10-digit mobile number"
                         maxlength="10"
                         inputmode="numeric"
-                        autocomplete="tel"
-                        required
-                    >
+                        autocomplete="tel">
 
                 </div>
 
-                <p class="mobile-info">
-                    Your mobile number will be used for secure OTP-based login.
-                </p>
+            </div>
 
 
-                <!-- LANGUAGE -->
+            <!-- EMAIL FIELDS -->
+
+            <div id="emailFields" class="hidden">
+
                 <div class="form-group">
 
-                    <label for="language">
-                        Preferred Language
+                    <label for="email">
+                        Email Address
                     </label>
 
-                    <select
-                        id="language"
-                        name="preferred_language"
-                    >
-
-                        <option value="English">
-                            English
-                        </option>
-
-                        <option value="Marathi">
-                            मराठी
-                        </option>
-
-                        <option value="Hindi">
-                            हिंदी
-                        </option>
-
-                    </select>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="email">
 
                 </div>
 
 
-                <!-- REGISTER BUTTON -->
-                <button
-                    type="submit"
-                    class="auth-button"
-                    id="registerButton"
-                >
-                    Create Account
-                </button>
+                <div class="form-group">
 
-            </form>
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter password"
+                        autocomplete="new-password">
+
+                </div>
 
 
-            <div class="auth-footer">
+                <div class="form-group">
 
-                Already have an account?
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
 
-                <a href="login.html">
-                    Login
-                </a>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirm_password"
+                        placeholder="Re-enter password"
+                        autocomplete="new-password">
+
+                </div>
 
             </div>
 
 
-            <div class="back-home">
+            <!-- LANGUAGE -->
 
-                <a href="index.html">
-                    ← Back to Home
-                </a>
+            <div class="form-group">
+
+                <label for="language">
+                    Preferred Language
+                </label>
+
+                <select
+                    id="language"
+                    name="preferred_language">
+
+                    <option value="English">
+                        English
+                    </option>
+
+                    <option value="Marathi">
+                        मराठी
+                    </option>
+
+                    <option value="Hindi">
+                        हिंदी
+                    </option>
+
+                </select>
 
             </div>
+
+
+            <button
+                type="submit"
+                class="auth-button"
+                id="registerButton">
+
+                Create Account
+
+            </button>
+
+        </form>
+
+
+        <div class="auth-footer">
+
+            Already have an account?
+
+            <a href="login.html">
+                Login
+            </a>
 
         </div>
 
-    </main>
+
+        <div class="back-home">
+
+            <a href="index.html">
+                ← Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
 
 
-    <script src="js/register.js"></script>
+<script src="js/register.js"></script>
 
 </body>
 

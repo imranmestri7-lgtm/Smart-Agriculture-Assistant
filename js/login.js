@@ -1,75 +1,95 @@
 const API_URL = "http://127.0.0.1:5000/api/auth";
 
-const loginForm = document.getElementById("loginForm");
-const mobileNumberInput = document.getElementById("mobileNumber");
+const phoneOption = document.getElementById("phoneOption");
+const emailOption = document.getElementById("emailOption");
 
-const sendOtpButton = document.getElementById("sendOtpButton");
+const phoneLoginForm = document.getElementById("phoneLoginForm");
+const emailLoginForm = document.getElementById("emailLoginForm");
 
-const otpSection = document.getElementById("otpSection");
-const otpInput = document.getElementById("otp");
-const verifyOtpButton = document.getElementById("verifyOtpButton");
-const changeNumberButton = document.getElementById("changeNumberButton");
+const mobileNumber = document.getElementById("mobileNumber");
+const otp = document.getElementById("otp");
 
-const message = document.getElementById("message");
+const sendOtpBtn = document.getElementById("sendOtpBtn");
+const verifyOtpBtn = document.getElementById("verifyOtpBtn");
 
 const developmentOtp = document.getElementById("developmentOtp");
 const otpValue = document.getElementById("otpValue");
 
+const changeNumberBtn = document.getElementById("changeNumberBtn");
 
-/* --------------------------------------------------
-   SHOW MESSAGE
--------------------------------------------------- */
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const emailLoginBtn = document.getElementById("emailLoginBtn");
 
+const message = document.getElementById("message");
+
+
+// Show message
 function showMessage(text, type) {
-
     message.textContent = text;
-
     message.className = "message " + type;
 }
 
 
-/* --------------------------------------------------
-   CLEAR MESSAGE
--------------------------------------------------- */
-
+// Clear message
 function clearMessage() {
-
     message.textContent = "";
     message.className = "message";
 }
 
 
-/* --------------------------------------------------
-   ONLY ALLOW NUMBERS
--------------------------------------------------- */
+// Switch to phone login
+phoneOption.addEventListener("click", () => {
 
-mobileNumberInput.addEventListener("input", function () {
+    phoneOption.classList.add("active");
+    emailOption.classList.remove("active");
 
-    this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    phoneLoginForm.style.display = "block";
+    emailLoginForm.style.display = "none";
 
+    clearMessage();
 });
 
 
-otpInput.addEventListener("input", function () {
+// Switch to email login
+emailOption.addEventListener("click", () => {
 
-    this.value = this.value.replace(/\D/g, "").slice(0, 6);
+    emailOption.classList.add("active");
+    phoneOption.classList.remove("active");
 
+    phoneLoginForm.style.display = "none";
+    emailLoginForm.style.display = "block";
+
+    clearMessage();
 });
 
 
-/* --------------------------------------------------
-   SEND OTP
--------------------------------------------------- */
+// Allow only numbers in mobile field
+mobileNumber.addEventListener("input", () => {
 
-loginForm.addEventListener("submit", async function (event) {
+    mobileNumber.value = mobileNumber.value
+        .replace(/\D/g, "")
+        .slice(0, 10);
+});
 
-    event.preventDefault();
+
+// Allow only numbers in OTP field
+otp.addEventListener("input", () => {
+
+    otp.value = otp.value
+        .replace(/\D/g, "")
+        .slice(0, 6);
+});
+
+
+// Send OTP
+sendOtpBtn.addEventListener("click", async () => {
 
     clearMessage();
 
-    const mobileNumber = mobileNumberInput.value.trim();
+    const mobile = mobileNumber.value.trim();
 
-    if (!/^\d{10}$/.test(mobileNumber)) {
+    if (!/^\d{10}$/.test(mobile)) {
 
         showMessage(
             "Please enter a valid 10-digit mobile number.",
@@ -79,8 +99,8 @@ loginForm.addEventListener("submit", async function (event) {
         return;
     }
 
-    sendOtpButton.disabled = true;
-    sendOtpButton.textContent = "Sending OTP...";
+    sendOtpBtn.disabled = true;
+    sendOtpBtn.textContent = "Sending...";
 
     try {
 
@@ -94,7 +114,7 @@ loginForm.addEventListener("submit", async function (event) {
                 },
 
                 body: JSON.stringify({
-                    mobile_number: mobileNumber
+                    mobile_number: mobile
                 })
             }
         );
@@ -102,77 +122,63 @@ loginForm.addEventListener("submit", async function (event) {
         const data = await response.json();
 
         if (!response.ok) {
-
             throw new Error(
                 data.message || "Unable to send OTP."
             );
         }
 
-
-        /* Show OTP section */
-
-        otpSection.classList.add("show");
-
-        /* Hide mobile form button */
-
-        sendOtpButton.style.display = "none";
-
-        mobileNumberInput.readOnly = true;
-
-
-        /* Development OTP */
-
-        if (data.development_otp) {
-
-            otpValue.textContent = data.development_otp;
-
-            developmentOtp.style.display = "block";
-        }
-
-
         showMessage(
-            "OTP generated successfully. Enter the OTP to continue.",
+            data.message || "OTP sent successfully.",
             "success"
         );
 
+        // Development OTP
+        if (data.development_otp) {
 
-        /* Focus OTP field */
+            otpValue.textContent = data.development_otp;
+            developmentOtp.style.display = "block";
+        }
 
-        otpInput.focus();
-
+        changeNumberBtn.style.display = "block";
 
     } catch (error) {
 
         console.error("Send OTP error:", error);
 
         showMessage(
-            error.message || "Unable to connect to the server.",
+            error.message || "Something went wrong while sending OTP.",
             "error"
         );
 
     } finally {
 
-        sendOtpButton.disabled = false;
-        sendOtpButton.textContent = "Send OTP";
-
+        sendOtpBtn.disabled = false;
+        sendOtpBtn.textContent = "Send OTP";
     }
-
 });
 
 
-/* --------------------------------------------------
-   VERIFY OTP
--------------------------------------------------- */
+// Verify OTP and login
+phoneLoginForm.addEventListener("submit", async (event) => {
 
-verifyOtpButton.addEventListener("click", async function () {
+    event.preventDefault();
 
     clearMessage();
 
-    const mobileNumber = mobileNumberInput.value.trim();
-    const otp = otpInput.value.trim();
+    const mobile = mobileNumber.value.trim();
+    const otpValueEntered = otp.value.trim();
 
+    if (!/^\d{10}$/.test(mobile)) {
 
-    if (!/^\d{6}$/.test(otp)) {
+        showMessage(
+            "Please enter a valid 10-digit mobile number.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (!/^\d{6}$/.test(otpValueEntered)) {
 
         showMessage(
             "Please enter the 6-digit OTP.",
@@ -182,10 +188,8 @@ verifyOtpButton.addEventListener("click", async function () {
         return;
     }
 
-
-    verifyOtpButton.disabled = true;
-    verifyOtpButton.textContent = "Verifying...";
-
+    verifyOtpBtn.disabled = true;
+    verifyOtpBtn.textContent = "Verifying...";
 
     try {
 
@@ -199,84 +203,153 @@ verifyOtpButton.addEventListener("click", async function () {
                 },
 
                 body: JSON.stringify({
-                    mobile_number: mobileNumber,
-                    otp: otp
+                    mobile_number: mobile,
+                    otp: otpValueEntered
                 })
             }
         );
 
-
         const data = await response.json();
 
-
         if (!response.ok) {
-
             throw new Error(
                 data.message || "OTP verification failed."
             );
         }
 
-
-        /* Save logged-in user */
-
+        // Save logged-in user
         localStorage.setItem(
             "agriSmartUser",
             JSON.stringify(data.user)
         );
 
-
         showMessage(
-            "OTP verified successfully! Redirecting...",
+            "Login successful! Redirecting...",
             "success"
         );
 
-
-        /* Redirect to Farmer Assistant */
-
-        setTimeout(function () {
-
+        setTimeout(() => {
             window.location.href = "farmer.html";
-
         }, 800);
-
 
     } catch (error) {
 
         console.error("OTP verification error:", error);
 
         showMessage(
-            error.message || "Unable to verify OTP.",
+            error.message || "Invalid OTP.",
             "error"
         );
 
     } finally {
 
-        verifyOtpButton.disabled = false;
-        verifyOtpButton.textContent = "Verify OTP";
-
+        verifyOtpBtn.disabled = false;
+        verifyOtpBtn.textContent = "Verify OTP & Login";
     }
-
 });
 
 
-/* --------------------------------------------------
-   CHANGE MOBILE NUMBER
--------------------------------------------------- */
+// Email login
+emailLoginForm.addEventListener("submit", async (event) => {
 
-changeNumberButton.addEventListener("click", function () {
+    event.preventDefault();
 
     clearMessage();
 
-    otpSection.classList.remove("show");
+    const emailValue = email.value.trim().toLowerCase();
+    const passwordValue = password.value;
+
+    if (!emailValue) {
+
+        showMessage(
+            "Please enter your email address.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (!passwordValue) {
+
+        showMessage(
+            "Please enter your password.",
+            "error"
+        );
+
+        return;
+    }
+
+    emailLoginBtn.disabled = true;
+    emailLoginBtn.textContent = "Logging in...";
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/login`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: emailValue,
+                    password: passwordValue
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Login failed."
+            );
+        }
+
+        // Save logged-in user
+        localStorage.setItem(
+            "agriSmartUser",
+            JSON.stringify(data.user)
+        );
+
+        showMessage(
+            "Login successful! Redirecting...",
+            "success"
+        );
+
+        setTimeout(() => {
+            window.location.href = "farmer.html";
+        }, 800);
+
+    } catch (error) {
+
+        console.error("Email login error:", error);
+
+        showMessage(
+            error.message || "Invalid email or password.",
+            "error"
+        );
+
+    } finally {
+
+        emailLoginBtn.disabled = false;
+        emailLoginBtn.textContent = "Login";
+    }
+});
+
+
+// Change mobile number
+changeNumberBtn.addEventListener("click", () => {
+
+    mobileNumber.value = "";
+    otp.value = "";
 
     developmentOtp.style.display = "none";
+    changeNumberBtn.style.display = "none";
 
-    otpInput.value = "";
+    clearMessage();
 
-    mobileNumberInput.readOnly = false;
-
-    sendOtpButton.style.display = "block";
-
-    mobileNumberInput.focus();
-
+    mobileNumber.focus();
 });

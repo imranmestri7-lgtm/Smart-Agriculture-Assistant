@@ -5,159 +5,930 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Smart Agriculture Assistant</title>
+    <title>AgriSmart | Smart Farming Made Simple</title>
 
-    <!-- Connect CSS -->
+    <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/home.css">
-
-
 </head>
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
-
+    <!-- ==========================================
+         NAVBAR
+    =========================================== -->
     <header class="navbar">
 
-        <div class="logo">
-            <span class="logo-icon">🌱</span>
-            <span>AgriSmart</span>
+        <div class="navbar-container">
+
+            <!-- Logo -->
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🌾</span>
+                <span>AgriSmart</span>
+            </a>
+
+            <!-- Navigation -->
+            <nav class="nav-links">
+
+                <a href="#home">Home</a>
+
+                <a href="#features">Features</a>
+
+                <a href="#how-it-works">How It Works</a>
+
+                <a href="#about">About</a>
+
+            </nav>
+
+            <!-- Navbar Actions -->
+            <div class="nav-actions">
+
+                <a href="login.html" class="login-button">
+                    Login
+                </a>
+
+                <a href="login.html" class="get-started-button">
+                    Get Started
+                </a>
+
+            </div>
+
         </div>
-
-        <nav class="nav-links">
-            <a href="index.html">Home</a>
-        </nav>
-
-        <button class="farmer-btn" onclick="window.location.href='login.html'">
-    Farmer
-</button>
-
-
-
-
 
     </header>
 
 
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- ==========================================
+         HERO / HOME SECTION
+    =========================================== -->
+    <main>
 
-        <div class="hero-content">
+        <section id="home" class="hero-section">
 
-            <h1>Smart Agriculture <br>
-                Assistant</h1>
+            <div class="hero-container">
 
-            <p>
-                Make smarter farming decisions using soil,
-                weather and agricultural data.
-            </p>
+                <!-- Hero Text -->
+                <div class="hero-content">
 
+                    <div class="hero-badge">
+                        🌱 Smart Farming Support
+                    </div>
 
+                    <h1>
+                        Smart Farming
+                        <span>Made Simple</span>
+                    </h1>
 
+                    <p>
+                        AgriSmart helps farmers manage crops, understand
+                        possible plant problems, check weather information,
+                        get irrigation guidance, and access farming support
+                        from one simple platform.
+                    </p>
 
-            <button onclick="window.location.href='login.html'">
-    Get Started
-</button>
+                    <div class="hero-buttons">
 
-        </div>
+                        <a href="login.html" class="primary-button">
+                            🌱 Get Started
+                        </a>
 
-    </section>
+                        <a href="#how-it-works" class="secondary-button">
+                            ▶ How It Works
+                        </a>
 
+                    </div>
 
-    <!-- Features Section -->
-    <section class="features">
-
-        <h2>Our Features</h2>
-
-        <div class="feature-container">
-
-            <div class="feature-card">
-                <h3>🌾 Crop Recommendation</h3>
-                <p>
-                    
-
-                    Get the best crop based on soil and weather conditions.
-
-                </p>
-                <a href="crop.html" class="feature-btn">Explore →</a>
-            </div>
-
-
-            <div class="feature-card">
-                <h3>🌦️ Weather Information</h3>
-                <p>
-                    Check weather information to make
-                    better farming decisions.
-                </p>
-                <a href="weather.html" class="feature-btn">Explore →</a>
-            </div>
-
-
-            <div class="feature-card">
-                <h3>🍃 Disease Detection</h3>
-                <p>
-                    Upload a crop leaf image and detect
-                    possible plant diseases.
-                </p>
-                <a href="disease.html" class="feature-btn">Explore →</a>
-            </div>
-
-            <div class="feature-card">
-                <h3>💧 Smart Irrigation</h3>
-                <p>Get irrigation recommendations based on soil moisture.</p>
-                <a href="irrigation.html" class="feature-btn">Explore →</a>
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- Why Choose Section -->
-
-    <section class="why-choose">
-
-        <div class="why-content">
-
-            <h2>Why Choose AgriSmart?</h2>
-
-            <p>
-                AgriSmart helps farmers make better decisions
-                using smart technology, agricultural data and
-                intelligent recommendations.
-            </p>
-
-        </div>
-
-        <div class="why-points">
-
-            <div class="why-item">
-                <span>🌱</span>
-                <div>
-                    <h3>Smart Recommendations</h3>
-                    <p>Get useful recommendations based on farming conditions.</p>
                 </div>
+
+
+                <!-- Hero Visual -->
+                <div class="hero-visual">
+
+                    <div class="hero-card">
+
+                        <div class="hero-card-icon">
+                            🌾
+                        </div>
+
+                        <h3>
+                            Your Farming Assistant
+                        </h3>
+
+                        <p>
+                            Manage your crops and get useful farming
+                            information in one place.
+                        </p>
+
+                        <div class="hero-mini-cards">
+
+                            <div>
+                                <span>🌱</span>
+                                <small>My Crops</small>
+                            </div>
+
+                            <div>
+                                <span>🍃</span>
+                                <small>Plant Health</small>
+                            </div>
+
+                            <div>
+                                <span>🌦️</span>
+                                <small>Weather</small>
+                            </div>
+
+                            <div>
+                                <span>💧</span>
+                                <small>Irrigation</small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="why-item">
-                <span>📊</span>
-                <div>
-                    <h3>Data Driven Decisions</h3>
-                    <p>Use soil, weather and crop data for better decisions.</p>
+        </section>
+
+
+        <!-- ==========================================
+             FEATURES
+        =========================================== -->
+        <section id="features" class="features-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        FARMING FEATURES
+                    </span>
+
+                    <h2>
+                        Everything You Need for Better Farming
+                    </h2>
+
+                    <p>
+                        Explore the main tools available through
+                        AgriSmart.
+                    </p>
+
                 </div>
+
+
+                <div class="features-grid">
+
+
+                    <!-- My Crops -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon crop-icon">
+                            🌱
+                        </div>
+
+                        <h3>
+                            My Crops
+                        </h3>
+
+                        <p>
+                            Add and manage your crops, varieties,
+                            planting dates, field information and notes.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            Manage Crops →
+                        </a>
+
+                    </div>
+
+
+                    <!-- Disease Detection -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon disease-icon">
+                            🍃
+                        </div>
+
+                        <h3>
+                            Disease Detection
+                        </h3>
+
+                        <p>
+                            Upload a plant image to identify possible
+                            plant health problems and learn about symptoms,
+                            causes and prevention.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            Learn More →
+                        </a>
+
+                    </div>
+
+
+                    <!-- Irrigation -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon irrigation-icon">
+                            💧
+                        </div>
+
+                        <h3>
+                            Irrigation Guidance
+                        </h3>
+
+                        <p>
+                            Get useful information about watering your
+                            crops and managing irrigation.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            Learn More →
+                        </a>
+
+                    </div>
+
+
+                    <!-- Weather -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon weather-icon">
+                            🌦️
+                        </div>
+
+                        <h3>
+                            Weather Information
+                        </h3>
+
+                        <p>
+                            Check weather information that can help you
+                            make better farming decisions.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            Check Weather →
+                        </a>
+
+                    </div>
+
+
+                    <!-- Farmer Assistant -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon assistant-icon">
+                            💬
+                        </div>
+
+                        <h3>
+                            Farmer Assistant
+                        </h3>
+
+                        <p>
+                            Ask farming-related questions and get useful
+                            guidance through the AgriSmart Assistant.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            Ask Assistant →
+                        </a>
+
+                    </div>
+
+
+                    <!-- Diagnosis History -->
+                    <div class="feature-card">
+
+                        <div class="feature-icon history-icon">
+                            📊
+                        </div>
+
+                        <h3>
+                            Diagnosis History
+                        </h3>
+
+                        <p>
+                            Keep track of previous plant health checks
+                            and review your farming history.
+                        </p>
+
+                        <a href="login.html" class="feature-link">
+                            View History →
+                        </a>
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="why-item">
-                <span>🤖</span>
-                <div>
-                    <h3>AI Powered Assistance</h3>
-                    <p>Get intelligent support for your agricultural needs.</p>
+        </section>
+
+
+        <!-- ==========================================
+             HOW IT WORKS
+        =========================================== -->
+        <section id="how-it-works" class="how-it-works-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        HOW IT WORKS
+                    </span>
+
+                    <h2>
+                        Start Using AgriSmart in Four Simple Steps
+                    </h2>
+
+                    <p>
+                        The platform is designed to keep the farming
+                        process simple and easy to understand.
+                    </p>
+
                 </div>
+
+
+                <div class="steps-container">
+
+
+                    <!-- Step 1 -->
+                    <div class="step-card">
+
+                        <div class="step-number">
+                            01
+                        </div>
+
+                        <div class="step-icon">
+                            👤
+                        </div>
+
+                        <h3>
+                            Create Your Account
+                        </h3>
+
+                        <p>
+                            Register using your mobile number or
+                            email address and access your farmer dashboard.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Step 2 -->
+                    <div class="step-card">
+
+                        <div class="step-number">
+                            02
+                        </div>
+
+                        <div class="step-icon">
+                            🌱
+                        </div>
+
+                        <h3>
+                            Add Your Crop
+                        </h3>
+
+                        <p>
+                            Add crop details such as crop name,
+                            variety, planting date and field information.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Step 3 -->
+                    <div class="step-card">
+
+                        <div class="step-number">
+                            03
+                        </div>
+
+                        <div class="step-icon">
+                            📷
+                        </div>
+
+                        <h3>
+                            Check or Ask
+                        </h3>
+
+                        <p>
+                            Upload a plant image, check farming
+                            information or ask the Farmer Assistant.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Step 4 -->
+                    <div class="step-card">
+
+                        <div class="step-number">
+                            04
+                        </div>
+
+                        <div class="step-icon">
+                            💡
+                        </div>
+
+                        <h3>
+                            Get Useful Guidance
+                        </h3>
+
+                        <p>
+                            View possible plant problems, farming
+                            information, treatment options and prevention.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Disease Detection Flow -->
+                <div class="analysis-flow">
+
+                    <div class="analysis-flow-heading">
+
+                        <span>
+                            🍃
+                        </span>
+
+                        <div>
+                            <h3>
+                                Plant Health Analysis Flow
+                            </h3>
+
+                            <p>
+                                Understand what happens when you check
+                                a plant image.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="analysis-steps">
+
+                        <div class="analysis-step">
+                            <span>📷</span>
+                            <strong>Upload Image</strong>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="analysis-step">
+                            <span>🔍</span>
+                            <strong>Analyze</strong>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="analysis-step">
+                            <span>🍃</span>
+                            <strong>Possible Problem</strong>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="analysis-step">
+                            <span>📋</span>
+                            <strong>Symptoms & Causes</strong>
+                        </div>
+
+                        <div class="flow-arrow">
+                            →
+                        </div>
+
+                        <div class="analysis-step">
+                            <span>🛡️</span>
+                            <strong>Treatment & Prevention</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             WHAT CAN A FARMER DO?
+        =========================================== -->
+        <section class="farmer-actions-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        FOR FARMERS
+                    </span>
+
+                    <h2>
+                        What Would You Like to Do?
+                    </h2>
+
+                    <p>
+                        Choose what you need help with.
+                    </p>
+
+                </div>
+
+
+                <div class="farmer-actions-grid">
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            🌱
+                        </span>
+
+                        <div>
+                            <h3>
+                                "I want to manage my crops"
+                            </h3>
+
+                            <p>
+                                Add and manage your crop information.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            Open →
+                        </a>
+
+                    </div>
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            🍃
+                        </span>
+
+                        <div>
+                            <h3>
+                                "My plant looks unhealthy"
+                            </h3>
+
+                            <p>
+                                Check a plant image for possible problems.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            Check →
+                        </a>
+
+                    </div>
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            💧
+                        </span>
+
+                        <div>
+                            <h3>
+                                "I want irrigation guidance"
+                            </h3>
+
+                            <p>
+                                Get useful information about watering crops.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            Explore →
+                        </a>
+
+                    </div>
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            🌦️
+                        </span>
+
+                        <div>
+                            <h3>
+                                "I want to check the weather"
+                            </h3>
+
+                            <p>
+                                View weather information for farming.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            Check →
+                        </a>
+
+                    </div>
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            💬
+                        </span>
+
+                        <div>
+                            <h3>
+                                "I have a farming question"
+                            </h3>
+
+                            <p>
+                                Ask the AgriSmart Farmer Assistant.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            Ask →
+                        </a>
+
+                    </div>
+
+
+                    <div class="farmer-action-card">
+
+                        <span class="action-icon">
+                            📊
+                        </span>
+
+                        <div>
+                            <h3>
+                                "I want to see my history"
+                            </h3>
+
+                            <p>
+                                Review your previous plant health checks.
+                            </p>
+                        </div>
+
+                        <a href="login.html">
+                            View →
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             WHY AGRISMART
+        =========================================== -->
+        <section class="why-section">
+
+            <div class="section-container">
+
+                <div class="why-content">
+
+                    <div class="why-text">
+
+                        <span class="section-label">
+                            WHY AGRISMART?
+                        </span>
+
+                        <h2>
+                            One Simple Platform for Everyday Farming Support
+                        </h2>
+
+                        <p>
+                            AgriSmart brings useful farming tools together
+                            so farmers can access crop information,
+                            plant health guidance, weather information,
+                            irrigation support and farming assistance
+                            from one place.
+                        </p>
+
+                    </div>
+
+
+                    <div class="why-points">
+
+                        <div class="why-point">
+                            <span>✓</span>
+                            <div>
+                                <strong>Simple Interface</strong>
+                                <p>
+                                    Designed to be easy to understand
+                                    and use.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="why-point">
+                            <span>✓</span>
+                            <div>
+                                <strong>Farmer Focused</strong>
+                                <p>
+                                    Built around common farming needs.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="why-point">
+                            <span>✓</span>
+                            <div>
+                                <strong>Multiple Farming Tools</strong>
+                                <p>
+                                    Crop, plant health, weather,
+                                    irrigation and assistance.
+                                </p>
+                            </div>
+                        </div>
+
+
+                        <div class="why-point">
+                            <span>✓</span>
+                            <div>
+                                <strong>Language Support</strong>
+                                <p>
+                                    Designed with multilingual support
+                                    in mind.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             ABOUT
+        =========================================== -->
+        <section id="about" class="about-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        ABOUT AGRISMART
+                    </span>
+
+                    <h2>
+                        Technology Designed Around Farmers
+                    </h2>
+
+                    <p>
+                        AgriSmart is a farmer-focused digital platform
+                        designed to make everyday farming information
+                        easier to access and understand.
+                    </p>
+
+                </div>
+
+
+                <div class="about-features">
+
+                    <div>
+                        <span>🌱</span>
+                        <h3>Crop Management</h3>
+                    </div>
+
+                    <div>
+                        <span>🍃</span>
+                        <h3>Plant Health</h3>
+                    </div>
+
+                    <div>
+                        <span>🌦️</span>
+                        <h3>Weather</h3>
+                    </div>
+
+                    <div>
+                        <span>💧</span>
+                        <h3>Irrigation</h3>
+                    </div>
+
+                    <div>
+                        <span>💬</span>
+                        <h3>Farmer Assistance</h3>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             FINAL CTA
+        =========================================== -->
+        <section class="cta-section">
+
+            <div class="cta-container">
+
+                <div class="cta-icon">
+                    🌾
+                </div>
+
+                <h2>
+                    Ready to Start?
+                </h2>
+
+                <p>
+                    Create your account and start exploring
+                    AgriSmart farming tools.
+                </p>
+
+                <a href="login.html" class="cta-button">
+                    Get Started →
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ==========================================
+         FOOTER
+    =========================================== -->
+    <footer class="footer">
+
+        <div class="footer-container">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🌾</span>
+                    <span>AgriSmart</span>
+                </a>
+
+                <p>
+                    Smart Farming Made Simple.
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <a href="#home">
+                    Home
+                </a>
+
+                <a href="#features">
+                    Features
+                </a>
+
+                <a href="#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="#about">
+                    About
+                </a>
+
+                <a href="login.html">
+                    Login
+                </a>
+
+            </div>
+
+
+            <div class="footer-bottom">
+
+                <p>
+                    © 2026 AgriSmart. All rights reserved.
+                </p>
+
             </div>
 
         </div>
 
-    </section>
+    </footer>
+
 
 </body>
 
