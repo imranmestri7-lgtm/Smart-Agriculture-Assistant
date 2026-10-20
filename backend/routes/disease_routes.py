@@ -221,6 +221,213 @@ def predict_disease():
         image
     """
 
+# =========================================================
+# FARMER RECOMMENDATION API
+# =========================================================
+
+from flask import request as recommendation_request
+
+
+@disease_bp.route("/recommend", methods=["POST"])
+def recommend_for_farmer():
+    """
+    Generate cautious, symptom-based guidance using the
+    model prediction and the farmer's answers.
+
+    Endpoint:
+        POST /api/disease/recommend
+    """
+
+    data = recommendation_request.get_json(silent=True) or {}
+
+    prediction = data.get("prediction") or {}
+    answers = data.get("answers") or {}
+
+    predicted_class = str(
+        prediction.get("class_name", "")
+    ).strip()
+
+    try:
+        confidence = float(prediction.get("confidence", 0))
+    except (TypeError, ValueError):
+        confidence = 0
+
+    plant = str(answers.get("plant", "Not sure")).strip()
+    symptoms = str(answers.get("symptoms", "Not sure")).strip()
+    duration = str(answers.get("duration", "Not sure")).strip()
+    spread = str(answers.get("spread", "Not sure")).strip()
+
+    if not symptoms:
+        symptoms = "Not sure"
+
+    # -----------------------------------------------------
+    # General safe actions suitable when the cause is unknown
+    # -----------------------------------------------------
+
+    recommendations = [
+        "Take clear photos of the affected leaf, the whole plant, and any affected fruit.",
+        "Check nearby leaves and plants daily to see whether new spots appear.",
+        "Avoid handling affected plants and then healthy plants without cleaning your hands and tools.",
+        "Water near the soil rather than repeatedly wetting the leaves.",
+        "Do not apply pesticides or mix chemicals until the cause has been identified."
+    ]
+
+    actions_to_avoid = [
+        "Do not remove the whole plant based only on this image prediction.",
+        "Do not use a pesticide or home remedy without checking whether it is suitable for the crop and problem."
+    ]
+
+    follow_up_questions = []
+
+    # -----------------------------------------------------
+    # Assess whether the model and farmer's crop agree
+    # -----------------------------------------------------
+
+    class_lower = predicted_class.lower()
+    plant_lower = plant.lower()
+
+    crop_matches = True
+
+    crop_keywords = {
+        "tomato": ["tomato"],
+        "potato": ["potato"],
+        "corn / maize": ["corn", "maize"],
+        "apple": ["apple"],
+        "strawberry": ["strawberry"]
+    }
+
+    if plant_lower in crop_keywords:
+        crop_matches = any(
+            keyword in class_lower
+            for keyword in crop_keywords[plant_lower]
+        )
+
+    uncertain = (
+        not predicted_class
+        or confidence < 60
+        or plant_lower in ("not sure", "other plant or fruit")
+        or not crop_matches
+    )
+
+    # -----------------------------------------------------
+    # Symptom-specific safe guidance
+    # -----------------------------------------------------
+
+    if "brown" in symptoms.lower() or "black" in symptoms.lower():
+        recommendations.append(
+            "Inspect whether the spots have a yellow edge, a ring pattern, or a wet/soft texture. These details can help distinguish possible causes."
+        )
+
+        follow_up_questions.append(
+            "Do the spots have yellow edges, circular rings, or a wet/soft appearance?"
+        )
+
+    elif "yellow" in symptoms.lower():
+        recommendations.append(
+            "Check whether yellowing affects older leaves, newer leaves, or the entire plant, and inspect the soil moisture."
+        )
+
+        follow_up_questions.append(
+            "Are the older leaves yellow, the newer leaves yellow, or all leaves yellow?"
+        )
+
+    elif "wilt" in symptoms.lower() or "curl" in symptoms.lower():
+        recommendations.append(
+            "Check soil moisture and look for stem damage or insects. Avoid adding extra water unless the soil is actually dry."
+        )
+
+        follow_up_questions.append(
+            "Is the soil dry, very wet, or normally moist?"
+        )
+
+    elif "insect" in symptoms.lower() or "hole" in symptoms.lower():
+        recommendations.append(
+            "Inspect the upper and lower leaf surfaces for insects, eggs, and fresh feeding damage. Photograph any insects you find."
+        )
+
+        follow_up_questions.append(
+            "Can you see insects, eggs, webbing, or only holes in the leaves?"
+        )
+
+    elif "rot" in symptoms.lower():
+        recommendations.append(
+            "Avoid touching or storing damaged fruit with healthy produce. Check whether the affected area is soft, wet, or spreading."
+        )
+
+        follow_up_questions.append(
+            "Is the affected fruit or stem soft and wet, or dry and firm?"
+        )
+
+    # -----------------------------------------------------
+    # Duration and spread guidance
+    # -----------------------------------------------------
+
+    if "many plants" in spread.lower() or "most of the plant" in spread.lower():
+        recommendations.append(
+            "Because the problem affects much of the plant or several plants, seek advice from a local agricultural extension officer promptly."
+        )
+
+    elif "one leaf" in spread.lower():
+        recommendations.append(
+            "Since you report only one affected leaf or fruit, mark or photograph it and monitor nearby leaves for changes."
+        )
+
+    if "1–3 days" in duration.lower() or "1-3 days" in duration.lower():
+        recommendations.append(
+            "Since the problem was noticed recently, compare a new photo after a short interval to check whether it is spreading."
+        )
+
+    # -----------------------------------------------------
+    # Assessment wording
+    # -----------------------------------------------------
+
+    if not predicted_class:
+        assessment = (
+            "No usable image prediction was provided. The cause cannot be assessed yet."
+        )
+
+    elif not crop_matches:
+        assessment = (
+            "The crop selected by the farmer does not appear to match the model's predicted plant class. The prediction may be unsuitable for this plant, so the disease is not confirmed."
+        )
+
+    elif confidence < 60:
+        assessment = (
+            f"The model predicted {predicted_class.replace('___', ' — ').replace('_', ' ')} "
+            f"with {confidence:.2f}% model confidence. This is an uncertain result, not a confirmed diagnosis."
+        )
+
+    else:
+        assessment = (
+            f"The model's leading prediction is {predicted_class.replace('___', ' — ').replace('_', ' ')} "
+            f"with {confidence:.2f}% model confidence. This is a possible match, not a confirmed diagnosis."
+        )
+
+    if uncertain:
+        next_step = (
+            "Provide a clear photo of the whole plant and a close-up of the affected area. "
+            "Answer the follow-up questions and consult a local agricultural expert if the problem spreads."
+        )
+    else:
+        next_step = (
+            "Compare the plant's visible symptoms with trusted crop-disease guidance before choosing a treatment. "
+            "Consult a local agricultural expert if the problem worsens."
+        )
+
+    return jsonify({
+        "status": "success",
+        "assessment": assessment,
+        "recommendations": recommendations,
+        "actions_to_avoid": actions_to_avoid,
+        "follow_up_questions": follow_up_questions,
+        "next_step": next_step,
+        "disclaimer": (
+            "These are general precautionary suggestions, not a confirmed diagnosis. "
+            "No pesticide or medicine is prescribed by this endpoint."
+        )
+    }), 200
+
+
     # -----------------------------------------------------
     # 1. Check model availability
     # -----------------------------------------------------
