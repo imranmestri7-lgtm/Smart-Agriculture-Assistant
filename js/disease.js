@@ -27,6 +27,7 @@ const scanAgainButton = document.getElementById("scanAgainButton");
 let selectedFile = null;
 let cameraStream = null;
 let previewObjectUrl = null;
+let lastPredictionData = null;
 
 // =====================================================
 // CREATE RESULT SECTION
@@ -596,6 +597,8 @@ function displayTopPredictions(predictions) {
 // =====================================================
 
 function showResult(data) {
+    lastPredictionData = data;
+
     const prediction = data.prediction;
     const confidence = Number(prediction.confidence);
 
