@@ -5,6 +5,7 @@
  // =====================================================
 
 const API_URL = "http://127.0.0.1:5000/api/disease/predict";
+const RECOMMEND_API_URL = "http://127.0.0.1:5000/api/disease/recommend";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const LOW_CONFIDENCE_LIMIT = 60;
 
