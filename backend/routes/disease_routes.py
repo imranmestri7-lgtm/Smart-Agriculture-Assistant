@@ -205,7 +205,6 @@ def disease_model_status():
 # =========================================================
 # DISEASE PREDICTION API
 # =========================================================
-
 @disease_bp.route("/predict", methods=["POST"])
 def predict_disease():
     """
@@ -225,41 +224,106 @@ def predict_disease():
 # FARMER RECOMMENDATION API
 # =========================================================
 
-from flask import request as recommendation_request
+@disease_bp.route("/predict", methods=["POST"])
+def predict_disease():
+    """Predict a plant disease from an uploaded image."""
 
+    # Check model availability
+    if model is None or class_labels is None:
+        return jsonify({
+            "status": "error",
+            "message": "Disease prediction model is unavailable.",
+            "details": model_load_error
+        }), 503
 
-@disease_bp.route("/recommend", methods=["POST"])
-def recommend_for_farmer():
-    """
-    Generate cautious, symptom-based guidance using the
-    model prediction and the farmer's answers.
+    # Check uploaded image
+    if "image" not in request.files:
+        return jsonify({
+            "status": "error",
+            "message": "Please upload an image using the 'image' field."
+        }), 400
 
-    Endpoint:
-        POST /api/disease/recommend
-    """
+    uploaded_file = request.files["image"]
 
-    data = recommendation_request.get_json(silent=True) or {}
+    if not uploaded_file.filename:
+        return jsonify({
+            "status": "error",
+            "message": "Please select an image."
+        }), 400
 
-    prediction = data.get("prediction") or {}
-    answers = data.get("answers") or {}
+    # Read image with a 10 MB limit
+    image_bytes = uploaded_file.read(MAX_IMAGE_SIZE + 1)
 
-    predicted_class = str(
-        prediction.get("class_name", "")
-    ).strip()
+    if not image_bytes:
+        return jsonify({
+            "status": "error",
+            "message": "The uploaded image is empty."
+        }), 400
 
+    if len(image_bytes) > MAX_IMAGE_SIZE:
+        return jsonify({
+            "status": "error",
+            "message": "Image size must not exceed 10 MB."
+        }), 413
+
+    # Prepare image for the trained model
     try:
-        confidence = float(prediction.get("confidence", 0))
-    except (TypeError, ValueError):
-        confidence = 0
+        processed_image = preprocess_image(image_bytes)
 
-    plant = str(answers.get("plant", "Not sure")).strip()
-    symptoms = str(answers.get("symptoms", "Not sure")).strip()
-    duration = str(answers.get("duration", "Not sure")).strip()
-    spread = str(answers.get("spread", "Not sure")).strip()
+    except (UnidentifiedImageError, OSError, ValueError):
+        return jsonify({
+            "status": "error",
+            "message": "Invalid image. Please upload a valid JPG or PNG image."
+        }), 400
 
-    if not symptoms:
-        symptoms = "Not sure"
+    # Run prediction
+    try:
+        predictions = model.predict(processed_image, verbose=0)
+        probabilities = predictions[0]
 
+        predicted_index = int(np.argmax(probabilities))
+        predicted_class = class_labels[predicted_index]
+
+        confidence = float(probabilities[predicted_index]) * 100
+
+        # Get the three highest-scoring classes
+        top_indices = np.argsort(probabilities)[-3:][::-1]
+
+        top_predictions = []
+
+        for index in top_indices:
+            index = int(index)
+
+            top_predictions.append({
+                "class_name": class_labels[index],
+                "confidence": round(
+                    float(probabilities[index]) * 100, 2
+                )
+            })
+
+        return jsonify({
+            "status": "success",
+            "message": "Image prediction completed.",
+            "prediction": {
+                "class_name": predicted_class,
+                "confidence": round(confidence, 2)
+            },
+            "top_predictions": top_predictions,
+            "disclaimer": (
+                "This result is a model prediction, not a confirmed "
+                "diagnosis. Prediction confidence does not guarantee "
+                "real-world accuracy. Verify symptoms before choosing "
+                "a treatment."
+            )
+        }), 200
+
+    except Exception as error:
+        print(f"Disease prediction failed: {error}")
+
+        return jsonify({
+            "status": "error",
+            "message": "An error occurred while predicting the image."
+        }), 500
     # -----------------------------------------------------
     # General safe actions suitable when the cause is unknown
     # -----------------------------------------------------

@@ -624,8 +624,8 @@ function showResult(data) {
 
     const isLowConfidence = confidence < LOW_CONFIDENCE_LIMIT;
 
-    warning.style.display = isLowConfidence ? "block" : "none";
-    followUp.style.display = isLowConfidence ? "block" : "none";
+warning.style.display = isLowConfidence ? "block" : "none";
+followUp.style.display = "block";
     answersResult.style.display = "none";
     answersResult.replaceChildren();
 
@@ -652,47 +652,142 @@ function showResult(data) {
 // Answers are displayed only; not saved or diagnosed.
 // =====================================================
 
+
 const farmerQuestionsForm = document.getElementById("farmerQuestionsForm");
 
 if (farmerQuestionsForm) {
-    farmerQuestionsForm.addEventListener("submit", function (event) {
+    farmerQuestionsForm.addEventListener("submit", async function (event) {
         event.preventDefault();
+        clearMessage();
 
-        const answers = [
-            ["Plant or fruit", document.getElementById("farmerPlant").value],
-            ["Symptoms", document.getElementById("farmerSymptoms").value],
-            ["Problem duration", document.getElementById("farmerDuration").value],
-            ["Spread", document.getElementById("farmerSpread").value]
-        ];
+        if (!lastPredictionData || !lastPredictionData.prediction) {
+            showMessage("Please analyze a plant image first.");
+            return;
+        }
 
-        const answersResult = document.getElementById("farmerAnswersResult");
-        answersResult.replaceChildren();
+        const answers = {
+            plant: document.getElementById("farmerPlant").value,
+            symptoms: document.getElementById("farmerSymptoms").value,
+            duration: document.getElementById("farmerDuration").value,
+            spread: document.getElementById("farmerSpread").value
+        };
 
-        const heading = document.createElement("h4");
-        heading.textContent = "Your answers";
-        heading.style.marginBottom = "8px";
-        answersResult.appendChild(heading);
+        const resultBox = document.getElementById("farmerAnswersResult");
+        const submitButton = farmerQuestionsForm.querySelector(
+            'button[type="submit"]'
+        );
 
-        answers.forEach(function (answer) {
-            const line = document.createElement("p");
-            const label = document.createElement("strong");
+        const originalButtonText = submitButton.textContent;
 
-            label.textContent = `${answer[0]}: `;
-            line.appendChild(label);
-            line.appendChild(document.createTextNode(answer[1] || "Not provided"));
+        submitButton.disabled = true;
+        submitButton.textContent = "Generating recommendations...";
 
-            answersResult.appendChild(line);
-        });
+        resultBox.style.display = "block";
+        resultBox.replaceChildren();
 
-        const note = document.createElement("p");
-        note.style.marginTop = "10px";
-        note.textContent =
-            "Thank you. These details can help guide a future assessment, but they have not confirmed the disease or generated a treatment recommendation.";
+        const loading = document.createElement("p");
+        loading.textContent = "Please wait while AgriSmart prepares suggestions...";
+        resultBox.appendChild(loading);
 
-        answersResult.appendChild(note);
-        answersResult.style.display = "block";
+        try {
+            const response = await fetch(RECOMMEND_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    prediction: lastPredictionData.prediction,
+                    top_predictions: lastPredictionData.top_predictions || [],
+                    answers: answers
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || result.status !== "success") {
+                throw new Error(
+                    result.message || "Could not generate recommendations."
+                );
+            }
+
+            resultBox.replaceChildren();
+
+            function addHeading(text) {
+                const heading = document.createElement("h4");
+                heading.textContent = text;
+                heading.style.margin = "16px 0 8px";
+                resultBox.appendChild(heading);
+            }
+
+            function addParagraph(text) {
+                const paragraph = document.createElement("p");
+                paragraph.textContent = text || "";
+                resultBox.appendChild(paragraph);
+            }
+
+            function addList(title, items) {
+                if (!Array.isArray(items) || items.length === 0) {
+                    return;
+                }
+
+                addHeading(title);
+
+                const list = document.createElement("ul");
+                list.style.paddingLeft = "22px";
+
+                items.forEach(function (item) {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = item;
+                    listItem.style.marginBottom = "8px";
+                    list.appendChild(listItem);
+                });
+
+                resultBox.appendChild(list);
+            }
+
+            addHeading("🌱 AgriSmart Recommendations");
+            addParagraph(result.assessment);
+
+            addList("What you can do now", result.recommendations);
+            addList("What to avoid", result.actions_to_avoid);
+            addList("Follow-up questions", result.follow_up_questions);
+
+            addHeading("Next step");
+            addParagraph(result.next_step);
+
+            const disclaimer = document.createElement("p");
+            disclaimer.textContent = result.disclaimer ||
+                "These suggestions do not confirm a plant disease.";
+            disclaimer.style.marginTop = "16px";
+            disclaimer.style.fontSize = "13px";
+            disclaimer.style.color = "#66551a";
+            resultBox.appendChild(disclaimer);
+
+            resultBox.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+
+        } catch (error) {
+            console.error("Recommendation error:", error);
+
+            resultBox.replaceChildren();
+
+            const errorText = document.createElement("p");
+            errorText.textContent = error.message.includes("Failed to fetch")
+                ? "Cannot connect to the recommendation API. Please check that Flask is running on port 5000."
+                : error.message || "Unable to generate recommendations.";
+
+            resultBox.appendChild(errorText);
+            resultBox.style.background = "#ffebee";
+
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
     });
 }
+
 
 // =====================================================
 // CALL THE FLASK PREDICTION API
