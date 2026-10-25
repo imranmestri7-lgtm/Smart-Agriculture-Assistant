@@ -5,6 +5,7 @@ from flask_cors import CORS
 from config import get_db_connection
 from routes.auth_routes import auth_bp
 from routes.disease_routes import disease_bp
+from routes.weather_routes import weather_bp
 
 app = Flask(__name__)
 
@@ -15,6 +16,9 @@ app.register_blueprint(auth_bp)
 
 # Register crop disease prediction routes
 app.register_blueprint(disease_bp)
+
+# Register weather routes
+app.register_blueprint(weather_bp)
 
 @app.route("/")
 def home():

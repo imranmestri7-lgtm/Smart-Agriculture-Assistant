@@ -1,30 +1,17 @@
 
-// 
-const API_KEY = "8568afaf35e5465c9dc62903260609";
-
-
-
+// ========================================
+// WEATHER API BACKEND ENDPOINT
+// Requests are routed through the Flask server
+// to keep external API credentials secure.
+// ========================================
+const WEATHER_API_URL = "http://127.0.0.1:5000/api/weather";
 
 const locationInput = document.getElementById("location");
 const searchButton = document.getElementById("searchWeather");
 const suggestionsBox = document.getElementById("suggestions");
 
-
-
-
 let selectedLocation = null;
 let searchTimer = null;
-
-
-// ========================================
-// CHECK API KEY
-// ========================================
-
-if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
-
-    console.error("WeatherAPI key is missing.");
-
-}
 
 
 // ========================================
@@ -50,9 +37,9 @@ locationInput.addEventListener("input", function () {
         try {
 
             const url =
-                "https://api.weatherapi.com/v1/search.json" +
-                "?key=" + API_KEY +
-                "&q=" + encodeURIComponent(query);
+                WEATHER_API_URL +
+                "/search?q=" +
+                encodeURIComponent(query);
 
             const response = await fetch(url);
 
@@ -60,15 +47,13 @@ locationInput.addEventListener("input", function () {
                 return;
             }
 
-            const locations = await response.json();
+            const indiaLocations = await response.json();
 
             suggestionsBox.innerHTML = "";
 
-            // Only India
-            const indiaLocations = locations.filter(function (location) {
-                return location.country === "India";
-            });
-
+            if (!Array.isArray(indiaLocations)) {
+                return;
+            }
 
             // Show maximum 5 suggestions
             indiaLocations.slice(0, 5).forEach(function (location) {
@@ -165,16 +150,14 @@ async function searchLocation() {
 
 
         // ========================================
-        // WEATHER API
+        // BACKEND WEATHER PROXY
         // ========================================
 
-        let url =
-            "https://api.weatherapi.com/v1/forecast.json" +
-            "?key=" + API_KEY +
-            "&q=" + encodeURIComponent(query) +
-            "&days=5" +
-            "&aqi=no" +
-            "&alerts=no";
+        const url =
+            WEATHER_API_URL +
+            "/forecast?q=" +
+            encodeURIComponent(query) +
+            "&days=5";
 
 
         let response = await fetch(url);
@@ -182,45 +165,16 @@ async function searchLocation() {
         let data = await response.json();
 
 
-        // ========================================
-        // SECOND ATTEMPT
-        // ========================================
-
-        // If "Pune, India" doesn't work,
-        // try simply "Pune"
-
+        // If response is not ok
         if (!response.ok) {
 
-            console.log("First weather search failed:", data);
+            console.log("Weather error:", data);
 
-
-            // Try without India
-            url =
-                "https://api.weatherapi.com/v1/forecast.json" +
-                "?key=" + API_KEY +
-                "&q=" + encodeURIComponent(location) +
-                "&days=5" +
-                "&aqi=no" +
-                "&alerts=no";
-
-
-            response = await fetch(url);
-
-            data = await response.json();
-
-        }
-
-
-        // ========================================
-        // FINAL RESPONSE CHECK
-        // ========================================
-
-        if (!response.ok) {
-
-            console.log("WeatherAPI error:", data);
-
-            document.querySelector(".weather-heading p").textContent =
-                "Weather data is not available for this location.";
+            const headingDesc = document.querySelector(".weather-heading p");
+            if (headingDesc) {
+                headingDesc.textContent =
+                    data.message || "Weather data is not available for this location.";
+            }
 
             return;
 
@@ -240,8 +194,11 @@ async function searchLocation() {
 
         console.error("Weather error:", error);
 
-        document.querySelector(".weather-heading p").textContent =
-            "Unable to connect to weather service.";
+        const headingDesc = document.querySelector(".weather-heading p");
+        if (headingDesc) {
+            headingDesc.textContent =
+                "Unable to connect to weather service.";
+        }
 
     }
 

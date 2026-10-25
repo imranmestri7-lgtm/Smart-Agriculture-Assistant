@@ -4,15 +4,24 @@ __pycache__/
 *$py.class
 
 # Virtual environments
-backend/venv/
-.venv/
-venv/
-env/
-ENV/
+backend/venv*/
+.venv*/
+venv*/
+env*/
+ENV*/
 
-# Environment variables
+# Environment variables & secrets
 .env
+.env.*
+*.env
+*.env.save
 backend/.env
+backend/.env.*
+backend/*.env
+backend/.env.save
+backend/*.env.save
+!.env.example
+!backend/.env.example
 
 # Uploaded files
 backend/uploads/
@@ -58,3 +67,4 @@ htmlcov/
 
 # Temporary files
 tempCodeRunnerFile.py
+!backend/.env.example
