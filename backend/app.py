@@ -1,9 +1,16 @@
-import mysql.connector
+try:
+    import mysql.connector
+except ImportError:
+    class _DummyMySQL:
+        class Error(Exception):
+            pass
+    mysql = _DummyMySQL()
 from flask import Flask, jsonify
 from flask_cors import CORS
 
 from config import get_db_connection
 from routes.auth_routes import auth_bp
+from routes.chat_routes import chat_bp
 from routes.disease_routes import disease_bp
 from routes.weather_routes import weather_bp
 
@@ -13,6 +20,7 @@ CORS(app)
 
 # Register authentication routes
 app.register_blueprint(auth_bp)
+app.register_blueprint(chat_bp)
 
 # Register crop disease prediction routes
 app.register_blueprint(disease_bp)

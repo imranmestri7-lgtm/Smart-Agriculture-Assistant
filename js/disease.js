@@ -813,8 +813,14 @@ if (analyzeButton) {
             const formData = new FormData();
             formData.append("image", selectedFile);
 
+            const token = localStorage.getItem("agriSmartToken");
+            const headers = token
+                ? { "Authorization": `Bearer ${token}` }
+                : {};
+
             const response = await fetch(API_URL, {
                 method: "POST",
+                headers,
                 body: formData
             });
 
@@ -912,6 +918,116 @@ if (scanAgainButton) {
         });
     });
 }
+
+
+// =====================================================
+// AUTHENTICATED DIAGNOSIS HISTORY
+// =====================================================
+
+const HISTORY_API_URL = "http://127.0.0.1:5000/api/disease/history";
+
+async function loadDiagnosisHistory() {
+    const message = document.getElementById("diagnosisHistoryMessage");
+    const list = document.getElementById("diagnosisHistoryList");
+
+    if (!message || !list) return;
+
+    list.replaceChildren();
+
+    const token = localStorage.getItem("agriSmartToken");
+
+    if (!token) {
+        message.textContent =
+            "Please log in to save and view your diagnosis history.";
+        return;
+    }
+
+    message.textContent = "Loading your saved diagnoses...";
+
+    try {
+        const response = await fetch(HISTORY_API_URL, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error("The server returned an invalid response.");
+        }
+
+        if (response.status === 401) {
+            localStorage.removeItem("agriSmartToken");
+            message.textContent =
+                "Your login session has expired. Please log in again.";
+            return;
+        }
+
+        if (!response.ok || data.status !== "success") {
+            throw new Error(data.message || "Could not load diagnosis history.");
+        }
+
+        if (!Array.isArray(data.history) || data.history.length === 0) {
+            message.textContent =
+                "No saved diagnoses yet. Log in and analyze a plant image to begin your history.";
+            return;
+        }
+
+        message.textContent = `Showing ${data.history.length} recent saved diagnosis(es).`;
+
+        for (const item of data.history) {
+            const card = document.createElement("article");
+            card.style.cssText = [
+                "padding: 16px",
+                "margin-top: 12px",
+                "border: 1px solid #dce8dc",
+                "border-radius: 10px",
+                "overflow-wrap: anywhere"
+            ].join(";");
+
+            const title = document.createElement("h3");
+            title.style.cssText = "color:#245c32;margin-bottom:8px;";
+            title.textContent = String(item.predicted_class || "Unknown prediction")
+                .replace(/___/g, " — ")
+                .replace(/_/g, " ");
+
+            const confidence = document.createElement("p");
+            confidence.style.marginBottom = "6px";
+            confidence.textContent =
+                item.confidence == null
+                    ? "Confidence: unavailable"
+                    : `Model confidence: ${Number(item.confidence).toFixed(2)}%`;
+
+            const date = document.createElement("p");
+            date.style.cssText = "color:#666;font-size:14px;";
+            const parsedDate = item.diagnosis_date
+                ? new Date(item.diagnosis_date)
+                : null;
+            date.textContent =
+                parsedDate && !Number.isNaN(parsedDate.getTime())
+                    ? `Saved: ${parsedDate.toLocaleString()}`
+                    : "Saved date unavailable";
+
+            card.append(title, confidence, date);
+            list.appendChild(card);
+        }
+    } catch (error) {
+        console.error("Diagnosis history error:", error);
+        message.textContent =
+            error.message || "Unable to load diagnosis history. Check your backend connection.";
+    }
+}
+
+const refreshHistoryButton = document.getElementById("refreshDiagnosisHistory");
+if (refreshHistoryButton) {
+    refreshHistoryButton.addEventListener("click", loadDiagnosisHistory);
+}
+
+// The script is loaded at the bottom of disease.html, so the elements exist.
+loadDiagnosisHistory();
 
 // =====================================================
 // CLEANUP

@@ -5,6 +5,7 @@ from twilio.rest import Client
 import os
 
 from config import get_db_connection
+from utils.auth_tokens import create_access_token
 
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -378,6 +379,7 @@ def login():
         return jsonify({
             "status": "success",
             "message": "Login successful",
+            "token": create_access_token(user["id"]),
             "user": get_user_response(user, "email")
         }), 200
 
@@ -584,6 +586,7 @@ def verify_otp():
         return jsonify({
             "status": "success",
             "message": "OTP verified successfully",
+            "token": create_access_token(user["id"]),
             "user": get_user_response(user, "phone")
         }), 200
 

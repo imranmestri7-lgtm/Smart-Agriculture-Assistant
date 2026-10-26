@@ -1401,3 +1401,38 @@ body {
     }
 
 }
+/* Phase 6: chatbot knowledge and follow-up details */
+.chat-knowledge-section {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-left: 3px solid #4b9b63;
+    border-radius: 6px;
+    background: rgba(75, 155, 99, 0.08);
+}
+
+.chat-knowledge-section strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.chat-knowledge-section p,
+.chat-follow-up p {
+    margin: 4px 0 0;
+    line-height: 1.55;
+    white-space: pre-line;
+}
+
+.chat-follow-up {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #b7d9bf;
+    border-radius: 8px;
+}
+
+.chat-follow-up-button {
+    margin-top: 8px;
+    padding: 7px 12px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}

@@ -217,11 +217,17 @@ phoneLoginForm.addEventListener("submit", async (event) => {
             );
         }
 
-        // Save logged-in user
+        // Save logged-in user and signed authentication token
         localStorage.setItem(
             "agriSmartUser",
             JSON.stringify(data.user)
         );
+
+        if (data.token) {
+            localStorage.setItem("agriSmartToken", data.token);
+        } else {
+            throw new Error("Login token was not returned by the server.");
+        }
 
         showMessage(
             "Login successful! Redirecting...",
@@ -308,11 +314,17 @@ emailLoginForm.addEventListener("submit", async (event) => {
             );
         }
 
-        // Save logged-in user
+        // Save logged-in user and signed authentication token
         localStorage.setItem(
             "agriSmartUser",
             JSON.stringify(data.user)
         );
+
+        if (data.token) {
+            localStorage.setItem("agriSmartToken", data.token);
+        } else {
+            throw new Error("Login token was not returned by the server.");
+        }
 
         showMessage(
             "Login successful! Redirecting...",

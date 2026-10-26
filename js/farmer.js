@@ -147,6 +147,40 @@ const sendButton =
 const chatArea =
     document.getElementById("chatArea");
 
+const languageSelector = document.getElementById("language");
+
+function getChatLanguage() {
+    if (!languageSelector) {
+        return "en";
+    }
+    return ["en", "mr", "hi"].includes(languageSelector.value)
+        ? languageSelector.value
+        : "en";
+}
+
+if (languageSelector) {
+    const savedLanguage = localStorage.getItem("agriSmartLanguage");
+    const preferredLanguage = currentUser &&
+        currentUser.preferred_language;
+
+    const initialLanguage = savedLanguage ||
+        ({"English": "en", "Marathi": "mr", "Hindi": "hi"}[
+            preferredLanguage
+        ]) ||
+        (["en", "mr", "hi"].includes(preferredLanguage)
+            ? preferredLanguage : "en");
+
+    languageSelector.value = initialLanguage;
+
+    languageSelector.addEventListener("change", function () {
+        localStorage.setItem(
+            "agriSmartLanguage",
+            getChatLanguage()
+        );
+    });
+}
+
+
 
 // =====================================================
 // SEND MESSAGE
@@ -221,131 +255,191 @@ function sendMessage() {
     showThinking();
 
 
-    // -------------------------------------------------
-    // TEMPORARY ASSISTANT RESPONSE
-    // -------------------------------------------------
+    // Send the question to the authenticated Flask chatbot.
+    const token = localStorage.getItem("agriSmartToken");
 
-    setTimeout(function () {
-
+    if (!token) {
         removeThinking();
+        addAssistantMessage("Your login session is missing. Please log in again to use the farming assistant.");
+        return;
+    }
 
-        addAssistantMessage(
-            getAssistantResponse(message)
-        );
+    fetch("http://127.0.0.1:5000/api/chat/message", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: message, language: getChatLanguage() })
+    })
+        .then(async function (response) {
+            const data = await response.json().catch(function () {
+                return {};
+            });
 
-    }, 1000);
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "The farming assistant could not answer right now."
+                );
+            }
+
+            if (!data.reply) {
+                throw new Error("The server returned an empty reply.");
+            }
+
+            return data;
+        })
+        .then(function (data) {
+            removeThinking();
+            addAssistantMessage(data);
+        })
+        .catch(function (error) {
+            removeThinking();
+            addAssistantMessage(
+                error.message ||
+                "Unable to connect to AgriSmart. Check that the Flask backend is running."
+            );
+            console.error("AgriSmart chat request failed:", error);
+        });
 
 }
 
 
 // =====================================================
-// TEMPORARY ASSISTANT RESPONSE
+// =====================================================
+// ADD ASSISTANT MESSAGE AND FARMING KNOWLEDGE
 // =====================================================
 
-function getAssistantResponse(message) {
-
-    const text =
-        message.toLowerCase();
-
-
-    if (
-        text.includes("crop") ||
-        text.includes("पीक") ||
-        text.includes("फसल")
-    ) {
-
-        return "I can help you with crop selection, crop management and farming conditions. The crop recommendation feature will be connected to the backend next.";
-
-    }
-
-
-    if (
-        text.includes("water") ||
-        text.includes("irrigation") ||
-        text.includes("पाणी") ||
-        text.includes("सिंचाई")
-    ) {
-
-        return "Irrigation guidance will use your crop information and environmental conditions. The irrigation module will be connected next.";
-
-    }
-
-
-    if (
-        text.includes("disease") ||
-        text.includes("disease") ||
-        text.includes("रोग")
-    ) {
-
-        return "You can use Disease Detection to upload a plant image. The plant-disease model will be connected in the next development stage.";
-
-    }
-
-
-    if (
-        text.includes("weather") ||
-        text.includes("हवामान") ||
-        text.includes("मौसम")
-    ) {
-
-        return "The Weather module will provide farming-related weather information. We will connect the weather API after the core modules are ready.";
-
-    }
-
-
-    return "Thanks for your question! The AgriSmart Assistant is ready for the next backend integration. More farming features will be connected step by step.";
-
-}
-
-
-// =====================================================
-// ADD ASSISTANT MESSAGE
-// =====================================================
-
-function addAssistantMessage(message) {
-
+function addAssistantMessage(response) {
     if (!chatArea) {
         return;
     }
 
+    // Support both old string replies and structured API responses.
+    const data = typeof response === "string"
+        ? { reply: response }
+        : (response || {});
 
-    const assistantMessage =
-        document.createElement("div");
+    const assistantMessage = document.createElement("div");
+    assistantMessage.className = "message assistant-message";
 
+    const avatar = document.createElement("div");
+    avatar.className = "message-avatar";
+    avatar.textContent = "🌱";
 
-    assistantMessage.className =
-        "message assistant-message";
+    const content = document.createElement("div");
+    content.className = "message-content";
 
+    const name = document.createElement("div");
+    name.className = "message-name";
+    name.textContent = "AgriSmart Assistant";
 
-    assistantMessage.innerHTML = `
+    const reply = document.createElement("p");
+    reply.textContent = data.reply || "I couldn't prepare a response.";
 
-        <div class="message-avatar">
-            🌱
-        </div>
+    content.appendChild(name);
+    content.appendChild(reply);
 
-        <div class="message-content">
+    function addDetail(title, value) {
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+            return;
+        }
 
-            <div class="message-name">
-                AgriSmart Assistant
-            </div>
+        const section = document.createElement("div");
+        section.className = "chat-knowledge-section";
 
-            <p></p>
+        const heading = document.createElement("strong");
+        heading.textContent = title;
+        section.appendChild(heading);
 
-        </div>
+        const detail = document.createElement("p");
 
-    `;
+        if (Array.isArray(value)) {
+            detail.textContent = value
+                .filter(item => typeof item === "string" ||
+                                typeof item === "number")
+                .join("\n• ");
+            if (detail.textContent) {
+                detail.textContent = "• " + detail.textContent;
+            }
+        } else if (
+            typeof value === "string" ||
+            typeof value === "number"
+        ) {
+            detail.textContent = String(value);
+        } else {
+            return;
+        }
 
+        if (detail.textContent.trim()) {
+            section.appendChild(detail);
+            content.appendChild(section);
+        }
+    }
 
-    assistantMessage
-        .querySelector("p")
-        .textContent = message;
+    const knowledge = data.knowledge;
 
+    if (
+        data.category === "disease" &&
+        knowledge &&
+        typeof knowledge === "object"
+    ) {
+        const diseaseName =
+            knowledge.display_name || knowledge.class_name;
 
+        if (diseaseName) {
+            addDetail("Plant condition", diseaseName);
+        }
+
+        addDetail("About", knowledge.description);
+        addDetail("Symptoms", knowledge.symptoms);
+        addDetail("Possible causes", knowledge.possible_causes);
+        addDetail("Prevention", knowledge.prevention);
+        addDetail(
+            "Care recommendations",
+            knowledge.care_recommendations
+        );
+        addDetail("Safe treatment guidance", knowledge.safe_treatment);
+        addDetail("Important note", knowledge.disclaimer);
+        addDetail(
+            "Crop compatibility",
+            knowledge.crop_compatibility_message
+        );
+    }
+
+    if (data.follow_up) {
+        const followUp = document.createElement("div");
+        followUp.className = "chat-follow-up";
+
+        const prompt = document.createElement("p");
+        prompt.textContent = data.follow_up;
+        followUp.appendChild(prompt);
+
+        const usePrompt = document.createElement("button");
+        usePrompt.type = "button";
+        usePrompt.className = "chat-follow-up-button";
+        usePrompt.textContent = "Answer follow-up";
+
+        usePrompt.addEventListener("click", function () {
+            if (messageInput) {
+                messageInput.value = data.follow_up;
+                messageInput.focus();
+            }
+        });
+
+        followUp.appendChild(usePrompt);
+        content.appendChild(followUp);
+    }
+
+    assistantMessage.appendChild(avatar);
+    assistantMessage.appendChild(content);
     chatArea.appendChild(assistantMessage);
 
-
     scrollToBottom();
-
 }
 
 
@@ -766,7 +860,7 @@ if (voiceButton) {
                 new SpeechRecognition();
 
 
-            recognition.lang = "en-IN";
+            recognition.lang = ({ en: "en-IN", mr: "mr-IN", hi: "hi-IN" })[getChatLanguage()];
 
             recognition.interimResults = false;
 

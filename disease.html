@@ -34,7 +34,7 @@
 
             <a href="index.html">Home</a>
 
-            
+
 
         </nav>
 
@@ -638,6 +638,36 @@
     </main>
 
 
+
+    <!-- Saved diagnosis history -->
+    <section id="diagnosisHistorySection" style="
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 24px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, 0.08);
+    ">
+        <h2 style="color: #245c32; margin-bottom: 8px;">
+            📋 My Diagnosis History
+        </h2>
+        <p style="color: #666; margin-bottom: 18px;">
+            Previous plant disease predictions saved to your account.
+        </p>
+        <p id="diagnosisHistoryMessage" role="status" aria-live="polite">
+            Loading diagnosis history...
+        </p>
+        <div id="diagnosisHistoryList"></div>
+        <button id="refreshDiagnosisHistory" type="button" style="
+            margin-top: 16px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: #245c32;
+            color: white;
+            cursor: pointer;
+        ">Refresh history</button>
+    </section>
 
     <!-- JavaScript -->
 
