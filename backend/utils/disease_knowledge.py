@@ -187,6 +187,13 @@ def get_disease_info(class_name, confidence=None, user_crop=None, language=None)
 # Helper to load the translation JSON (cached)
 _TRANSLATION_CACHE = None
 def _load_translation_file():
+    path = os.path.join(BASE_DIR, "data", "disease_knowledge_translations.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Failed to load disease translations: {e}")
+        return {}
     global _TRANSLATION_CACHE
     if _TRANSLATION_CACHE is not None:
         return _TRANSLATION_CACHE
