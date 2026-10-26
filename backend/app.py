@@ -13,6 +13,8 @@ from routes.auth_routes import auth_bp
 from routes.chat_routes import chat_bp
 from routes.disease_routes import disease_bp
 from routes.weather_routes import weather_bp
+from routes.crop_routes import crop_bp
+from routes.irrigation_routes import irrigation_bp
 
 app = Flask(__name__)
 
@@ -23,10 +25,12 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(chat_bp)
 
 # Register crop disease prediction routes
+# Register crop disease prediction routes
 app.register_blueprint(disease_bp)
+app.register_blueprint(weather_bp)
 
 # Register weather routes
-app.register_blueprint(weather_bp)
+# app.register_blueprint(weather_bp)  # duplicate removed
 
 @app.route("/")
 def home():

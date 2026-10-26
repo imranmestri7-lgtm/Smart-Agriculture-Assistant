@@ -264,7 +264,9 @@ function sendMessage() {
         return;
     }
 
-    fetch("http://127.0.0.1:5000/api/chat/message", {
+    // Disable send button to prevent duplicate submissions
+    sendButton.disabled = true;
+    fetch("http://127.0.0.1:5002/api/chat/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -291,10 +293,12 @@ function sendMessage() {
         })
         .then(function (data) {
             removeThinking();
+            sendButton.disabled = false;
             addAssistantMessage(data);
         })
         .catch(function (error) {
             removeThinking();
+            sendButton.disabled = false;
             addAssistantMessage(
                 error.message ||
                 "Unable to connect to AgriSmart. Check that the Flask backend is running."

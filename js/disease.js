@@ -4,8 +4,8 @@
  // Flask API + TensorFlow model + farmer follow-up
  // =====================================================
 
-const API_URL = "http://127.0.0.1:5000/api/disease/predict";
-const RECOMMEND_API_URL = "http://127.0.0.1:5000/api/disease/recommend";
+const API_URL = "http://127.0.0.1:5002/api/disease/predict";
+const RECOMMEND_API_URL = "http://127.0.0.1:5002/api/disease/recommend";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const LOW_CONFIDENCE_LIMIT = 60;
 
@@ -806,8 +806,18 @@ if (analyzeButton) {
 
         const originalButtonText = analyzeButton.textContent;
 
+        // Preserve original text and disable button
         analyzeButton.disabled = true;
+        analyzeButton.dataset.originalText = analyzeButton.textContent;
+        // Set visible analyzing label
         analyzeButton.textContent = "⏳ Analyzing image...";
+        // Insert visible loading spinner for accessibility
+        const spinner = document.createElement('span');
+        spinner.className = 'loading-spinner';
+        spinner.setAttribute('role', 'status');
+        spinner.setAttribute('aria-live', 'polite');
+        spinner.textContent = 'Analyzing...';
+        analyzeButton.prepend(spinner);
 
         try {
             const formData = new FormData();
@@ -854,10 +864,13 @@ if (analyzeButton) {
 
             showMessage(
                 errorMessage.includes("Failed to fetch")
-                    ? "Cannot connect to the Flask backend. Check that http://127.0.0.1:5000 is running."
+                    ? `Cannot connect to the Flask backend at ${API_URL}.`
                     : errorMessage
             );
         } finally {
+            // Remove spinner and restore button text
+            const spinner = analyzeButton.querySelector('.loading-spinner');
+            if (spinner) { spinner.remove(); }
             analyzeButton.disabled = false;
             analyzeButton.textContent = originalButtonText;
         }
@@ -924,7 +937,7 @@ if (scanAgainButton) {
 // AUTHENTICATED DIAGNOSIS HISTORY
 // =====================================================
 
-const HISTORY_API_URL = "http://127.0.0.1:5000/api/disease/history";
+const HISTORY_API_URL = "http://127.0.0.1:5002/api/disease/history";
 
 async function loadDiagnosisHistory() {
     const message = document.getElementById("diagnosisHistoryMessage");

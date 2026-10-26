@@ -4,7 +4,7 @@
 // Requests are routed through the Flask server
 // to keep external API credentials secure.
 // ========================================
-const WEATHER_API_URL = "http://127.0.0.1:5000/api/weather";
+const WEATHER_API_URL = "http://127.0.0.1:5002/api/weather";
 
 const locationInput = document.getElementById("location");
 const searchButton = document.getElementById("searchWeather");

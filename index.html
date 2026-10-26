@@ -9,6 +9,7 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/home.css">
 </head>
 
@@ -63,7 +64,7 @@
     =========================================== -->
     <main>
 
-        <section id="home" class="hero-section">
+<section id="home" class="hero-section" data-reveal>
 
             <div class="hero-container">
 
@@ -155,7 +156,7 @@
         <!-- ==========================================
              FEATURES
         =========================================== -->
-        <section id="features" class="features-section">
+        <section id="features" class="features-section" data-reveal>
 
             <div class="section-container">
 
@@ -328,7 +329,7 @@
         <!-- ==========================================
              HOW IT WORKS
         =========================================== -->
-        <section id="how-it-works" class="how-it-works-section">
+        <section id="how-it-works" class="how-it-works-section" data-reveal>
 
             <div class="section-container">
 
@@ -930,6 +931,12 @@
     </footer>
 
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const reveals = document.querySelectorAll('[data-reveal]');
+  reveals.forEach(el => el.classList.add('visible'));
+});
+</script>
 </body>
 
 </html>

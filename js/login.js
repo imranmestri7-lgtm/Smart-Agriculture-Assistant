@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000/api/auth";
+const API_URL = "http://127.0.0.1:5002/api/auth";
 
 const phoneOption = document.getElementById("phoneOption");
 const emailOption = document.getElementById("emailOption");
@@ -137,6 +137,8 @@ sendOtpBtn.addEventListener("click", async () => {
 
             otpValue.textContent = data.development_otp;
             developmentOtp.style.display = "block";
+    // Show OTP input row after OTP is sent
+    document.getElementById('otpRow').style.display = 'grid';
         }
 
         changeNumberBtn.style.display = "block";
@@ -359,7 +361,7 @@ changeNumberBtn.addEventListener("click", () => {
     otp.value = "";
 
     developmentOtp.style.display = "none";
-    changeNumberBtn.style.display = "none";
+    document.getElementById('otpRow').style.display = 'none';
 
     clearMessage();
 

@@ -143,7 +143,60 @@ body {
    WELCOME
    ===================================================== */
 
+
+/* Enhanced hero (welcome) section */
 .dashboard-welcome {
+    opacity: 0;
+    animation: slideIn var(--transition-slow) forwards;
+    /* keep existing styles */
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-welcome { animation: none; opacity: 1; }
+}
+/* Enhanced dashboard cards */
+.dashboard-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-3);
+    transition: var(--transition-medium);
+    opacity: 0;
+    animation: fadeIn var(--transition-medium) forwards;
+}
+/* Ensure fade-in delay based on order using nth-child */
+.dashboard-grid .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-grid .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-grid .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-grid .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-grid .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+.dashboard-grid .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-card { animation: none; opacity: 1; }
+}
+/* Hover lift effect (already defined in common.css) – ensure it applies */
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-welcome {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    .dashboard-welcome-icon {
+        margin-top: var(--space-3);
+    }
+}
+
     min-height: 190px;
 
     display: flex;
@@ -1225,7 +1278,60 @@ body {
     }
 
 
+
+/* Enhanced hero (welcome) section */
+.dashboard-welcome {
+    opacity: 0;
+    animation: slideIn var(--transition-slow) forwards;
+    /* keep existing styles */
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-welcome { animation: none; opacity: 1; }
+}
+/* Enhanced dashboard cards */
+.dashboard-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-3);
+    transition: var(--transition-medium);
+    opacity: 0;
+    animation: fadeIn var(--transition-medium) forwards;
+}
+/* Ensure fade-in delay based on order using nth-child */
+.dashboard-grid .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-grid .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-grid .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-grid .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-grid .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+.dashboard-grid .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-card { animation: none; opacity: 1; }
+}
+/* Hover lift effect (already defined in common.css) – ensure it applies */
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
     .dashboard-welcome {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    .dashboard-welcome-icon {
+        margin-top: var(--space-3);
+    }
+}
+
         min-height: auto;
 
         padding: 25px;

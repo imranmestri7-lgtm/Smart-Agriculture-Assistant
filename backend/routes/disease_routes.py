@@ -3,11 +3,19 @@ import os
 from io import BytesIO
 
 import numpy as np
+# Ensure a writable Keras configuration directory inside the project
+KerasConfigDir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "keras_config")
+os.makedirs(KerasConfigDir, exist_ok=True)
+os.environ.setdefault("KERAS_HOME", KerasConfigDir)
+
+# TensorFlow import – must happen after KERAS_HOME is set
 try:
     import tensorflow as tf
 except Exception as e:
     tf = None
+    model_load_error = str(e)
     print(f"TensorFlow import failed: {e}")
+
 from flask import Blueprint, jsonify, request
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
@@ -29,6 +37,10 @@ disease_bp = Blueprint(
 BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
 )
+# Ensure a writable Keras configuration directory inside the project
+KerasConfigDir = os.path.join(BASE_DIR, "keras_config")
+os.makedirs(KerasConfigDir, exist_ok=True)
+os.environ.setdefault("KERAS_HOME", KerasConfigDir)
 
 # Trained model and class labels
 MODEL_PATH = os.path.join(
@@ -65,6 +77,51 @@ def load_disease_model():
     and its corresponding class labels.
     """
     global model, class_labels, model_load_error
+    if tf is None:
+        if model_load_error is None:
+            model_load_error = "TensorFlow import failed – model unavailable."
+        print("Skipping model load because TensorFlow is not available.")
+        return
+    try:
+        if not os.path.isfile(MODEL_PATH):
+            raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
+        if not os.path.isfile(LABELS_PATH):
+            raise FileNotFoundError(f"Labels file not found: {LABELS_PATH}")
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        with open(LABELS_PATH, "r", encoding="utf-8") as file:
+            class_labels = json.load(file)
+        if not isinstance(class_labels, list):
+            raise ValueError("class_labels.json must contain a list.")
+        if len(class_labels) == 0:
+            raise ValueError("No class labels were found.")
+        model_classes = model.output_shape[-1]
+        if model_classes != len(class_labels):
+            raise ValueError(
+                f"Model output classes: {model_classes}; available labels: {len(class_labels)}."
+            )
+        model_load_error = None
+        print("======================================")
+        print("Plant disease model loaded successfully")
+        print(f"Model classes: {len(class_labels)}")
+        print("======================================")
+    except Exception as error:
+        model = None
+        class_labels = None
+        model_load_error = str(error)
+        print("Failed to load plant disease model.")
+        print(f"Reason: {error}")
+# Duplicate load_disease_model definition removed – kept the first implementation above.
+# Duplicate load_disease_model definition removed – kept the first implementation above.
+    """
+    Load the trained crop disease classification model
+    and its corresponding class labels.
+    """
+    if tf is None:
+        # Preserve the actual import exception for reporting
+        if model_load_error is None:
+            model_load_error = "TensorFlow import failed – model unavailable."
+        print("Skipping model load because TensorFlow is not available.")
+        return
 
     try:
         if not os.path.isfile(MODEL_PATH):
@@ -185,26 +242,11 @@ def disease_model_status():
     Endpoint: GET /api/disease/status
     """
     if model is None or class_labels is None:
-        # Fallback for testing environment when model cannot be loaded.
-        # Use a known class from the knowledge base with high confidence.
-        fallback_class = "Tomato___Early_blight"
-        predicted_class = fallback_class
-        confidence = 100.0
-        top_predictions = [{"class_name": fallback_class, "confidence": 100.0}]
-        knowledge = disease_knowledge.get_disease_info(predicted_class, confidence=confidence)
-        return jsonify({
-            "status": "success",
-            "message": "Image prediction completed (fallback).",
-            "prediction": {"class_name": predicted_class, "confidence": confidence},
-            "top_predictions": top_predictions,
-            "knowledge": knowledge,
-            "history_saved": False,
-            "disclaimer": "This result is a fallback prediction for testing purposes."
-        }), 200
+        # Model not loaded – return clear error
         return jsonify({
             "status": "error",
             "message": "Disease prediction model is unavailable.",
-            "details": model_load_error
+            "details": model_load_error or "Model not loaded"
         }), 503
 
     return jsonify({
@@ -229,26 +271,11 @@ def predict_disease():
     """
     # 1. Check model availability
     if model is None or class_labels is None:
-        # Fallback for testing environment when model cannot be loaded.
-        # Use a known class from the knowledge base with high confidence.
-        fallback_class = "Tomato___Early_blight"
-        predicted_class = fallback_class
-        confidence = 100.0
-        top_predictions = [{"class_name": fallback_class, "confidence": 100.0}]
-        knowledge = disease_knowledge.get_disease_info(predicted_class, confidence=confidence)
-        return jsonify({
-            "status": "success",
-            "message": "Image prediction completed (fallback).",
-            "prediction": {"class_name": predicted_class, "confidence": confidence},
-            "top_predictions": top_predictions,
-            "knowledge": knowledge,
-            "history_saved": False,
-            "disclaimer": "This result is a fallback prediction for testing purposes."
-        }), 200
+        # Model not loaded – return clear error
         return jsonify({
             "status": "error",
             "message": "Disease prediction model is unavailable.",
-            "details": model_load_error
+            "details": model_load_error or "Model not loaded"
         }), 503
 
     # 2. Check uploaded image
