@@ -4,8 +4,8 @@
  // Flask API + TensorFlow model + farmer follow-up
  // =====================================================
 
-const API_URL = "http://127.0.0.1:5002/api/disease/predict";
-const RECOMMEND_API_URL = "http://127.0.0.1:5002/api/disease/recommend";
+const API_URL = "http://127.0.0.1:5000/api/disease/predict";
+const RECOMMEND_API_URL = "http://127.0.0.1:5000/api/disease/recommend";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const LOW_CONFIDENCE_LIMIT = 60;
 
@@ -937,7 +937,7 @@ if (scanAgainButton) {
 // AUTHENTICATED DIAGNOSIS HISTORY
 // =====================================================
 
-const HISTORY_API_URL = "http://127.0.0.1:5002/api/disease/history";
+const HISTORY_API_URL = "http://127.0.0.1:5000/api/disease/history";
 
 async function loadDiagnosisHistory() {
     const message = document.getElementById("diagnosisHistoryMessage");

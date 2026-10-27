@@ -1,0 +1,150 @@
+"""Rule-based farming guidance for the AgriSmart chat assistant.
+
+import re
+import difflib
+from typing import Dict, List, Tuple
+
+from utils.disease_knowledge import load_knowledge_base, get_disease_info
+
+MAX_MESSAGE_LENGTH = 1000
+
+# Intent keyword definitions (primary keywords and common synonyms).
+INTENT_KEYWORDS: Dict[str, List[str]] = {
+    "greeting": ["hello", "hi", "hey", "namaste", "नमस्ते", "नमस्कार"],
+    "crop": ["crop", "कौन", "suitable", "पीक", "फसल", "soil", "soil type", "season"],
+    "irrigation": ["water", "irrigation", "पानी", "सिंचाई", "पाणी", "सिंचन"],
+    "disease": ["disease", "leaf spot", "yellow leaves", "रोग", "बीमारी", "पानांवर डाग", "पत्ते पीले"],
+    "weather": ["weather", "rain", "forecast", "मौसम", "बारिश", "हवामान", "पाऊस"],
+    "fertilizer": ["fertilizer", "fertiliser", "manure", "खाद", "खत"],
+    "pest": ["pest", "insect", "कीट", "किड", "किडे"],
+    "market": ["market price", "mandi", "भाव", "बाजार भाव", "market rate"],
+    "soil": ["soil", "soil health", "soil testing", "माती", "मातीची"],
+}
+
+FOLLOW_UP_QUESTIONS: Dict[str, str] = {
+    "crop": "Which crop are you planning to grow, and what is your location?",
+    "irrigation": "What crop and soil type are you irrigating?",
+    "disease": "Can you tell me which crop you are observing the symptoms on?",
+    "fertilizer": "What crop are you fertilizing and do you have a recent soil‑test report?",
+    "pest": "Which crop is affected and can you describe the pest you see?",
+    "soil": "What is the current soil type and any known nutrient issues?",
+}
+
+# Simple fuzzy matcher to find intent.
+def detect_intent(message: str) -> Tuple[str, List[str]]:
+    """Return (intent, matched_keywords) for the given message.
+    Uses fuzzy matching to tolerate minor spelling errors.
+    """
+    text = message.lower()
+    # Remove punctuation for matching.
+    text = re.sub(r"[.,!?;:]", " ", text)
+    words = text.split()
+    for intent, keywords in INTENT_KEYWORDS.items():
+        matches = []
+        for kw in keywords:
+            # Direct substring match first.
+            if kw in text:
+                matches.append(kw)
+                continue
+            # Fuzzy match each word against the keyword.
+            for w in words:
+                if difflib.SequenceMatcher(None, w, kw).ratio() > 0.8:
+                    matches.append(kw)
+                    break
+        if matches:
+            return intent, matches
+    return "general", []
+
+
+def generate_response(message: str, language: str = "en") -> Dict:
+    """Return a farming response, its category, and optional follow‑up.
+    The `language` parameter is currently reserved for future localisation.
+    """
+    intent, _ = detect_intent(message)
+
+    # ----- Disease specific handling using knowledge base -----
+    if intent == "disease":
+        kb = load_knowledge_base()
+        # Attempt to locate a known disease name within the message.
+        for class_name in kb.keys():
+            # Normalise both strings for a tolerant match.
+            if re.search(r"\\b" + re.escape(class_name.lower()) + r"\\b", message.lower()):
+                info = get_disease_info(class_name)
+                # Build a concise answer from the knowledge entry.
+                reply = (
+                    f"**{info.get('display_name', class_name)}**: {info.get('description', '')}\n"
+                    f"Symptoms: {', '.join(info.get('symptoms', []))}.\n"
+                    f"Prevention: {', '.join(info.get('prevention', []))}.\n"
+                    f"Management: {', '.join(info.get('care_recommendations', []))}.\n"
+                    f"{info.get('disclaimer', '')}"
+                )
+                return {"category": "disease", "reply": reply}
+        # Fallback disease advice if no specific disease matched.
+        return {
+            "category": "disease",
+            "reply": (
+                "Upload a clear photo in the Disease Detection section to get a model prediction. "
+                "Until the cause is confirmed, remove severely affected material, avoid wetting foliage, "
+                "and keep tools clean. Do not apply an unidentified pesticide."
+            ),
+        }
+
+    # ----- Standard intent replies -----
+    if intent == "greeting":
+        reply = (
+            "Hello! I'm your AgriSmart farming assistant. Ask me about crops, irrigation, plant diseases, "
+            "fertilizers, pests, or weather."
+        )
+        return {"category": "greeting", "reply": reply}
+    if intent == "crop":
+        reply = (
+            "Crop selection depends on your location, season, soil type, water availability, and market demand. "
+            "Tell me your location, soil type, and the current season so I can help you compare suitable options."
+        )
+        return {"category": "crop", "reply": reply, "follow_up": FOLLOW_UP_QUESTIONS.get("crop")}
+    if intent == "irrigation":
+        reply = (
+            "Check soil moisture near the root zone before watering. Requirements depend on crop, growth stage, "
+            "soil, temperature, and recent rainfall. Avoid waterlogging and follow local irrigation guidance."
+        )
+        return {"category": "irrigation", "reply": reply, "follow_up": FOLLOW_UP_QUESTIONS.get("irrigation")}
+    if intent == "weather":
+        reply = (
+            "For current conditions and forecasts, open the AgriSmart Weather section and enter your location. "
+            "I cannot retrieve live weather data directly from this chat."
+        )
+        return {"category": "weather", "reply": reply}
+    if intent == "fertilizer":
+        reply = (
+            "The right fertilizer and dose depend on the crop, growth stage, and soil nutrient levels. "
+            "A soil test is the best starting point. Follow the label and local agricultural recommendations; "
+            "avoid guessing a dose."
+        )
+        return {"category": "fertilizer", "reply": reply, "follow_up": FOLLOW_UP_QUESTIONS.get("fertilizer")}
+    if intent == "pest":
+        reply = (
+            "First identify the pest and assess how widely it has spread. Inspect both leaf surfaces, "
+            "remove affected parts when appropriate, and encourage beneficial insects. Use pesticides only "
+            "when the pest is identified and follow label directions and local advice."
+        )
+        return {"category": "pest", "reply": reply, "follow_up": FOLLOW_UP_QUESTIONS.get("pest")}
+    if intent == "market":
+        reply = (
+            "Market prices vary by crop, market, quality, and date. This chatbot does not retrieve live market "
+            "prices. Check an official agricultural market-price service for current rates before selling."
+        )
+        return {"category": "market", "reply": reply}
+    if intent == "soil":
+        reply = (
+            "Soil health is fundamental. Conduct a soil test to assess pH, nutrient levels, and organic matter. "
+            "Based on results, amend with appropriate organic or inorganic fertilizers and practice crop rotation."
+        )
+        return {"category": "soil", "reply": reply, "follow_up": FOLLOW_UP_QUESTIONS.get("soil")}
+
+    # ----- General fallback -----
+    reply = (
+        "I can help with crop selection, irrigation, plant diseases, fertilizers, pest management, and weather guidance. "
+        "Please tell me which crop you are growing and describe the problem, or ask one specific farming question."
+    )
+    return {"category": "general", "reply": reply}
+"

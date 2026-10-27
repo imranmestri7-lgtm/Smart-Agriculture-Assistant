@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5002/api/auth";
+const API_URL = "http://127.0.0.1:5000/api/auth";
 
 const phoneOption = document.getElementById("phoneOption");
 const emailOption = document.getElementById("emailOption");

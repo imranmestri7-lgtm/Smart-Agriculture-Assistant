@@ -1,0 +1,129 @@
+"""Rule-based farming guidance for the AgriSmart chat assistant."""
+
+MAX_MESSAGE_LENGTH = 1000
+
+
+def generate_response(message):
+    """Return a farming response and its category for a user question."""
+    text = message.casefold()
+
+    if any(word in text for word in (
+        "hello", "hi", "hey", "नमस्ते", "नमस्कार", "नमस्कार"
+    )):
+        return {
+            "category": "greeting",
+            "reply": (
+                "Hello! I'm your AgriSmart farming assistant. "
+                "Ask me about crops, irrigation, plant diseases, "
+                "fertilizers, pests, or weather."
+            ),
+        }
+
+    if any(word in text for word in (
+        "crop", "कौन सी फसल", "पीक", "फसल", "suitable for my soil"
+    )):
+        return {
+            "category": "crop",
+            "reply": (
+                "Crop selection depends on your location, season, soil "
+                "type, water availability, and market demand. Tell me "
+                "your location, soil type, and the current season so "
+                "I can help you compare suitable options. Confirm local "
+                "recommendations with your agricultural extension office."
+            ),
+        }
+
+    if any(word in text for word in (
+        "water", "irrigation", "पानी", "सिंचाई", "पाणी", "सिंचन"
+    )):
+        return {
+            "category": "irrigation",
+            "reply": (
+                "Check soil moisture near the root zone before watering. "
+                "Water requirements depend on crop, growth stage, soil, "
+                "temperature, and recent rainfall. Avoid waterlogging "
+                "and follow local irrigation guidance. Tell me your crop "
+                "and soil type for more specific advice."
+            ),
+        }
+
+    if any(word in text for word in (
+        "disease", "leaf spot", "yellow leaves", "रोग", "बीमारी",
+        "पानांवर डाग", "पत्ते पीले"
+    )):
+        return {
+            "category": "disease",
+            "reply": (
+                "Upload a clear photo in the Disease Detection section "
+                "to get a model prediction. Until the cause is confirmed, "
+                "remove severely affected material when appropriate, "
+                "avoid wetting foliage unnecessarily, and clean tools. "
+                "Do not apply an unidentified pesticide. A photo-based "
+                "prediction is not a confirmed diagnosis."
+            ),
+        }
+
+    if any(word in text for word in (
+        "weather", "rain", "forecast", "मौसम", "बारिश", "हवामान", "पाऊस"
+    )):
+        return {
+            "category": "weather",
+            "reply": (
+                "For current conditions and rainfall forecasts, open "
+                "the AgriSmart Weather section and enter your location. "
+                "Check the forecast before irrigation or spraying. "
+                "I cannot confirm live weather conditions from this "
+                "chat response."
+            ),
+        }
+
+    if any(word in text for word in (
+        "fertilizer", "fertiliser", "manure", "खाद", "खत", "fertiliser"
+    )):
+        return {
+            "category": "fertilizer",
+            "reply": (
+                "The right fertilizer and dose depend on the crop, "
+                "growth stage, and soil nutrient levels. A soil test "
+                "is the best starting point. Follow the label and local "
+                "agricultural recommendations; avoid guessing a dose. "
+                "Tell me your crop and whether you have a soil-test report."
+            ),
+        }
+
+    if any(word in text for word in (
+        "pest", "insect", "कीट", "किड", "किडे"
+    )):
+        return {
+            "category": "pest",
+            "reply": (
+                "First identify the pest and check how widely it has "
+                "spread. Inspect both sides of leaves, remove affected "
+                "parts when appropriate, and encourage beneficial insects. "
+                "Use pesticides only when the pest is identified and follow "
+                "the product label and local agricultural advice."
+            ),
+        }
+
+    if any(word in text for word in (
+        "market price", "mandi", "भाव", "बाजार भाव", "market rate"
+    )):
+        return {
+            "category": "market",
+            "reply": (
+                "Market prices vary by crop, market, quality, and date. "
+                "This chatbot does not currently retrieve live market "
+                "prices. Check an official agricultural market-price "
+                "service for current rates before making a sale."
+            ),
+        }
+
+    return {
+        "category": "general",
+        "reply": (
+            "I can help with crop selection, irrigation, plant diseases, "
+            "fertilizers, pest management, and weather guidance. Please "
+            "tell me which crop you are growing and describe the problem "
+            "or ask one specific farming question."
+        ),
+    }

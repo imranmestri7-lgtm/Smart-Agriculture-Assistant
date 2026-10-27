@@ -27,10 +27,12 @@ app.register_blueprint(chat_bp)
 # Register crop disease prediction routes
 # Register crop disease prediction routes
 app.register_blueprint(disease_bp)
-app.register_blueprint(weather_bp)
+app.register_blueprint(irrigation_bp)
+
 
 # Register weather routes
-# app.register_blueprint(weather_bp)  # duplicate removed
+# app.register_blueprint(irrigation_bp)
+  # duplicate removed
 
 @app.route("/")
 def home():

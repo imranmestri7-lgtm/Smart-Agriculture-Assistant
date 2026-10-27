@@ -265,8 +265,7 @@ function sendMessage() {
     }
 
     // Disable send button to prevent duplicate submissions
-    sendButton.disabled = true;
-    fetch("http://127.0.0.1:5002/api/chat/message", {
+   fetch("http://127.0.0.1:5000/api/chat/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

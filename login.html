@@ -414,20 +414,19 @@
 
             .auth-container {
                 padding: 35px 22px;
-
                 border-radius: 22px;
             }
 
             .brand-name {
-                font-size: 42px;
+                font-size: 24px;
             }
 
             .brand-description {
-                font-size: 21px;
+                font-size: 12px;
             }
 
             .login-title {
-                font-size: 25px;
+                font-size: 18px;
             }
 
             .method-options {
@@ -439,7 +438,7 @@
             }
 
             .method-option {
-                min-height: 110px;
+                min-height: 60px;
             }
 
         }
@@ -451,6 +450,34 @@
     <div class="auth-container">
 
         <!-- Header -->
+        <div class="auth-header">
+
+            <div class="brand-section">
+
+                <div class="brand-icon">
+                    🌱
+                </div>
+
+                <h1 class="brand-name" data-i18n="brand_name">AgriSmart</h1>
+
+            </div>
+
+            <div class="brand-description">
+                Smart Agriculture<br>
+                Assistant
+            </div>
+
+        </div>
+
+        <nav class="nav-actions">
+            <a href="login.html" class="login-button" data-i18n="login_button">Login</a>
+            <a href="login.html" class="get-started-button" data-i18n="signup_button">Get Started</a>
+            <select id="lang-select" style="margin-left:10px;">
+                <option value="en" data-i18n="english">English</option>
+                <option value="mr" data-i18n="marathi">मराठी</option>
+                <option value="hi" data-i18n="hindi">हिन्दी</option>
+            </select>
+        </nav>
         <div class="auth-header">
 
             <div class="brand-section">

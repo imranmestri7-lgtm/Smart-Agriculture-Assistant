@@ -15,6 +15,7 @@
 
 <body>
 
+
     <!-- ==========================================
          NAVBAR
     =========================================== -->
@@ -31,26 +32,29 @@
             <!-- Navigation -->
             <nav class="nav-links">
 
-                <a href="#home">Home</a>
+                <a href="#home" data-i18n="home">Home</a>
 
-                <a href="#features">Features</a>
+                <a href="#features" data-i18n="features">Features</a>
 
-                <a href="#how-it-works">How It Works</a>
+                <a href="#how-it-works" data-i18n="how_it_works">How It Works</a>
 
-                <a href="#about">About</a>
+                <a href="#about" data-i18n="about">About</a>
 
             </nav>
 
             <!-- Navbar Actions -->
             <div class="nav-actions">
 
-                <a href="login.html" class="login-button">
-                    Login
-                </a>
+                <a href="login.html" class="login-button" data-i18n="login_button">Login</a>
 
-                <a href="login.html" class="get-started-button">
-                    Get Started
-                </a>
+                <a href="login.html" class="get-started-button" data-i18n="signup_button">Get Started</a>
+
+                <!-- Language selector -->
+                <select id="lang-select" style="margin-left:10px;">
+                    <option value="en" data-i18n="english">English</option>
+                    <option value="mr" data-i18n="marathi">मराठी</option>
+                    <option value="hi" data-i18n="hindi">हिन्दी</option>
+                </select>
 
             </div>
 
@@ -931,11 +935,13 @@
     </footer>
 
 
+<script src="js/i18n.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const reveals = document.querySelectorAll('[data-reveal]');
-  reveals.forEach(el => el.classList.add('visible'));
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        // Existing reveal script
+        const reveals = document.querySelectorAll('[data-reveal]');
+        reveals.forEach(el => el.classList.add('visible'));
+    });
 </script>
 </body>
 

@@ -481,9 +481,13 @@ def send_otp():
             "expires_in": 600
         }), 200
 
+    
     except Exception as error:
+        import traceback
 
-        print("Twilio Send OTP Error:", str(error))
+        print("\n===== OTP ERROR DETAILS =====")
+        traceback.print_exc()
+        print("===== END OTP ERROR =====\n")
 
         return jsonify({
             "status": "error",
@@ -492,6 +496,7 @@ def send_otp():
 
     finally:
         close_database(cursor, connection)
+
 
 
 # ==================================================
