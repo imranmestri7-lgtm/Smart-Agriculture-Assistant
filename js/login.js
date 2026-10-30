@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000/api/auth";
+const API_URL = "/api/auth";
 
 const phoneOption = document.getElementById("phoneOption");
 const emailOption = document.getElementById("emailOption");
@@ -231,6 +231,14 @@ phoneLoginForm.addEventListener("submit", async (event) => {
             throw new Error("Login token was not returned by the server.");
         }
 
+        if (data.user && data.user.preferred_language) {
+            const langMap = { "English": "en", "Marathi": "mr", "Hindi": "hi" };
+            const langCode = langMap[data.user.preferred_language] || data.user.preferred_language;
+            if (["en", "mr", "hi"].includes(langCode)) {
+                localStorage.setItem("lang", langCode);
+            }
+        }
+
         showMessage(
             "Login successful! Redirecting...",
             "success"
@@ -326,6 +334,14 @@ emailLoginForm.addEventListener("submit", async (event) => {
             localStorage.setItem("agriSmartToken", data.token);
         } else {
             throw new Error("Login token was not returned by the server.");
+        }
+
+        if (data.user && data.user.preferred_language) {
+            const langMap = { "English": "en", "Marathi": "mr", "Hindi": "hi" };
+            const langCode = langMap[data.user.preferred_language] || data.user.preferred_language;
+            if (["en", "mr", "hi"].includes(langCode)) {
+                localStorage.setItem("lang", langCode);
+            }
         }
 
         showMessage(

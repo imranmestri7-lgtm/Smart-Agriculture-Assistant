@@ -5,7 +5,8 @@ except ImportError:
         class Error(Exception):
             pass
     mysql = _DummyMySQL()
-from flask import Flask, jsonify
+import os
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 
 from config import get_db_connection
@@ -24,15 +25,15 @@ CORS(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(chat_bp)
 
-# Register crop disease prediction routes
-# Register crop disease prediction routes
+# Register crop disease prediction and irrigation routes
 app.register_blueprint(disease_bp)
 app.register_blueprint(irrigation_bp)
 
-
 # Register weather routes
-# app.register_blueprint(irrigation_bp)
-  # duplicate removed
+app.register_blueprint(weather_bp)
+
+# Register crop recommendation routes
+app.register_blueprint(crop_bp)
 
 @app.route("/")
 def home():
@@ -79,6 +80,17 @@ def db_test():
 
         if connection:
             connection.close()
+
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+@app.route("/<path:filename>")
+def serve_frontend(filename):
+    safe_path = os.path.join(PROJECT_ROOT, filename)
+    if os.path.isfile(safe_path):
+        return send_from_directory(PROJECT_ROOT, filename)
+    return jsonify({"status": "error", "message": "File not found"}), 404
 
 
 if __name__ == "__main__":

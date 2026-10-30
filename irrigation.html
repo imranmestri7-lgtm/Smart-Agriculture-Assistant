@@ -7,7 +7,13 @@
 
     <title>Smart Irrigation | AgriSmart</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/irrigation.css">
 </head>
 
@@ -18,15 +24,23 @@
 
         <div class="logo">
             <span class="logo-icon">🌱</span>
-            <span>AgriSmart</span>
+            <span data-i18n="brand_name">AgriSmart</span>
         </div>
 
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
+
         <nav class="nav-links">
-            <a href="index.html">Home</a>
-       
+            <a href="index.html" data-i18n="home">Home</a>
         </nav>
 
-        <button class="profile-btn">Farmer</button>
+        <div class="nav-actions">
+            <button class="profile-btn" onclick="window.location.href='farmer.html'">Farmer</button>
+            <select id="lang-select" style="margin-left:10px;">
+                <option value="en" data-i18n="english">English</option>
+                <option value="mr" data-i18n="marathi">मराठी</option>
+                <option value="hi" data-i18n="hindi">हिन्दी</option>
+            </select>
+        </div>
 
     </header>
 
@@ -39,21 +53,21 @@
 
             <div class="irrigation-hero-content">
 
-                <div class="hero-badge">
+                <div class="hero-badge" data-i18n="smart_irrigation_badge">
                     💧 Smart Agriculture
                 </div>
 
                 <h1>
-                    Smart Irrigation
-                    <span>Management</span>
+                    <span data-i18n="smart_irrigation_title">Smart Irrigation</span>
+                    <span data-i18n="smart_irrigation_title_sub">Management</span>
                 </h1>
 
-                <p>
+                <p data-i18n="smart_irrigation_desc">
                     Make better irrigation decisions using soil,
                     weather and crop conditions.
                 </p>
 
-                <button class="hero-btn" id="startIrrigationButton">
+                <button class="hero-btn" id="startIrrigationButton" data-i18n="check_irrigation_hero_btn">
                     Check Irrigation →
                 </button>
 
@@ -63,7 +77,7 @@
 
 
         <!-- Irrigation Form -->
-        <section class="irrigation-section">
+        <section class="irrigation-section" id="irrigationFormSection">
 
             <div class="irrigation-card">
 
@@ -72,9 +86,9 @@
                     <span class="section-number">01</span>
 
                     <div>
-                        <h2>Irrigation Information</h2>
+                        <h2 data-i18n="irrigation_info_heading">Irrigation Information</h2>
 
-                        <p>
+                        <p data-i18n="irrigation_info_sub">
                             Enter your field conditions to check
                             irrigation requirements.
                         </p>
@@ -82,161 +96,190 @@
 
                 </div>
 
+                <!-- Form alert box for client-side feedback -->
+                <div id="irrigationAlert" style="display:none; padding:12px 18px; margin-bottom:20px; border-radius:10px; font-size:14px; font-weight:600;" role="alert"></div>
 
-                <div class="form-grid">
+                <form id="irrigationForm">
 
-                    <!-- Crop -->
-                    <div class="form-group">
+                    <div class="form-grid">
 
-                        <label for="crop">
-                            🌾 Select Crop
-                        </label>
+                        <!-- Crop -->
+                        <div class="form-group">
 
-                        <select id="crop">
-                            <option value="">Select your crop</option>
-                            <option>Rice</option>
-                            <option>Wheat</option>
-                            <option>Cotton</option>
-                            <option>Sugarcane</option>
-                            <option>Maize</option>
-                            <option>Soybean</option>
-                            <option>Tomato</option>
-                            <option>Potato</option>
-                        </select>
+                            <label for="crop" data-i18n="select_crop_label">
+                                🌾 Select Crop
+                            </label>
+
+                            <select id="crop" required>
+                                <option value="" data-i18n="select_crop_placeholder">Select your crop</option>
+                                <option value="Rice">Rice</option>
+                                <option value="Wheat">Wheat</option>
+                                <option value="Cotton">Cotton</option>
+                                <option value="Sugarcane">Sugarcane</option>
+                                <option value="Maize">Maize</option>
+                                <option value="Soybean">Soybean</option>
+                                <option value="Tomato">Tomato</option>
+                                <option value="Potato">Potato</option>
+                            </select>
+
+                        </div>
+
+
+                        <!-- Soil Moisture -->
+                        <div class="form-group">
+
+                            <label for="soilMoisture" data-i18n="soil_moisture_label">
+                                💧 Soil Moisture (%)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="soilMoisture"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                placeholder="e.g. 35"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Temperature -->
+                        <div class="form-group">
+
+                            <label for="temperature" data-i18n="temperature_label">
+                                🌡️ Temperature (°C)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="temperature"
+                                min="-10"
+                                max="60"
+                                step="0.1"
+                                placeholder="e.g. 28"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Humidity -->
+                        <div class="form-group">
+
+                            <label for="humidity" data-i18n="humidity_label">
+                                ☁️ Humidity (%)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="humidity"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                placeholder="e.g. 65"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Rainfall -->
+                        <div class="form-group">
+
+                            <label for="rainfall" data-i18n="rainfall_label">
+                                🌧️ Recent Rainfall (mm)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="rainfall"
+                                min="0"
+                                step="0.1"
+                                placeholder="e.g. 10"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Location -->
+                        <div class="form-group">
+
+                            <label for="location" data-i18n="location_label">
+                                📍 Location
+                            </label>
+
+                            <select id="location">
+
+                                <option value="" data-i18n="select_location_placeholder">
+                                    Select location
+                                </option>
+
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Other">Other</option>
+
+                            </select>
+
+                        </div>
 
                     </div>
 
 
-                    <!-- Soil Moisture -->
-                    <div class="form-group">
+                    <!-- Action Button -->
+                    <div class="form-action" style="display:flex; gap:12px; align-items:center;">
 
-                        <label for="soilMoisture">
-                            💧 Soil Moisture (%)
-                        </label>
-
-                        <input
-                            type="number"
-                            id="soilMoisture"
-                            min="0"
-                            max="100"
-                            placeholder="e.g. 35"
+                        <button
+                            type="button"
+                            id="resetIrrigationButton"
+                            style="padding:14px 20px; border:1px solid #c2d6c6; background:#f4f9f5; color:#235231; border-radius:12px; font-weight:600; cursor:pointer;"
+                            data-i18n="reset_btn"
                         >
+                            Reset Form
+                        </button>
 
-                    </div>
-
-
-                    <!-- Temperature -->
-                    <div class="form-group">
-
-                        <label for="temperature">
-                            🌡️ Temperature (°C)
-                        </label>
-
-                        <input
-                            type="number"
-                            id="temperature"
-                            placeholder="e.g. 28"
+                        <button
+                            type="submit"
+                            class="check-irrigation-btn"
+                            id="checkIrrigationButton"
                         >
+                            <span id="buttonText" data-i18n="check_irrigation_btn">💧 Check Irrigation Requirement</span>
+                        </button>
 
                     </div>
 
-
-                    <!-- Humidity -->
-                    <div class="form-group">
-
-                        <label for="humidity">
-                            ☁️ Humidity (%)
-                        </label>
-
-                        <input
-                            type="number"
-                            id="humidity"
-                            min="0"
-                            max="100"
-                            placeholder="e.g. 65"
-                        >
-
-                    </div>
-
-
-                    <!-- Rainfall -->
-                    <div class="form-group">
-
-                        <label for="rainfall">
-                            🌧️ Recent Rainfall (mm)
-                        </label>
-
-                        <input
-                            type="number"
-                            id="rainfall"
-                            min="0"
-                            placeholder="e.g. 10"
-                        >
-
-                    </div>
-
-
-                    <!-- Location -->
-                    <div class="form-group">
-
-                        <label for="location">
-                            📍 Location
-                        </label>
-
-                        <select id="location">
-
-                            <option value="">
-                                Select location
-                            </option>
-
-                            <option>Maharashtra</option>
-                            <option>Karnataka</option>
-                            <option>Goa</option>
-                            <option>Gujarat</option>
-                            <option>Madhya Pradesh</option>
-                            <option>Other</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Action Button -->
-                <div class="form-action">
-
-                    <button
-                        class="check-irrigation-btn"
-                        id="checkIrrigationButton"
-                    >
-                        💧 Check Irrigation Requirement
-                    </button>
-
-                </div>
+                </form>
 
             </div>
 
         </section>
 
 
-        <!-- Result Placeholder -->
-        <section class="irrigation-result" id="irrigationResult">
+        <!-- Result Container -->
+        <section class="irrigation-result" id="irrigationResult" aria-live="polite">
 
-            <div class="result-card">
+            <div class="result-card" id="initialPlaceholder">
 
                 <div class="result-icon">
                     💧
                 </div>
 
-                <h2>Irrigation Recommendation</h2>
+                <h2 data-i18n="irrigation_recommendation_title">Irrigation Recommendation</h2>
 
-                <p>
+                <p data-i18n="irrigation_initial_msg">
                     Your irrigation recommendation will appear here
                     after the irrigation system is connected.
                 </p>
 
             </div>
+
+            <!-- Dynamic Recommendation Box (injected by js/irrigation.js) -->
+            <div id="dynamicResultCard" style="display:none;"></div>
 
         </section>
 
@@ -246,13 +289,13 @@
 
             <div class="section-title">
 
-                <span>WHY SMART IRRIGATION?</span>
+                <span data-i18n="why_smart_irrigation">WHY SMART IRRIGATION?</span>
 
-                <h2>
+                <h2 data-i18n="use_water_efficiently">
                     Use Water More Efficiently
                 </h2>
 
-                <p>
+                <p data-i18n="smart_irrigation_benefits_desc">
                     Smart irrigation helps farmers make
                     informed water management decisions.
                 </p>
@@ -268,9 +311,9 @@
                         💧
                     </div>
 
-                    <h3>Save Water</h3>
+                    <h3 data-i18n="save_water_title">Save Water</h3>
 
-                    <p>
+                    <p data-i18n="save_water_desc">
                         Reduce unnecessary water usage
                         by understanding soil moisture.
                     </p>
@@ -284,9 +327,9 @@
                         🌱
                     </div>
 
-                    <h3>Healthy Crops</h3>
+                    <h3 data-i18n="healthy_crops_title">Healthy Crops</h3>
 
-                    <p>
+                    <p data-i18n="healthy_crops_desc">
                         Provide crops with suitable
                         amounts of water.
                     </p>
@@ -300,9 +343,9 @@
                         🌦️
                     </div>
 
-                    <h3>Weather Based</h3>
+                    <h3 data-i18n="weather_based_title">Weather Based</h3>
 
-                    <p>
+                    <p data-i18n="weather_based_desc">
                         Consider rainfall and weather
                         conditions for better decisions.
                     </p>
@@ -316,9 +359,9 @@
                         📊
                     </div>
 
-                    <h3>Data Driven</h3>
+                    <h3 data-i18n="data_driven_title">Data Driven</h3>
 
-                    <p>
+                    <p data-i18n="data_driven_desc">
                         Use field data to support
                         irrigation planning.
                     </p>
@@ -335,9 +378,9 @@
 
             <div class="section-title">
 
-                <span>HOW IT WORKS</span>
+                <span data-i18n="how_it_works_title">HOW IT WORKS</span>
 
-                <h2>
+                <h2 data-i18n="smart_irrigation_process">
                     Smart Irrigation Process
                 </h2>
 
@@ -352,9 +395,9 @@
                         01
                     </div>
 
-                    <h3>Enter Field Data</h3>
+                    <h3 data-i18n="step_1_title">Enter Field Data</h3>
 
-                    <p>
+                    <p data-i18n="step_1_desc">
                         Provide crop, soil moisture
                         and weather information.
                     </p>
@@ -368,9 +411,9 @@
                         02
                     </div>
 
-                    <h3>Analyze Conditions</h3>
+                    <h3 data-i18n="step_2_title">Analyze Conditions</h3>
 
-                    <p>
+                    <p data-i18n="step_2_desc">
                         The system analyzes the
                         available field conditions.
                     </p>
@@ -384,9 +427,9 @@
                         03
                     </div>
 
-                    <h3>Get Recommendation</h3>
+                    <h3 data-i18n="step_3_title">Get Recommendation</h3>
 
-                    <p>
+                    <p data-i18n="step_3_desc">
                         Receive an irrigation
                         recommendation.
                     </p>
@@ -399,8 +442,10 @@
 
     </main>
 
-
+    <!-- Client-side Internationalization & Irrigation Scripts -->
+    <script src="js/i18n.js"></script>
     <script src="js/irrigation.js"></script>
+    <script src="js/mobile-nav.js"></script>
 
 </body>
 

@@ -1,612 +1,461 @@
-/* ================================
-   IRRIGATION PAGE
-================================ */
+/* =====================================================
+   AGRISMART — SMART IRRIGATION MANAGEMENT
+   Polished, Aligned, Professional Layout
+   ===================================================== */
+
+@import url("common.css");
+
+/* ================= PAGE CONTAINER ================= */
 
 .irrigation-page {
-    padding: 35px 5% 70px;
-    background: #f7faf7;
-    min-height: 100vh;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-16);
 }
 
-
-/* ================================
-   HERO
-================================ */
+/* ================= HERO SECTION ================= */
 
 .irrigation-hero {
-    max-width: 1500px;
-    height: 500px;
-    margin: 0 auto 55px;
-    border-radius: 32px;
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+    margin: 0 0 var(--space-10) 0;
+    border-radius: var(--radius-xl);
     overflow: hidden;
-
     background:
         linear-gradient(
             90deg,
-            rgba(5, 45, 25, 0.92) 0%,
-            rgba(5, 45, 25, 0.70) 45%,
-            rgba(5, 45, 25, 0.15) 100%
+            rgba(12, 43, 32, 0.95) 0%,
+            rgba(20, 83, 45, 0.82) 48%,
+            rgba(20, 83, 45, 0.35) 85%,
+            rgba(12, 43, 32, 0.2) 100%
         ),
         url("../images/irrigation.jpg");
-
     background-size: cover;
     background-position: center;
-
     display: flex;
     align-items: center;
-
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-lg);
 }
-
 
 .irrigation-hero-content {
-    max-width: 650px;
-    padding: 50px 70px;
-    color: white;
+    position: relative;
+    z-index: 2;
+    max-width: 620px;
+    padding: var(--space-10) var(--space-10);
+    color: #ffffff;
 }
-
 
 .hero-badge {
-    display: inline-block;
-    padding: 9px 18px;
-    margin-bottom: 20px;
-
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    margin-bottom: var(--space-4);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 30px;
-
-    background: rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.16);
     backdrop-filter: blur(8px);
-
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #86efac;
+    text-transform: uppercase;
 }
-
 
 .irrigation-hero h1 {
-    margin: 0;
-    font-size: 56px;
-    line-height: 1.08;
-    letter-spacing: -1px;
+    margin: 0 0 var(--space-3);
+    font-size: clamp(2rem, 3.5vw, 2.85rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #ffffff;
 }
-
 
 .irrigation-hero h1 span {
     display: block;
-    color: #a7e6b4;
+    color: #86efac;
 }
-
 
 .irrigation-hero p {
-    margin: 22px 0 30px;
-
-    max-width: 560px;
-
-    font-size: 18px;
-    line-height: 1.7;
-
-    color: #e3eee6;
+    margin: 0 0 var(--space-6);
+    font-size: var(--font-base);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-
-.hero-btn {
+.hero-btn,
+.irrigation-hero .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     border: none;
-    border-radius: 12px;
-
-    padding: 14px 25px;
-
-    background: white;
-    color: #126332;
-
-    font-size: 15px;
-    font-weight: 700;
-
+    border-radius: var(--radius-full);
+    padding: 14px 28px;
+    background: #ffffff !important;
+    color: #14532d !important;
+    font-family: var(--font-heading);
+    font-size: var(--font-sm);
+    font-weight: 800;
     cursor: pointer;
-
-    transition: 0.25s ease;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
 }
 
-
-.hero-btn:hover {
+.hero-btn:hover,
+.irrigation-hero .hero-btn:hover {
+    background: #f0fdf4 !important;
+    color: #0f3d20 !important;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
-
-/* ================================
-   IRRIGATION FORM
-================================ */
+/* ================= IRRIGATION FORM ================= */
 
 .irrigation-section {
-    margin-bottom: 55px;
+    width: 100%;
+    margin-bottom: var(--space-10);
 }
-
 
 .irrigation-card {
-    max-width: 1050px;
-    margin: auto;
-
-    padding: 38px 45px;
-
-    background: white;
-
-    border: 1px solid #e2ebe3;
-    border-radius: 26px;
-
-    box-shadow: 0 12px 35px rgba(20, 83, 45, 0.08);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-md);
+    margin: 0;
 }
-
-
-/* Section Heading */
 
 .section-heading {
     display: flex;
     align-items: center;
-    gap: 18px;
-
-    margin-bottom: 35px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
-
 
 .section-number {
     width: 48px;
     height: 48px;
-
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius-md);
+    background: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    color: var(--primary-700);
+    font-family: var(--font-heading);
+    font-size: var(--font-base);
+    font-weight: 800;
+    flex-shrink: 0;
+}
 
-    border-radius: 14px;
-
-    background: #e9f6ec;
-    color: #16803b;
-
+.section-heading h2 {
+    margin: 0 0 4px;
+    color: var(--text-heading);
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
     font-weight: 800;
 }
 
-
-.section-heading h2 {
-    margin: 0 0 6px;
-
-    color: #163b24;
-    font-size: 27px;
-}
-
-
 .section-heading p {
     margin: 0;
-
-    color: #718077;
-    font-size: 14px;
+    color: var(--text-muted);
+    font-size: var(--font-sm);
 }
-
-
-/* Form Grid */
 
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: var(--space-5);
 }
-
 
 .form-group {
     display: flex;
     flex-direction: column;
 }
 
-
 .form-group label {
-    margin-bottom: 9px;
-
-    color: #294434;
-
-    font-size: 14px;
-    font-weight: 650;
+    margin-bottom: var(--space-2);
+    color: var(--text-heading);
+    font-size: var(--font-sm);
+    font-weight: 600;
 }
-
 
 .form-group input,
 .form-group select {
     width: 100%;
-    height: 50px;
-
-    padding: 0 15px;
-
-    border: 1px solid #d9e5db;
-    border-radius: 11px;
-
-    background: #fbfdfb;
-
-    color: #26382c;
-
-    font-size: 14px;
-
+    height: 48px;
+    padding: 0 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-size: var(--font-sm);
     outline: none;
-
-    transition: 0.2s ease;
+    transition: all var(--transition-fast);
 }
-
 
 .form-group input:focus,
 .form-group select:focus {
-    border-color: #38a65a;
-
-    background: white;
-
-    box-shadow: 0 0 0 3px rgba(56, 166, 90, 0.10);
+    border-color: var(--primary-600);
+    box-shadow: 0 0 0 3px var(--primary-glow);
 }
-
-
-/* Action */
 
 .form-action {
-    margin-top: 32px;
-
+    margin-top: var(--space-6);
     display: flex;
     justify-content: flex-end;
+    gap: var(--space-3);
 }
-
 
 .check-irrigation-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
     border: none;
-    border-radius: 12px;
-
-    padding: 14px 25px;
-
-    background: #15803d;
-    color: white;
-
-    font-size: 15px;
+    border-radius: var(--radius-full);
+    padding: 0 28px;
+    background: #15803d !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading);
+    font-size: var(--font-sm);
     font-weight: 700;
-
     cursor: pointer;
-
-    transition: 0.25s ease;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 14px rgba(21, 128, 61, 0.3);
 }
-
 
 .check-irrigation-btn:hover {
-    background: #116b32;
+    background: #166534 !important;
     transform: translateY(-2px);
-
-    box-shadow: 0 8px 18px rgba(21, 128, 61, 0.22);
+    box-shadow: 0 8px 20px rgba(21, 128, 61, 0.4);
 }
 
-
-/* ================================
-   RESULT
-================================ */
+/* ================= RESULT ================= */
 
 .irrigation-result {
-    max-width: 1050px;
-    margin: 0 auto 70px;
+    width: 100%;
+    margin-bottom: var(--space-10);
 }
-
 
 .result-card {
-    padding: 35px;
-
+    padding: var(--space-8);
     text-align: center;
-
-    background: #edf8ef;
-
-    border: 1px solid #d3ead7;
-    border-radius: 22px;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
 }
-
 
 .result-icon {
     width: 58px;
     height: 58px;
-
-    margin: 0 auto 15px;
-
+    margin: 0 auto var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 50%;
-
-    background: white;
-
-    font-size: 26px;
+    background: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    font-size: 28px;
 }
-
 
 .result-card h2 {
-    margin: 0 0 10px;
-
-    color: #194b2b;
-    font-size: 24px;
+    margin: 0 0 var(--space-2);
+    color: var(--text-heading);
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    font-weight: 800;
 }
-
 
 .result-card p {
     max-width: 650px;
     margin: auto;
-
-    color: #64736a;
+    color: var(--text-muted);
+    font-size: var(--font-sm);
     line-height: 1.6;
 }
 
-
-/* ================================
-   SECTION TITLES
-================================ */
+/* ================= SECTION TITLES ================= */
 
 .section-title {
     text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: var(--space-6);
 }
-
 
 .section-title span {
-    color: #16803b;
-
-    font-size: 12px;
+    display: inline-block;
+    color: var(--primary-600);
+    font-family: var(--font-heading);
+    font-size: var(--font-xs);
     font-weight: 800;
-
-    letter-spacing: 1.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
 }
-
 
 .section-title h2 {
-    margin: 9px 0 10px;
-
-    color: #163b24;
-
-    font-size: 32px;
+    margin: 0 0 var(--space-2);
+    color: var(--text-heading);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
 }
-
 
 .section-title p {
     max-width: 650px;
     margin: auto;
-
-    color: #6e7b73;
-
+    color: var(--text-muted);
+    font-size: var(--font-sm);
     line-height: 1.6;
 }
 
-
-/* ================================
-   BENEFITS
-================================ */
+/* ================= BENEFITS ================= */
 
 .benefits-section {
-    max-width: 1150px;
-    margin: 0 auto 75px;
+    width: 100%;
+    margin-bottom: var(--space-10);
 }
-
 
 .benefits-container {
     display: grid;
-
     grid-template-columns: repeat(4, 1fr);
-
-    gap: 18px;
+    gap: var(--space-4);
 }
-
 
 .benefit-card {
-    padding: 27px 22px;
-
-    background: white;
-
-    border: 1px solid #e2ebe3;
-    border-radius: 20px;
-
+    padding: var(--space-6) var(--space-5);
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
     text-align: center;
-
-    transition: 0.25s ease;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
 }
-
 
 .benefit-card:hover {
-    transform: translateY(-5px);
-
-    box-shadow: 0 12px 28px rgba(20, 83, 45, 0.09);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-200);
 }
 
-
 .benefit-icon {
-    width: 55px;
-    height: 55px;
-
-    margin: 0 auto 17px;
-
+    width: 52px;
+    height: 52px;
+    margin: 0 auto var(--space-3);
     display: flex;
     align-items: center;
     justify-content: center;
-
-    border-radius: 15px;
-
-    background: #edf8ef;
-
-    font-size: 25px;
+    border-radius: var(--radius-md);
+    background: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    font-size: 26px;
 }
-
 
 .benefit-card h3 {
-    margin: 0 0 9px;
-
-    color: #23442e;
-    font-size: 17px;
+    margin: 0 0 var(--space-2);
+    color: var(--text-heading);
+    font-size: var(--font-base);
+    font-weight: 700;
 }
-
 
 .benefit-card p {
     margin: 0;
-
-    color: #718077;
-
-    font-size: 13px;
+    color: var(--text-muted);
+    font-size: var(--font-xs);
     line-height: 1.6;
 }
 
-
-/* ================================
-   HOW IT WORKS
-================================ */
+/* ================= HOW IT WORKS ================= */
 
 .how-it-works {
-    max-width: 1050px;
-    margin: auto;
+    width: 100%;
+    margin-bottom: var(--space-10);
 }
-
 
 .process-container {
     display: grid;
-
     grid-template-columns: repeat(3, 1fr);
-
-    gap: 25px;
+    gap: var(--space-5);
 }
-
 
 .process-step {
     position: relative;
-
-    padding: 30px;
-
-    background: white;
-
-    border: 1px solid #e2ebe3;
-    border-radius: 20px;
-
+    padding: var(--space-6);
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
     text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
 }
 
+.process-step:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
 
 .process-number {
-    width: 48px;
-    height: 48px;
-
-    margin: 0 auto 17px;
-
+    width: 44px;
+    height: 44px;
+    margin: 0 auto var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 50%;
-
-    background: #15803d;
-    color: white;
-
-    font-size: 14px;
+    background: var(--primary-600);
+    color: #ffffff;
+    font-size: var(--font-sm);
     font-weight: 800;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
 }
-
 
 .process-step h3 {
-    margin: 0 0 10px;
-
-    color: #24462f;
-    font-size: 17px;
+    margin: 0 0 var(--space-2);
+    color: var(--text-heading);
+    font-size: var(--font-base);
+    font-weight: 700;
 }
-
 
 .process-step p {
     margin: 0;
-
-    color: #718077;
-
-    font-size: 13px;
+    color: var(--text-muted);
+    font-size: var(--font-xs);
     line-height: 1.6;
 }
 
-
-/* ================================
-   TABLET
-================================ */
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 900px) {
-
     .irrigation-hero {
-        height: 470px;
+        min-height: 380px;
     }
 
     .irrigation-hero-content {
-        padding: 40px;
+        padding: var(--space-6);
     }
 
-    .irrigation-hero h1 {
-        font-size: 46px;
+    .form-grid {
+        grid-template-columns: 1fr;
     }
 
     .benefits-container {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .process-container {
+        grid-template-columns: 1fr;
+    }
 }
 
-
-/* ================================
-   MOBILE
-================================ */
-
-@media (max-width: 650px) {
-
-    .irrigation-page {
-        padding: 20px 4% 50px;
-    }
-
-    .irrigation-hero {
-        height: 500px;
-
-        border-radius: 24px;
-
-        background-position: center;
-    }
-
-    .irrigation-hero-content {
-        padding: 30px;
-    }
-
+@media (max-width: 640px) {
     .irrigation-hero h1 {
-        font-size: 38px;
-    }
-
-    .irrigation-hero p {
-        font-size: 15px;
-    }
-
-    .irrigation-card {
-        padding: 28px 22px;
-        border-radius: 20px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .section-heading {
-        align-items: flex-start;
-    }
-
-    .section-heading h2 {
-        font-size: 22px;
-    }
-
-    .form-action {
-        justify-content: stretch;
-    }
-
-    .check-irrigation-btn {
-        width: 100%;
+        font-size: 1.8rem;
     }
 
     .benefits-container {
         grid-template-columns: 1fr;
     }
-
-    .process-container {
-        grid-template-columns: 1fr;
-    }
-
-    .section-title h2 {
-        font-size: 27px;
-    }
-
 }

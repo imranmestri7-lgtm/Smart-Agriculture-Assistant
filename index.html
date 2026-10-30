@@ -7,6 +7,11 @@
 
     <title>AgriSmart | Smart Farming Made Simple</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/common.css">
@@ -20,46 +25,35 @@
          NAVBAR
     =========================================== -->
     <header class="navbar">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+            <span class="logo-icon">🌱</span>
+            <span data-i18n="brand_name">AgriSmart</span>
+        </a>
 
-        <div class="navbar-container">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
 
-            <!-- Logo -->
-            <a href="index.html" class="logo">
-                <span class="logo-icon">🌾</span>
-                <span>AgriSmart</span>
-            </a>
+        <!-- Navigation -->
+        <nav class="nav-links">
+            <a href="#home" data-i18n="home">Home</a>
+            <a href="#features" data-i18n="features">Features</a>
+            <a href="#how-it-works" data-i18n="how_it_works">How It Works</a>
+            <a href="#about" data-i18n="about">About</a>
+        </nav>
 
-            <!-- Navigation -->
-            <nav class="nav-links">
+        <!-- Navbar Actions -->
+        <div class="nav-actions">
+            <a href="login.html" class="login-button" data-i18n="login_button">Login</a>
+            <a href="login.html" class="get-started-button" data-i18n="signup_button">Get Started</a>
 
-                <a href="#home" data-i18n="home">Home</a>
-
-                <a href="#features" data-i18n="features">Features</a>
-
-                <a href="#how-it-works" data-i18n="how_it_works">How It Works</a>
-
-                <a href="#about" data-i18n="about">About</a>
-
-            </nav>
-
-            <!-- Navbar Actions -->
-            <div class="nav-actions">
-
-                <a href="login.html" class="login-button" data-i18n="login_button">Login</a>
-
-                <a href="login.html" class="get-started-button" data-i18n="signup_button">Get Started</a>
-
-                <!-- Language selector -->
-                <select id="lang-select" style="margin-left:10px;">
-                    <option value="en" data-i18n="english">English</option>
-                    <option value="mr" data-i18n="marathi">मराठी</option>
-                    <option value="hi" data-i18n="hindi">हिन्दी</option>
-                </select>
-
-            </div>
-
+            <!-- Language selector -->
+            <select id="lang-select">
+                <option value="en" data-i18n="english">English</option>
+                <option value="mr" data-i18n="marathi">मराठी</option>
+                <option value="hi" data-i18n="hindi">हिन्दी</option>
+            </select>
         </div>
-
     </header>
 
 
@@ -936,13 +930,8 @@
 
 
 <script src="js/i18n.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Existing reveal script
-        const reveals = document.querySelectorAll('[data-reveal]');
-        reveals.forEach(el => el.classList.add('visible'));
-    });
-</script>
+<script src="js/scroll-reveal.js"></script>
+<script src="js/mobile-nav.js"></script>
 </body>
 
 </html>

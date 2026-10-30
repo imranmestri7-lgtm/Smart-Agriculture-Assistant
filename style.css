@@ -22,19 +22,12 @@ html {
     scroll-behavior: smooth;
 }
 
+@import url("css/common.css");
+
 body {
-    font-family: Arial, sans-serif;
-
-    background:
-        linear-gradient(
-            135deg,
-            #eef8f0 0%,
-            #f8faf8 50%,
-            #eaf6ed 100%
-        );
-
-    color: #1f2937;
-
+    font-family: var(--font-body);
+    background: linear-gradient(135deg, #f2f8f3 0%, #fbfdfb 50%, #eef7f0 100%);
+    color: var(--text-body);
     min-height: 100vh;
 }
 

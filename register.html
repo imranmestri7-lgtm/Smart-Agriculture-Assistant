@@ -7,7 +7,13 @@
 
     <title>Create Account | AgriSmart</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/common.css">
 
     <style>
         * {
@@ -17,8 +23,11 @@
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background: #f4faf3;
+            font-family: var(--font-body, "Inter", sans-serif);
+            background: radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 90%, rgba(20, 83, 45, 0.06) 0%, transparent 40%),
+                        #f8faf8;
+            color: var(--text-body, #1f2937);
         }
 
         .auth-page {
@@ -34,54 +43,56 @@
             max-width: 480px;
             background: #ffffff;
             padding: 40px;
-            border-radius: 22px;
-            border: 1px solid #dce8dc;
-            box-shadow: 0 15px 40px rgba(22, 101, 52, 0.10);
+            border-radius: 24px;
+            border: 1px solid #e2ece3;
+            box-shadow: 0 20px 45px -10px rgba(20, 83, 45, 0.12);
         }
 
         .auth-icon {
-            width: 65px;
-            height: 65px;
-            margin: 0 auto 20px;
-
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-
             background: #dcfce7;
             border: 1px solid #bbf7d0;
-            border-radius: 18px;
-
-            font-size: 30px;
+            border-radius: 16px;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
         }
 
         .auth-card h1 {
             margin: 0;
             text-align: center;
-            color: #14532d;
-            font-size: 30px;
+            color: #0f172a;
+            font-family: var(--font-heading, "Plus Jakarta Sans", sans-serif);
+            font-size: 26px;
+            font-weight: 800;
         }
 
         .auth-subtitle {
-            margin: 10px 0 30px;
+            margin: 8px 0 24px;
             text-align: center;
-            color: #718071;
-            font-size: 14px;
+            color: #64748b;
+            font-size: 13px;
             line-height: 1.6;
         }
 
         .method-title {
-            margin-bottom: 12px;
-            color: #304936;
-            font-size: 13px;
+            margin-bottom: 10px;
+            color: #334155;
+            font-size: 12px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .method-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
         }
 
         .method-option {
@@ -99,117 +110,102 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-
-            height: 52px;
-
-            border: 1px solid #d4ded5;
-            border-radius: 11px;
-
+            height: 46px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
             background: #ffffff;
             color: #475569;
-
             font-size: 13px;
-            font-weight: 700;
-
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .method-option label:hover {
-            border-color: #55a94e;
+            border-color: #86efac;
             background: #f0fdf4;
         }
 
         .method-option input:checked + label {
-            border-color: #42a851;
+            border-color: #16a34a;
             background: #f0fdf4;
-            color: #166534;
-            box-shadow: 0 0 0 3px rgba(66, 168, 81, 0.10);
+            color: #15803d;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-
-            color: #304936;
+            margin-bottom: 6px;
+            color: #334155;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            height: 50px;
-
-            padding: 0 15px;
-
-            border: 1px solid #d4ded5;
-            border-radius: 11px;
-
+            height: 48px;
+            padding: 0 16px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
             outline: none;
-
             font-size: 14px;
-            color: #334155;
-
+            font-family: inherit;
+            color: #1e293b;
             background: #ffffff;
+            transition: all 0.2s ease;
         }
 
         .form-group input:focus,
         .form-group select:focus {
-            border-color: #55a94e;
-            box-shadow: 0 0 0 4px rgba(85, 169, 78, 0.10);
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
         }
 
         .auth-button {
             width: 100%;
-            height: 50px;
-
+            height: 48px;
             margin-top: 8px;
-
             border: none;
-            border-radius: 11px;
-
-            background: linear-gradient(135deg, #18753d, #42a851);
-
+            border-radius: 12px;
+            background: #16a34a;
             color: #ffffff;
-
+            font-family: inherit;
             font-size: 14px;
-            font-weight: 800;
-
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.2s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
         }
 
         .auth-button:hover {
+            background: #15803d;
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(35, 120, 60, 0.22);
+            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
         }
 
         .auth-button:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .message {
             display: none;
-
             margin-bottom: 18px;
             padding: 12px 14px;
-
             border-radius: 10px;
-
             font-size: 13px;
             line-height: 1.5;
         }
 
         .message.error {
             display: block;
-
             color: #991b1b;
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -217,23 +213,20 @@
 
         .message.success {
             display: block;
-
             color: #166534;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
         }
 
         .auth-footer {
-            margin-top: 25px;
-
+            margin-top: 24px;
             text-align: center;
-
-            color: #718071;
+            color: #64748b;
             font-size: 13px;
         }
 
         .auth-footer a {
-            color: #15803d;
+            color: #16a34a;
             font-weight: 700;
             text-decoration: none;
         }
@@ -243,18 +236,18 @@
         }
 
         .back-home {
-            margin-top: 18px;
+            margin-top: 16px;
             text-align: center;
         }
 
         .back-home a {
             color: #64748b;
-            font-size: 12px;
+            font-size: 13px;
             text-decoration: none;
         }
 
         .back-home a:hover {
-            color: #15803d;
+            color: #16a34a;
         }
 
         .hidden {
@@ -262,9 +255,8 @@
         }
 
         @media (max-width: 600px) {
-
             .auth-card {
-                padding: 30px 22px;
+                padding: 28px 20px;
             }
 
             .method-options {
@@ -278,21 +270,30 @@
 
 <header class="navbar">
 
-    <div class="logo">
+    <a href="index.html" class="logo">
         <span class="logo-icon">🌱</span>
-        <span>AgriSmart</span>
-    </div>
+        <span data-i18n="brand_name">AgriSmart</span>
+    </a>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
 
     <nav class="nav-links">
-        <a href="index.html">Home</a>
+        <a href="index.html" data-i18n="home">Home</a>
     </nav>
 
-    <button
-        class="farmer-btn"
-        onclick="window.location.href='login.html'"
-    >
-        Farmer
-    </button>
+    <div class="nav-actions" style="display:flex; align-items:center; gap:10px;">
+        <button
+            class="farmer-btn"
+            onclick="window.location.href='login.html'"
+        >
+            Farmer
+        </button>
+        <select id="lang-select">
+            <option value="en" data-i18n="english">English</option>
+            <option value="mr" data-i18n="marathi">मराठी</option>
+            <option value="hi" data-i18n="hindi">हिन्दी</option>
+        </select>
+    </div>
 
 </header>
 
@@ -507,7 +508,9 @@
 </main>
 
 
+<script src="js/i18n.js"></script>
 <script src="js/register.js"></script>
+<script src="js/mobile-nav.js"></script>
 
 </body>
 

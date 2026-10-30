@@ -7,6 +7,11 @@
 
     <title>Farmer Dashboard | AgriSmart</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/farmer.css">
@@ -22,19 +27,21 @@
 
         <div class="logo">
             <span class="logo-icon">🌱</span>
-            <span>AgriSmart</span>
+            <span data-i18n="brand_name">AgriSmart</span>
         </div>
 
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
+
+        <nav class="nav-links">
+            <a href="index.html" data-i18n="home">Home</a>
+        </nav>
+
         <div class="navbar-right">
-            <nav class="nav-actions">
-                <a href="login.html" class="login-button" data-i18n="login_button">Login</a>
-                <a href="login.html" class="get-started-button" data-i18n="signup_button">Get Started</a>
-                <select id="lang-select" style="margin-left:10px;">
-                    <option value="en" data-i18n="english">English</option>
-                    <option value="mr" data-i18n="marathi">मराठी</option>
-                    <option value="hi" data-i18n="hindi">हिन्दी</option>
-                </select>
-            </nav>
+            <select id="lang-select" style="margin-right:15px;">
+                <option value="en" data-i18n="english">English</option>
+                <option value="mr" data-i18n="marathi">मराठी</option>
+                <option value="hi" data-i18n="hindi">हिन्दी</option>
+            </select>
 
             <span class="welcome-text" id="welcomeText">
                 Welcome, Farmer
@@ -226,7 +233,7 @@
 
                 <!-- DIAGNOSIS HISTORY -->
 
-                <div class="dashboard-card dashboard-card-disabled">
+                <a href="disease.html#diagnosisHistorySection" class="dashboard-card" id="historyCard">
 
                     <div class="dashboard-card-icon history-icon">
                         📋
@@ -236,28 +243,24 @@
 
                         <div class="card-title-row">
 
-                            <h3>
+                            <h3 data-i18n="diagnosis_history_title">
                                 Diagnosis History
                             </h3>
 
-                            <span class="coming-badge">
-                                Coming Soon
-                            </span>
-
                         </div>
 
-                        <p>
+                        <p data-i18n="diagnosis_history_desc">
                             View your previous plant checks and
                             diagnosis information.
                         </p>
 
-                        <span class="card-link disabled-link">
-                            Available Soon
+                        <span class="card-link" data-i18n="view_history_btn">
+                            View History →
                         </span>
 
                     </div>
 
-                </div>
+                </a>
 
 
                 <!-- FARMER ASSISTANT -->
@@ -359,29 +362,47 @@
                     </div>
 
 
-                    <!-- LANGUAGE -->
+                    <!-- CHAT HEADER ACTIONS -->
 
-                    <div class="language-selector">
+                    <div class="chat-header-actions" style="display: flex; align-items: center; gap: 12px;">
 
-                        <label for="language">
-                            🌐
-                        </label>
+                        <!-- LANGUAGE -->
 
-                        <select id="language">
+                        <div class="language-selector">
 
-                            <option value="en">
-                                English
-                            </option>
+                            <label for="language">
+                                🌐
+                            </label>
 
-                            <option value="mr">
-                                मराठी
-                            </option>
+                            <select id="language">
 
-                            <option value="hi">
-                                हिंदी
-                            </option>
+                                <option value="en">
+                                    English
+                                </option>
 
-                        </select>
+                                <option value="mr">
+                                    मराठी
+                                </option>
+
+                                <option value="hi">
+                                    हिंदी
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- CLEAR CHAT -->
+
+                        <button
+                            type="button"
+                            id="clearChatBtn"
+                            class="clear-chat-btn"
+                            title="Clear Chat History"
+                            data-i18n-title="clear_chat_title"
+                        >
+                            🗑️ <span data-i18n="clear_chat">Clear Chat</span>
+                        </button>
 
                     </div>
 
@@ -549,7 +570,9 @@
     </main>
 
 
+    <script src="js/i18n.js"></script>
     <script src="js/farmer.js"></script>
+    <script src="js/mobile-nav.js"></script>
 
 </body>
 

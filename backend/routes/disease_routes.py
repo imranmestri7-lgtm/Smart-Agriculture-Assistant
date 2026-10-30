@@ -110,77 +110,6 @@ def load_disease_model():
         model_load_error = str(error)
         print("Failed to load plant disease model.")
         print(f"Reason: {error}")
-# Duplicate load_disease_model definition removed – kept the first implementation above.
-# Duplicate load_disease_model definition removed – kept the first implementation above.
-    """
-    Load the trained crop disease classification model
-    and its corresponding class labels.
-    """
-    if tf is None:
-        # Preserve the actual import exception for reporting
-        if model_load_error is None:
-            model_load_error = "TensorFlow import failed – model unavailable."
-        print("Skipping model load because TensorFlow is not available.")
-        return
-
-    try:
-        if not os.path.isfile(MODEL_PATH):
-            raise FileNotFoundError(
-                f"Model file not found: {MODEL_PATH}"
-            )
-
-        if not os.path.isfile(LABELS_PATH):
-            raise FileNotFoundError(
-                f"Labels file not found: {LABELS_PATH}"
-            )
-
-        # Load the trained TensorFlow/Keras model
-        model = tf.keras.models.load_model(
-            MODEL_PATH,
-            compile=False
-        )
-
-        # Load disease class names
-        with open(
-            LABELS_PATH,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            class_labels = json.load(file)
-
-        if not isinstance(class_labels, list):
-            raise ValueError(
-                "class_labels.json must contain a list."
-            )
-
-        if len(class_labels) == 0:
-            raise ValueError(
-                "No class labels were found."
-            )
-
-        # Verify the number of output classes
-        model_classes = model.output_shape[-1]
-
-        if model_classes != len(class_labels):
-            raise ValueError(
-                f"Model output classes: {model_classes}; "
-                f"available labels: {len(class_labels)}."
-            )
-
-        model_load_error = None
-
-        print("======================================")
-        print("Plant disease model loaded successfully")
-        print(f"Model classes: {len(class_labels)}")
-        print("======================================")
-
-    except Exception as error:
-        model = None
-        class_labels = None
-        model_load_error = str(error)
-
-        print("Failed to load plant disease model.")
-        print(f"Reason: {error}")
 
 
 # Load the model when the route module is imported
@@ -345,26 +274,74 @@ def predict_disease():
         # Save history only when the request has a valid signed token.
         # Guest predictions continue to work without being saved.
         history_saved = False
+        saved_image_filename = None
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
             token = auth_header[len("Bearer "):].strip()
             user_id = get_user_id_from_token(token)
 
             if user_id is not None:
+                # Safely save uploaded leaf image to backend/uploads
+                try:
+                    import uuid
+                    from werkzeug.utils import secure_filename
+                    ext = ".jpg"
+                    if uploaded_file.filename:
+                        _, orig_ext = os.path.splitext(secure_filename(uploaded_file.filename))
+                        if orig_ext.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
+                            ext = orig_ext.lower()
+                    safe_filename = f"leaf_{user_id}_{uuid.uuid4().hex[:12]}{ext}"
+                    uploads_dir = os.path.join(BASE_DIR, "uploads")
+                    os.makedirs(uploads_dir, exist_ok=True)
+                    target_path = os.path.join(uploads_dir, safe_filename)
+                    with open(target_path, "wb") as f:
+                        f.write(image_bytes)
+                    saved_image_filename = safe_filename
+                except Exception as img_err:
+                    print(f"Could not save leaf image: {img_err}")
+
                 connection = None
                 cursor = None
                 try:
                     connection = get_db_connection()
                     cursor = connection.cursor()
+
+                    # Match disease_id from diseases table
+                    disease_id = None
+                    try:
+                        cursor.execute("SELECT id FROM diseases WHERE disease_name = %s LIMIT 1", (predicted_class,))
+                        d_row = cursor.fetchone()
+                        if d_row:
+                            disease_id = d_row[0] if isinstance(d_row, (tuple, list)) else d_row.get("id")
+                    except Exception:
+                        pass
+
+                    # Match crop_id from crops table
+                    crop_id = None
+                    try:
+                        crop_keyword = predicted_class.split("___")[0].replace("_", " ").strip().lower()
+                        cursor.execute(
+                            "SELECT id FROM crops WHERE user_id = %s AND LOWER(crop_name) LIKE %s LIMIT 1",
+                            (user_id, f"%{crop_keyword}%")
+                        )
+                        c_row = cursor.fetchone()
+                        if c_row:
+                            crop_id = c_row[0] if isinstance(c_row, (tuple, list)) else c_row.get("id")
+                    except Exception:
+                        pass
+
                     cursor.execute(
                         """
                         INSERT INTO diagnosis_history
-                            (user_id, predicted_class, confidence, notes)
-                        VALUES (%s, %s, %s, %s)
+                            (user_id, crop_id, disease_id, predicted_class, image_path, confidence, notes)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             user_id,
+                            crop_id,
+                            disease_id,
                             predicted_class,
+                            saved_image_filename,
                             round(confidence, 2),
                             "Image-based model prediction"
                         )
@@ -643,7 +620,7 @@ def get_diagnosis_history():
 
         cursor.execute(
             """
-            SELECT id, predicted_class, confidence, notes, diagnosis_date
+            SELECT id, predicted_class, confidence, notes, diagnosis_date, image_path, crop_id, disease_id
             FROM diagnosis_history
             WHERE user_id = %s
             ORDER BY diagnosis_date DESC, id DESC
@@ -658,10 +635,27 @@ def get_diagnosis_history():
         for row in rows:
             confidence = row.get("confidence")
             diagnosis_date = row.get("diagnosis_date")
+            predicted_class = row.get("predicted_class") or "Unknown"
+            img_path = row.get("image_path")
+            img_url = f"/api/disease/image/{img_path}" if img_path else None
+
+            # Retrieve rich agronomic guidance for this predicted class
+            info = {}
+            if predicted_class and predicted_class != "Unknown":
+                try:
+                    info = disease_knowledge.get_disease_info(
+                        predicted_class,
+                        confidence=float(confidence) if confidence is not None else None
+                    )
+                except Exception:
+                    pass
+
+            crop_name = info.get("crop") or (predicted_class.split("___")[0].replace("_", " ") if "___" in predicted_class else "Plant")
+            display_name = info.get("display_name") or (predicted_class.replace("___", " — ").replace("_", " "))
 
             history.append({
                 "id": row["id"],
-                "predicted_class": row.get("predicted_class"),
+                "predicted_class": predicted_class,
                 "confidence": (
                     float(confidence) if confidence is not None else None
                 ),
@@ -670,7 +664,16 @@ def get_diagnosis_history():
                     diagnosis_date.isoformat()
                     if diagnosis_date is not None
                     else None
-                )
+                ),
+                "image_path": img_path,
+                "image_url": img_url,
+                "crop_name": crop_name,
+                "display_name": display_name,
+                "description": info.get("description", ""),
+                "symptoms": info.get("symptoms", []),
+                "prevention": info.get("prevention", []),
+                "safe_treatment": info.get("safe_treatment", []),
+                "disclaimer": info.get("disclaimer", "")
             })
 
         return jsonify({
@@ -691,3 +694,160 @@ def get_diagnosis_history():
             cursor.close()
         if connection:
             connection.close()
+
+
+@disease_bp.route("/history/<int:history_id>", methods=["GET"])
+def get_diagnosis_detail(history_id):
+    """
+    Return full diagnosis detail for an authenticated farmer's specific record.
+    Endpoint: GET /api/disease/history/<int:history_id>
+    """
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({
+            "status": "error",
+            "message": "Authentication required. Please log in."
+        }), 401
+
+    token = auth_header[len("Bearer "):].strip()
+    user_id = get_user_id_from_token(token)
+
+    if user_id is None:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid or expired login token. Please log in again."
+        }), 401
+
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute(
+            """
+            SELECT id, predicted_class, confidence, notes, diagnosis_date, image_path, crop_id, disease_id
+            FROM diagnosis_history
+            WHERE id = %s AND user_id = %s
+            LIMIT 1
+            """,
+            (history_id, user_id)
+        )
+
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({
+                "status": "error",
+                "message": "Diagnosis record not found or access denied."
+            }), 404
+
+        confidence = row.get("confidence")
+        diagnosis_date = row.get("diagnosis_date")
+        predicted_class = row.get("predicted_class") or "Unknown"
+        img_path = row.get("image_path")
+        img_url = f"/api/disease/image/{img_path}" if img_path else None
+
+        info = {}
+        if predicted_class and predicted_class != "Unknown":
+            try:
+                info = disease_knowledge.get_disease_info(
+                    predicted_class,
+                    confidence=float(confidence) if confidence is not None else None
+                )
+            except Exception:
+                pass
+
+        crop_name = info.get("crop") or (predicted_class.split("___")[0].replace("_", " ") if "___" in predicted_class else "Plant")
+        display_name = info.get("display_name") or (predicted_class.replace("___", " — ").replace("_", " "))
+
+        detail = {
+            "id": row["id"],
+            "predicted_class": predicted_class,
+            "confidence": float(confidence) if confidence is not None else None,
+            "notes": row.get("notes"),
+            "diagnosis_date": (
+                diagnosis_date.isoformat()
+                if diagnosis_date is not None
+                else None
+            ),
+            "image_path": img_path,
+            "image_url": img_url,
+            "crop_name": crop_name,
+            "display_name": display_name,
+            "description": info.get("description", ""),
+            "symptoms": info.get("symptoms", []),
+            "prevention": info.get("prevention", []),
+            "safe_treatment": info.get("safe_treatment", []),
+            "disclaimer": info.get("disclaimer", "")
+        }
+
+        return jsonify({
+            "status": "success",
+            "detail": detail
+        }), 200
+
+    except Exception as error:
+        print(f"Could not retrieve diagnosis detail: {error}")
+        return jsonify({
+            "status": "error",
+            "message": "Unable to retrieve diagnosis detail right now."
+        }), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@disease_bp.route("/image/<filename>", methods=["GET"])
+def get_diagnosis_image(filename):
+    """
+    Serve uploaded leaf image with path traversal and ownership checks.
+    Endpoint: GET /api/disease/image/<filename>
+    """
+    from werkzeug.utils import secure_filename
+    from flask import send_from_directory
+
+    safe_name = secure_filename(filename)
+    if not safe_name or safe_name != filename:
+        return jsonify({"status": "error", "message": "Invalid image filename."}), 400
+
+    upload_dir = os.path.join(BASE_DIR, "uploads")
+    file_path = os.path.join(upload_dir, safe_name)
+    if not os.path.isfile(file_path):
+        return jsonify({"status": "error", "message": "Image not found."}), 404
+
+    # Security check: verify ownership if an authentication token is provided
+    auth_header = request.headers.get("Authorization", "")
+    token = None
+    if auth_header.startswith("Bearer "):
+        token = auth_header[len("Bearer "):].strip()
+    elif request.args.get("token"):
+        token = request.args.get("token").strip()
+
+    if token:
+        user_id = get_user_id_from_token(token)
+        if user_id:
+            connection = None
+            cursor = None
+            try:
+                connection = get_db_connection()
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute(
+                    "SELECT user_id FROM diagnosis_history WHERE image_path = %s LIMIT 1",
+                    (safe_name,)
+                )
+                rec = cursor.fetchone()
+                if rec and rec["user_id"] != user_id:
+                    return jsonify({"status": "error", "message": "Access denied to this image."}), 403
+            except Exception:
+                pass
+            finally:
+                if cursor:
+                    cursor.close()
+                if connection:
+                    connection.close()
+
+    return send_from_directory(upload_dir, safe_name)

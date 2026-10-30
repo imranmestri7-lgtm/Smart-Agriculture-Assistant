@@ -5,7 +5,10 @@ import os
 from datetime import timedelta
 
 # Ensure the app can import utilities
-from app import app
+try:
+    from backend.app import app
+except ImportError:
+    from app import app
 from utils.auth_tokens import create_access_token
 
 class Phase5Tests(unittest.TestCase):

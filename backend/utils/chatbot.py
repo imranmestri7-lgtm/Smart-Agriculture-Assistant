@@ -177,18 +177,20 @@ def _normalise(text):
     return re.sub(r"\\s+", " ", str(text or "").casefold().strip())
 
 
-def _matches_intent(text, phrases):
-    """Match exact phrases or tolerate common spelling mistakes."""
+def _matches_intent_exact(text, phrases):
+    """Match exact normalized phrases."""
     normalized = _normalise(text)
     padded = f" {normalized} "
-
-    # Exact phrase matching first.
     for phrase in phrases:
         candidate = _normalise(phrase)
         if f" {candidate} " in padded:
             return True
+    return False
 
-    # Fuzzy matching for individual words, e.g. 'irrigtion'.
+
+def _matches_intent_fuzzy(text, phrases):
+    """Match words using fuzzy sequence similarity for spelling variations."""
+    normalized = _normalise(text)
     words = re.findall(r"[a-zA-Z]+", normalized)
     for word in words:
         if len(word) < 5:
@@ -197,10 +199,14 @@ def _matches_intent(text, phrases):
             for target in re.findall(r"[a-zA-Z]+", phrase.casefold()):
                 if len(target) >= 5 and SequenceMatcher(
                     None, word, target
-                ).ratio() >= 0.82:
+                ).ratio() >= 0.85:
                     return True
-
     return False
+
+
+def _matches_intent(text, phrases):
+    """Match exact phrases or tolerate common spelling mistakes."""
+    return _matches_intent_exact(text, phrases) or _matches_intent_fuzzy(text, phrases)
 
 
 def _known_disease_classes():
@@ -446,19 +452,21 @@ def _generate_response(message, language="en"):
             ),
         }
 
-    # Market queries take precedence over crop-name matching.
-    for category in ("market", "weather", "irrigation", "fertilizer", "pest"):
-        if _matches_intent(normalized, INTENTS[category]):
+    # Priority 1: Exact phrase matches across domain categories
+    for category in ("market", "irrigation", "weather", "fertilizer", "pest", "disease"):
+        if _matches_intent_exact(normalized, INTENTS[category]):
             return {
                 "category": category,
                 "reply": RESPONSES[category],
             }
 
-    if _matches_intent(normalized, INTENTS["disease"]):
-        return {
-            "category": "disease",
-            "reply": RESPONSES["disease"],
-        }
+    # Priority 2: Fuzzy matches for typos (e.g. 'irrigtion')
+    for category in ("market", "irrigation", "weather", "fertilizer", "pest", "disease"):
+        if _matches_intent_fuzzy(normalized, INTENTS[category]):
+            return {
+                "category": category,
+                "reply": RESPONSES[category],
+            }
 
     # Handle questions such as 'I grow wheat'.
     crop_phrases = (

@@ -126,6 +126,8 @@ if (logoutButton) {
         }
 
         localStorage.removeItem("agriSmartUser");
+        localStorage.removeItem("agriSmartToken");
+        localStorage.removeItem("token");
 
         window.location.href = "login.html";
 
@@ -150,36 +152,216 @@ const chatArea =
 const languageSelector = document.getElementById("language");
 
 function getChatLanguage() {
-    if (!languageSelector) {
-        return "en";
+    if (window.i18n && typeof window.i18n.getLang === "function") {
+        return window.i18n.getLang();
     }
-    return ["en", "mr", "hi"].includes(languageSelector.value)
-        ? languageSelector.value
-        : "en";
+    const current = localStorage.getItem("lang") || localStorage.getItem("agriSmartLanguage");
+    if (["en", "mr", "hi"].includes(current)) {
+        return current;
+    }
+    if (languageSelector && ["en", "mr", "hi"].includes(languageSelector.value)) {
+        return languageSelector.value;
+    }
+    return "en";
 }
 
 if (languageSelector) {
-    const savedLanguage = localStorage.getItem("agriSmartLanguage");
-    const preferredLanguage = currentUser &&
-        currentUser.preferred_language;
+    const savedLanguage = localStorage.getItem("lang") ||
+        localStorage.getItem("agriSmartLanguage") ||
+        (currentUser && currentUser.preferred_language) ||
+        "en";
 
-    const initialLanguage = savedLanguage ||
-        ({"English": "en", "Marathi": "mr", "Hindi": "hi"}[
-            preferredLanguage
-        ]) ||
-        (["en", "mr", "hi"].includes(preferredLanguage)
-            ? preferredLanguage : "en");
+    const initialLanguage =
+        ({"English": "en", "Marathi": "mr", "Hindi": "hi"}[savedLanguage]) ||
+        (["en", "mr", "hi"].includes(savedLanguage) ? savedLanguage : "en");
 
     languageSelector.value = initialLanguage;
 
     languageSelector.addEventListener("change", function () {
-        localStorage.setItem(
-            "agriSmartLanguage",
-            getChatLanguage()
-        );
+        const chosen = languageSelector.value;
+        localStorage.setItem("lang", chosen);
+        localStorage.setItem("agriSmartLanguage", chosen);
+        if (window.i18n && typeof window.i18n.setLang === "function") {
+            window.i18n.setLang(chosen);
+            window.i18n.applyTranslations();
+        }
+        const globalSelect = document.getElementById("lang-select");
+        if (globalSelect && globalSelect.value !== chosen) {
+            globalSelect.value = chosen;
+        }
+        window.dispatchEvent(new CustomEvent("languageChanged", { detail: { lang: chosen } }));
+    });
+
+    window.addEventListener("languageChanged", function (e) {
+        if (languageSelector && e.detail && e.detail.lang) {
+            languageSelector.value = e.detail.lang;
+        }
     });
 }
 
+
+// =====================================================
+// TIME FORMATTER
+// =====================================================
+
+function formatChatTime(dateInput) {
+    try {
+        const date = dateInput ? new Date(dateInput) : new Date();
+        if (isNaN(date.getTime())) {
+            return "Just now";
+        }
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+        return "Just now";
+    }
+}
+
+
+// =====================================================
+// LOAD CHAT HISTORY
+// =====================================================
+
+function loadChatHistory() {
+    if (!chatArea) {
+        return;
+    }
+
+    const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
+    if (!token) {
+        return;
+    }
+
+    fetch("/api/chat/history?limit=50", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(function (res) {
+        if (!res.ok) {
+            throw new Error(`HTTP error ${res.status}`);
+        }
+        return res.json();
+    })
+    .then(function (data) {
+        if (data.status === "success" && Array.isArray(data.history) && data.history.length > 0) {
+            const divider = document.createElement("div");
+            divider.className = "chat-history-divider";
+            divider.innerHTML = `<span data-i18n="previous_conversations">${window.i18n ? window.i18n.t("previous_conversations") : "Previous Conversations"}</span>`;
+            chatArea.appendChild(divider);
+
+            data.history.forEach(function (item) {
+                // Historical user message
+                const userMsg = document.createElement("div");
+                userMsg.className = "message user-message";
+                userMsg.innerHTML = `
+                    <div class="message-content">
+                        <p></p>
+                        <span class="message-time">${formatChatTime(item.created_at)}</span>
+                    </div>
+                    <div class="message-avatar">👨‍🌾</div>
+                `;
+                userMsg.querySelector("p").textContent = item.message;
+                chatArea.appendChild(userMsg);
+
+                // Historical assistant message
+                const botMsg = document.createElement("div");
+                botMsg.className = "message assistant-message";
+                botMsg.innerHTML = `
+                    <div class="message-avatar">🌱</div>
+                    <div class="message-content">
+                        <div class="message-name">AgriSmart Assistant</div>
+                        <p></p>
+                        <span class="message-time">${formatChatTime(item.created_at)}</span>
+                    </div>
+                `;
+                botMsg.querySelector("p").textContent = item.response;
+                chatArea.appendChild(botMsg);
+            });
+
+            scrollToBottom();
+        }
+    })
+    .catch(function (err) {
+        console.warn("Could not load previous chat history:", err);
+    });
+}
+
+
+// =====================================================
+// CLEAR CHAT HISTORY
+// =====================================================
+
+const clearChatBtn = document.getElementById("clearChatBtn");
+
+if (clearChatBtn) {
+    clearChatBtn.addEventListener("click", function () {
+        const confirmMsg = window.i18n
+            ? window.i18n.t("clear_chat_confirm")
+            : "Are you sure you want to clear your conversation history?";
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
+        if (!token) {
+            alert("Please log in to clear your chat history.");
+            return;
+        }
+
+        clearChatBtn.disabled = true;
+
+        fetch("/api/chat/history", {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        })
+        .then(function (res) {
+            return res.json().catch(function () { return {}; });
+        })
+        .then(function (data) {
+            clearChatBtn.disabled = false;
+            if (data.status === "success") {
+                chatArea.innerHTML = `
+                    <div class="message assistant-message">
+                        <div class="message-avatar">
+                            🌱
+                        </div>
+                        <div class="message-content">
+                            <div class="message-name">
+                                AgriSmart Assistant
+                            </div>
+                            <p>
+                                Hello <span id="chatFarmerName">${getUserName()}</span>! 👋
+                            </p>
+                            <p>
+                                I can help you with crops, irrigation,
+                                weather, plant diseases, pests and
+                                general farming guidance.
+                            </p>
+                            <span class="message-time">
+                                Just now
+                            </span>
+                        </div>
+                    </div>
+                `;
+                const successMsg = window.i18n
+                    ? window.i18n.t("clear_chat_success")
+                    : "Conversation history cleared.";
+                alert(successMsg);
+            } else {
+                alert(data.message || "Could not clear chat history.");
+            }
+        })
+        .catch(function (err) {
+            clearChatBtn.disabled = false;
+            console.error("Error clearing chat history:", err);
+            alert("Could not connect to server to clear chat history.");
+        });
+    });
+}
 
 
 // =====================================================
@@ -220,6 +402,7 @@ function sendMessage() {
         <div class="message-content">
 
             <p></p>
+            <span class="message-time">${formatChatTime(new Date())}</span>
 
         </div>
 
@@ -256,7 +439,7 @@ function sendMessage() {
 
 
     // Send the question to the authenticated Flask chatbot.
-    const token = localStorage.getItem("agriSmartToken");
+    const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
 
     if (!token) {
         removeThinking();
@@ -264,8 +447,11 @@ function sendMessage() {
         return;
     }
 
-    // Disable send button to prevent duplicate submissions
-   fetch("http://127.0.0.1:5000/api/chat/message", {
+    if (sendButton) {
+        sendButton.disabled = true;
+    }
+
+    fetch("/api/chat/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -292,12 +478,16 @@ function sendMessage() {
         })
         .then(function (data) {
             removeThinking();
-            sendButton.disabled = false;
+            if (sendButton) {
+                sendButton.disabled = false;
+            }
             addAssistantMessage(data);
         })
         .catch(function (error) {
             removeThinking();
-            sendButton.disabled = false;
+            if (sendButton) {
+                sendButton.disabled = false;
+            }
             addAssistantMessage(
                 error.message ||
                 "Unable to connect to AgriSmart. Check that the Flask backend is running."
@@ -437,6 +627,11 @@ function addAssistantMessage(response) {
         followUp.appendChild(usePrompt);
         content.appendChild(followUp);
     }
+
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "message-time";
+    timeSpan.textContent = formatChatTime(new Date());
+    content.appendChild(timeSpan);
 
     assistantMessage.appendChild(avatar);
     assistantMessage.appendChild(content);
@@ -845,9 +1040,11 @@ if (voiceButton) {
                 )
             ) {
 
-                alert(
-                    "Voice input is not supported by this browser."
-                );
+                const notSupportedMsg = window.i18n
+                    ? window.i18n.t("voice_not_supported")
+                    : "Voice input is not supported by this browser.";
+
+                alert(notSupportedMsg);
 
                 return;
 
@@ -863,43 +1060,81 @@ if (voiceButton) {
                 new SpeechRecognition();
 
 
-            recognition.lang = ({ en: "en-IN", mr: "mr-IN", hi: "hi-IN" })[getChatLanguage()];
+            recognition.lang = ({ en: "en-IN", mr: "mr-IN", hi: "hi-IN" })[getChatLanguage()] || "en-IN";
 
             recognition.interimResults = false;
 
             recognition.maxAlternatives = 1;
 
 
-            recognition.start();
+            recognition.onstart = function () {
+                voiceButton.classList.add("recording");
+                voiceButton.title = window.i18n
+                    ? window.i18n.t("listening")
+                    : "Listening...";
+            };
 
+            recognition.onend = function () {
+                voiceButton.classList.remove("recording");
+                voiceButton.title = "Voice Input";
+            };
 
             recognition.onresult =
                 function (event) {
+                    voiceButton.classList.remove("recording");
 
-                    const transcript =
-                        event.results[0][0].transcript;
+                    if (event.results && event.results[0] && event.results[0][0]) {
+                        const transcript =
+                            event.results[0][0].transcript;
 
-
-                    if (messageInput) {
-
-                        messageInput.value =
-                            transcript;
-
+                        if (messageInput) {
+                            messageInput.value =
+                                transcript;
+                            messageInput.focus();
+                        }
                     }
-
                 };
 
 
             recognition.onerror =
-                function () {
+                function (event) {
+                    voiceButton.classList.remove("recording");
 
-                    alert(
-                        "Unable to capture voice input. Please try again."
-                    );
-
+                    if (event.error === "not-allowed" || event.error === "permission-denied") {
+                        const deniedMsg = window.i18n
+                            ? window.i18n.t("mic_permission_denied")
+                            : "Microphone access was denied. Please allow microphone permissions in your browser.";
+                        alert(deniedMsg);
+                    } else if (event.error === "no-speech") {
+                        console.warn("No speech was detected.");
+                    } else {
+                        console.error("Speech recognition error:", event.error);
+                        alert(
+                            "Voice recognition error: " +
+                            (event.error || "Unable to capture voice.")
+                        );
+                    }
                 };
+
+            try {
+                recognition.start();
+            } catch (err) {
+                console.error("Speech recognition start failed:", err);
+                voiceButton.classList.remove("recording");
+            }
 
         }
     );
 
+}
+
+
+// =====================================================
+// INITIALIZE CHAT HISTORY ON LOAD
+// =====================================================
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadChatHistory);
+} else {
+    loadChatHistory();
 }

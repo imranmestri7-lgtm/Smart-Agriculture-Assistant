@@ -7,7 +7,14 @@
 
     <title>Crop Recommendation | AgriSmart</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/crop.css">
 </head>
 
 <body>
@@ -18,20 +25,26 @@
 
         <a href="index.html" class="logo">
             <span class="logo-icon">🌱</span>
-            <span>AgriSmart</span>
+            <span data-i18n="brand_name">AgriSmart</span>
         </a>
 
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
+
         <nav class="nav-links">
-
-            <a href="index.html">Home</a>
-
-
-
+            <a href="index.html" data-i18n="home">Home</a>
+            <a href="farmer.html">Dashboard</a>
         </nav>
 
-        <button class="profile-btn">
-            Farmer
-        </button>
+        <div class="nav-actions">
+            <button class="profile-btn" onclick="window.location.href='farmer.html'">
+                Farmer
+            </button>
+            <select id="lang-select" style="margin-left:10px;">
+                <option value="en" data-i18n="english">English</option>
+                <option value="mr" data-i18n="marathi">मराठी</option>
+                <option value="hi" data-i18n="hindi">हिन्दी</option>
+            </select>
+        </div>
 
     </header>
 
@@ -474,6 +487,9 @@
 
     </main>
 
+    <script src="js/i18n.js"></script>
+    <script src="js/crop.js"></script>
+    <script src="js/mobile-nav.js"></script>
 </body>
 
 </html>
