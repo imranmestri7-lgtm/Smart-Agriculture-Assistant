@@ -57,6 +57,51 @@ document.addEventListener("DOMContentLoaded", function () {
         alertBox.style.display = "none";
     }
 
+    // IoT Soil Moisture Telemetry Sync (Phase 10)
+    const btnSyncIoT = document.getElementById("btnSyncIoTMmoisture");
+    const iotNotice = document.getElementById("iotMoistureNotice");
+    if (btnSyncIoT) {
+        btnSyncIoT.addEventListener("click", async function () {
+            const cropVal = document.getElementById("crop") ? document.getElementById("crop").value.trim() : "";
+            const token = localStorage.getItem("token") || localStorage.getItem("agriSmartToken");
+            if (!token) {
+                showAlert("Please log in to sync real IoT sensor readings.", "error");
+                return;
+            }
+            btnSyncIoT.disabled = true;
+            btnSyncIoT.textContent = "Checking sensors...";
+            try {
+                let url = "/api/iot/irrigation-sync?";
+                if (cropVal) url += `crop=${encodeURIComponent(cropVal)}`;
+                const res = await fetch(url, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.status === "success" && data.has_sensor_data) {
+                    const moistureInput = document.getElementById("soilMoisture");
+                    if (moistureInput) moistureInput.value = data.soil_moisture;
+                    if (iotNotice) {
+                        iotNotice.style.display = "block";
+                        const tag = data.is_demo ? "[Demo Data]" : "[Live Hardware]";
+                        iotNotice.textContent = `✓ Applied ${data.soil_moisture}% from '${data.sensor_name}' (${data.recorded_at}) ${tag}`;
+                        iotNotice.style.color = data.is_demo ? "#7c3aed" : "#059669";
+                    }
+                } else {
+                    if (iotNotice) {
+                        iotNotice.style.display = "block";
+                        iotNotice.textContent = "ℹ️ No recent soil moisture readings found for this crop. Enter manually.";
+                        iotNotice.style.color = "#d97706";
+                    }
+                }
+            } catch (err) {
+                console.error("IoT sync error:", err);
+            } finally {
+                btnSyncIoT.disabled = false;
+                btnSyncIoT.textContent = t("iot_sync_irrigation_btn", "📡 Use Live IoT Sensor Moisture");
+            }
+        });
+    }
+
     // Form submission
     if (form) {
         form.addEventListener("submit", async function (event) {

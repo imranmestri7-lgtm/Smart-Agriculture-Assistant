@@ -331,6 +331,39 @@
                 </a>
 
 
+                <!-- SMART FARM MONITORING (PHASE 10 - IoT) -->
+
+                <a href="#iotMonitoringSection" class="dashboard-card" id="iotDashboardCard">
+
+                    <div class="dashboard-card-icon iot-card-icon">
+                        📡
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="iot_monitoring_title">
+                                Smart Farm Monitoring
+                            </h3>
+
+                            <span class="iot-card-badge" id="cardIotBadge">IoT Ready</span>
+
+                        </div>
+
+                        <p data-i18n="iot_card_desc">
+                            Live sensor readings for soil moisture, air &amp; soil temperature, humidity and water levels.
+                        </p>
+
+                        <span class="card-link" data-i18n="iot_card_link">
+                            View Monitoring →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
                 <!-- FARMER ASSISTANT -->
 
                 <a href="#assistant" class="dashboard-card">
@@ -703,6 +736,273 @@
                     <!-- Populated dynamically by js/notifications.js -->
                 </div>
             </div>
+        </section>
+
+
+        <!-- =================================================
+             SMART FARM MONITORING (PHASE 10 - IoT)
+        ================================================== -->
+
+        <section class="iot-section" id="iotMonitoringSection">
+
+            <!-- SECTION HEADER -->
+            <div class="iot-header">
+                <div class="section-title-wrap">
+                    <span class="dashboard-label">IoT-READY SENSOR NETWORK</span>
+                    <h2 data-i18n="iot_monitoring_heading">Smart Farm Monitoring</h2>
+                    <p data-i18n="iot_monitoring_sub">Real-time field telemetry from soil probes, weather stations, and water level sensors.</p>
+                </div>
+                <div class="iot-header-actions">
+                    <button type="button" class="btn btn-secondary" id="btnOpenDemoMode">
+                        🧪 <span data-i18n="iot_demo_mode_btn">Demo Mode</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnOpenAddSensorModal">
+                        ➕ <span data-i18n="iot_add_sensor_btn">Register Sensor</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HARDWARE CONNECTIVITY BANNER -->
+            <div class="iot-status-banner" id="iotStatusBanner">
+                <div class="status-indicator">
+                    <span class="pulse-dot active"></span>
+                    <strong id="iotNetworkStatusText">IoT Telemetry Hub</strong>
+                    <span class="iot-device-counts" id="iotDeviceCounts">(0 online, 0 offline)</span>
+                </div>
+                <div class="iot-quick-refresh">
+                    <button type="button" class="refresh-pill-btn" id="btnRefreshIoT">
+                        🔄 <span>Refresh Telemetry</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- LIVE SENSOR READINGS CARDS (5 METRICS) -->
+            <div class="iot-metrics-grid">
+                <!-- 1. SOIL MOISTURE -->
+                <div class="iot-metric-card" id="cardMetricSoilMoisture">
+                    <div class="iot-card-top">
+                        <span class="iot-card-icon icon-moisture">💧</span>
+                        <div class="iot-card-badges">
+                            <span class="iot-status-tag status-disconnected" id="statusSoilMoisture">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeSoilMoisture" style="display:none;">DEMO</span>
+                        </div>
+                    </div>
+                    <div class="iot-card-body">
+                        <span class="metric-label" data-i18n="iot_soil_moisture">Soil Moisture</span>
+                        <div class="metric-val-row">
+                            <strong class="metric-large-num" id="valSoilMoisture">--</strong>
+                            <span class="metric-unit">%</span>
+                        </div>
+                        <div class="iot-card-meta">
+                            <span class="meta-field">🏡 <span id="farmSoilMoisture">Not assigned</span></span>
+                            <span class="meta-field">🌾 <span id="cropSoilMoisture">-</span></span>
+                            <span class="meta-time">⏱️ <span id="timeSoilMoisture">Never</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. AIR TEMPERATURE -->
+                <div class="iot-metric-card" id="cardMetricAirTemp">
+                    <div class="iot-card-top">
+                        <span class="iot-card-icon icon-temp">🌡️</span>
+                        <div class="iot-card-badges">
+                            <span class="iot-status-tag status-disconnected" id="statusAirTemp">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeAirTemp" style="display:none;">DEMO</span>
+                        </div>
+                    </div>
+                    <div class="iot-card-body">
+                        <span class="metric-label" data-i18n="iot_air_temp">Air Temperature</span>
+                        <div class="metric-val-row">
+                            <strong class="metric-large-num" id="valAirTemp">--</strong>
+                            <span class="metric-unit">°C</span>
+                        </div>
+                        <div class="iot-card-meta">
+                            <span class="meta-field">🏡 <span id="farmAirTemp">Not assigned</span></span>
+                            <span class="meta-time">⏱️ <span id="timeAirTemp">Never</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. AIR HUMIDITY -->
+                <div class="iot-metric-card" id="cardMetricAirHumidity">
+                    <div class="iot-card-top">
+                        <span class="iot-card-icon icon-humidity">☁️</span>
+                        <div class="iot-card-badges">
+                            <span class="iot-status-tag status-disconnected" id="statusAirHumidity">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeAirHumidity" style="display:none;">DEMO</span>
+                        </div>
+                    </div>
+                    <div class="iot-card-body">
+                        <span class="metric-label" data-i18n="iot_air_humidity">Air Humidity</span>
+                        <div class="metric-val-row">
+                            <strong class="metric-large-num" id="valAirHumidity">--</strong>
+                            <span class="metric-unit">%</span>
+                        </div>
+                        <div class="iot-card-meta">
+                            <span class="meta-field">🏡 <span id="farmAirHumidity">Not assigned</span></span>
+                            <span class="meta-time">⏱️ <span id="timeAirHumidity">Never</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. SOIL TEMPERATURE -->
+                <div class="iot-metric-card" id="cardMetricSoilTemp">
+                    <div class="iot-card-top">
+                        <span class="iot-card-icon icon-soil-temp">🌱</span>
+                        <div class="iot-card-badges">
+                            <span class="iot-status-tag status-disconnected" id="statusSoilTemp">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeSoilTemp" style="display:none;">DEMO</span>
+                        </div>
+                    </div>
+                    <div class="iot-card-body">
+                        <span class="metric-label" data-i18n="iot_soil_temp">Soil Temperature</span>
+                        <div class="metric-val-row">
+                            <strong class="metric-large-num" id="valSoilTemp">--</strong>
+                            <span class="metric-unit">°C</span>
+                        </div>
+                        <div class="iot-card-meta">
+                            <span class="meta-field">🏡 <span id="farmSoilTemp">Not assigned</span></span>
+                            <span class="meta-time">⏱️ <span id="timeSoilTemp">Never</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. WATER LEVEL -->
+                <div class="iot-metric-card" id="cardMetricWaterLevel">
+                    <div class="iot-card-top">
+                        <span class="iot-card-icon icon-water-level">🚰</span>
+                        <div class="iot-card-badges">
+                            <span class="iot-status-tag status-disconnected" id="statusWaterLevel">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeWaterLevel" style="display:none;">DEMO</span>
+                        </div>
+                    </div>
+                    <div class="iot-card-body">
+                        <span class="metric-label" data-i18n="iot_water_level">Water Level</span>
+                        <div class="metric-val-row">
+                            <strong class="metric-large-num" id="valWaterLevel">--</strong>
+                            <span class="metric-unit">%</span>
+                        </div>
+                        <div class="iot-card-meta">
+                            <span class="meta-field">🏡 <span id="farmWaterLevel">Not assigned</span></span>
+                            <span class="meta-time">⏱️ <span id="timeWaterLevel">Never</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS: SENSORS LIST & SENSOR HISTORY -->
+            <div class="iot-tabs-container">
+                <div class="iot-tab-buttons">
+                    <button type="button" class="iot-tab-btn active" id="tabBtnSensors" data-tab="sensorsPanel">
+                        📡 <span data-i18n="iot_tab_sensors">Registered Sensors</span>
+                    </button>
+                    <button type="button" class="iot-tab-btn" id="tabBtnHistory" data-tab="historyPanel">
+                        📈 <span data-i18n="iot_tab_history">Sensor History &amp; Analytics</span>
+                    </button>
+                    <button type="button" class="iot-tab-btn" id="tabBtnIntegration" data-tab="hardwarePanel">
+                        🔌 <span data-i18n="iot_tab_hardware">ESP32 / Arduino Guide</span>
+                    </button>
+                </div>
+
+                <!-- TAB 1: SENSORS LIST -->
+                <div class="iot-tab-panel active" id="sensorsPanel">
+                    <div id="sensorsListContainer" class="sensors-grid">
+                        <!-- Populated dynamically with registered sensors -->
+                    </div>
+                    <div id="sensorsEmptyState" class="iot-empty-state" style="display:none;">
+                        <span class="empty-icon">📡</span>
+                        <h4 data-i18n="iot_no_sensors_title">No Sensors Registered Yet</h4>
+                        <p data-i18n="iot_no_sensors_desc">Connect an ESP32 or Arduino sensor to monitor soil moisture, humidity, and weather in real time, or test with Demo Mode.</p>
+                        <button type="button" class="btn btn-outline" id="btnRegisterFirstSensor">
+                            ➕ <span data-i18n="iot_add_sensor_btn">Register Your First Sensor</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: SENSOR HISTORY & ANALYTICS -->
+                <div class="iot-tab-panel" id="historyPanel" style="display:none;">
+                    <div class="history-controls-bar">
+                        <div class="form-group-inline">
+                            <label for="historySensorSelect" data-i18n="iot_select_sensor">Select Sensor:</label>
+                            <select id="historySensorSelect" class="form-control-compact">
+                                <option value="">-- Choose a sensor --</option>
+                            </select>
+                        </div>
+                        <div class="range-pills" id="historyRangePills">
+                            <button type="button" class="range-pill active" data-range="24h">24 Hours</button>
+                            <button type="button" class="range-pill" data-range="7d">7 Days</button>
+                            <button type="button" class="range-pill" data-range="30d">30 Days</button>
+                            <button type="button" class="range-pill" data-range="all">All</button>
+                        </div>
+                    </div>
+
+                    <!-- STATS SUMMARY (MIN, MAX, AVG) -->
+                    <div class="history-stats-row" id="historyStatsRow">
+                        <div class="stat-pill"><span class="stat-label">Min:</span> <strong id="statMinVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label">Avg:</span> <strong id="statAvgVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label">Max:</span> <strong id="statMaxVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label">Readings:</span> <strong id="statCountVal">0</strong></div>
+                    </div>
+
+                    <!-- SVG LINE CHART -->
+                    <div class="history-chart-wrapper" id="historyChartWrapper">
+                        <svg id="historyLineChart" class="iot-line-chart" viewBox="0 0 800 240" preserveAspectRatio="none">
+                            <!-- Rendered dynamically -->
+                        </svg>
+                    </div>
+
+                    <!-- READINGS TABLE / LIST -->
+                    <div class="history-table-wrapper" id="historyTableWrapper">
+                        <table class="iot-table">
+                            <thead>
+                                <tr>
+                                    <th>Date &amp; Time</th>
+                                    <th>Measurement</th>
+                                    <th>Status</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: HARDWARE INTEGRATION GUIDE -->
+                <div class="iot-tab-panel" id="hardwarePanel" style="display:none;">
+                    <div class="hardware-guide-card">
+                        <h3>🔌 ESP32 &amp; Arduino Integration Specifications</h3>
+                        <p>Hardware microcontrollers can transmit telemetry directly to AgriSmart via HTTP/HTTPS POST without exposing farmer accounts or database credentials.</p>
+                        
+                        <div class="code-spec-box">
+                            <strong>Endpoint:</strong> <code>POST /api/iot/ingest</code><br>
+                            <strong>Headers:</strong>
+                            <pre>Content-Type: application/json
+X-Device-Id: &lt;YOUR_REGISTERED_DEVICE_ID&gt;
+X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
+                            <strong>Sample Soil Moisture JSON Payload:</strong>
+                            <pre>{
+  "device_id": "ESP32-SOIL-01",
+  "sensor_type": "soil_moisture",
+  "value": 34.5,
+  "unit": "%",
+  "timestamp": "2026-10-31T09:50:00Z"
+}</pre>
+                            <strong>Sample Combined DHT22 Payload:</strong>
+                            <pre>{
+  "device_id": "ESP32-DHT22-01",
+  "readings": [
+    {"sensor_type": "air_temp", "value": 28.5, "unit": "°C"},
+    {"sensor_type": "air_humidity", "value": 65.0, "unit": "%"}
+  ],
+  "timestamp": "2026-10-31T09:50:00Z"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
 
@@ -1130,6 +1430,134 @@
             </div>
         </div>
 
+
+        <!-- =================================================
+             MODALS: IoT SMART FARM MONITORING (PHASE 10)
+        ================================================== -->
+
+        <!-- 1. REGISTER SENSOR MODAL -->
+        <div class="farm-modal-backdrop" id="sensorModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="sensorModalTitle" data-i18n="iot_add_sensor_btn">Register Sensor</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="sensorForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="sensorFarmSelect">🏡 Farm <span class="required">*</span></label>
+                        <select id="sensorFarmSelect" class="form-control" required>
+                            <option value="">Loading farms...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sensorCropSelect">🌾 Assigned Crop (Optional)</label>
+                        <select id="sensorCropSelect" class="form-control">
+                            <option value="">-- Optional: Assign Crop --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sensorNameInput">🏷️ Sensor Name <span class="required">*</span></label>
+                        <input type="text" id="sensorNameInput" class="form-control" placeholder="e.g. North Field Soil Probe" required maxlength="150">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sensorTypeSelect">📡 Sensor Type <span class="required">*</span></label>
+                        <select id="sensorTypeSelect" class="form-control" required>
+                            <option value="soil_moisture">💧 Soil Moisture Sensor (%)</option>
+                            <option value="air_temp_humidity">🌡️ Air Temp &amp; Humidity (DHT22 / SHT30)</option>
+                            <option value="soil_temp">🌱 Soil Temperature (°C)</option>
+                            <option value="water_level">🚰 Water Level Sensor (%)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sensorDeviceIdInput">🆔 Unique Device ID <span class="required">*</span></label>
+                        <input type="text" id="sensorDeviceIdInput" class="form-control" placeholder="e.g. ESP32-SOIL-01" required maxlength="100" style="text-transform:uppercase;">
+                        <small style="color:var(--text-tertiary); display:block; margin-top:4px;">Must be unique across your hardware devices (letters, digits, dashes).</small>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" data-i18n="btn_save">Register Sensor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. DEVICE SECRET KEY MODAL (SHOWN ONCE ON CREATION) -->
+        <div class="farm-modal-backdrop" id="deviceKeyModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3>🔑 Device Credentials Generated</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" style="padding: 18px 24px;">
+                    <div class="alert-box-warning" style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px; margin-bottom:16px;">
+                        <strong style="color:#b45309;">⚠️ Important Security Notice:</strong>
+                        <p style="color:#92400e; font-size:13px; margin:4px 0 0 0;">
+                            Copy this secret key and flash it to your ESP32 or Arduino. For security, this secret is hashed and will <strong>NEVER</strong> be displayed again.
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>Device ID:</label>
+                        <strong id="modalKeyDeviceId" style="display:block; font-size:16px; color:var(--text-primary); margin-top:4px;"></strong>
+                    </div>
+                    <div class="form-group">
+                        <label>Secret Device API Key:</label>
+                        <div style="display:flex; gap:8px; margin-top:4px;">
+                            <input type="text" id="modalKeySecret" class="form-control" readonly style="background:#f8fafc; font-family:monospace; font-weight:600;">
+                            <button type="button" class="btn btn-primary" id="btnCopyDeviceKey">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="margin-top:20px;">
+                        <button type="button" class="btn-primary modal-close-btn" style="width:100%;">I Have Saved This Key</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MANUAL DEMO MODE MODAL -->
+        <div class="farm-modal-backdrop" id="demoModeModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3>🧪 Manual IoT Demo Mode</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="demoModeForm" class="modal-form">
+                    <p style="color:var(--text-secondary); font-size:13px; margin-bottom:14px;">
+                        Inject simulated telemetry into your registered sensors to test dashboard gauges, graphs, and alert thresholds without physical hardware. All manual readings are tagged as <strong>[Demo Data]</strong>.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="demoSensorSelect">Target Sensor <span class="required">*</span></label>
+                        <select id="demoSensorSelect" class="form-control" required>
+                            <option value="">-- Choose Sensor --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="demoReadingValue">Sample Telemetry Value <span class="required">*</span></label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="number" id="demoReadingValue" class="form-control" step="0.1" placeholder="e.g. 32.5" required>
+                            <span id="demoUnitLabel" style="font-weight:700; color:var(--text-secondary);">%</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions" style="justify-content:space-between; margin-top:20px;">
+                        <button type="button" class="btn btn-outline-danger" id="btnClearDemoData" style="color:#ef4444; border-color:#fca5a5; background:#fff;">
+                            🗑️ Clear Demo Data
+                        </button>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                            <button type="submit" class="btn-primary">Inject Reading</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 
@@ -1138,6 +1566,7 @@
     <script src="js/farm_crop.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/notifications.js"></script>
+    <script src="js/iot_monitoring.js"></script>
     <script src="js/mobile-nav.js"></script>
 
 </body>

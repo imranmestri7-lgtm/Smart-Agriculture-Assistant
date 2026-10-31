@@ -19,6 +19,7 @@ from routes.irrigation_routes import irrigation_bp
 from routes.farm_crop_routes import farm_bp, crop_mgmt_bp
 from routes.analytics_routes import analytics_bp
 from routes.notification_routes import notification_bp
+from routes.iot_routes import iot_bp
 
 app = Flask(__name__)
 
@@ -47,6 +48,9 @@ app.register_blueprint(analytics_bp)
 
 # Register smart notifications and alerts routes
 app.register_blueprint(notification_bp)
+
+# Register IoT smart farm monitoring routes
+app.register_blueprint(iot_bp)
 
 @app.route("/")
 def home():
