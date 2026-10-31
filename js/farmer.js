@@ -797,62 +797,71 @@ const quickActions =
         ".quick-actions button"
     );
 
-
 quickActions.forEach(function (button) {
-
     button.addEventListener(
         "click",
         function () {
+            const actionKey = button.getAttribute("data-quick-action");
+            const lang = (typeof getChatLanguage === "function" ? getChatLanguage() : "en") || "en";
 
-            const action =
-                button.textContent.trim();
-
-
-            const questions = {
-
-                "🌾 Crop Recommendation":
-                    "Which crop is suitable for my soil?",
-
-                "💧 Irrigation Advice":
-                    "How much water does my crop need?",
-
-                "🍃 Disease Detection":
-                    "How can I identify a disease in my crop?",
-
-                "🌦️ Weather Information":
-                    "What weather conditions are suitable for farming?",
-
-                "🌱 Fertilizer Recommendation":
-                    "Which fertilizer is suitable for my crop?",
-
-                "🐛 Pest Management":
-                    "How can I manage pests in my crop?",
-
-                "📊 Market Prices":
-                    "What is the current market price of my crop?",
-
-                "🌍 Soil Health":
-                    "How can I improve my soil health?"
-
+            const questionMap = {
+                crop_status: {
+                    en: "What is my crop status?",
+                    mr: "माझ्या पिकांची स्थिती काय आहे?",
+                    hi: "मेरी फसलों की स्थिति क्या है?"
+                },
+                irrigation_guidance: {
+                    en: "What irrigation recommendation did I receive?",
+                    mr: "सिंचन मार्गदर्शन",
+                    hi: "सिंचाई मार्गदर्शन"
+                },
+                disease_prevention: {
+                    en: "Show my recent disease diagnosis",
+                    mr: "रोग प्रतिबंध",
+                    hi: "रोग रोकथाम"
+                },
+                weather_info: {
+                    en: "Weather information",
+                    mr: "हवामान माहिती",
+                    hi: "मौसम जानकारी"
+                },
+                harvest_reminders: {
+                    en: "Which crops are ready for harvest?",
+                    mr: "काढणी स्मरणपत्रे",
+                    hi: "कटाई रिमाइंडर"
+                },
+                farm_summary: {
+                    en: "Give me my farm summary",
+                    mr: "माझ्या शेताचा सारांश द्या",
+                    hi: "मेरे खेत का सारांश दें"
+                }
             };
 
+            const legacyQuestions = {
+                "🌾 Crop Recommendation": "Which crop is suitable for my soil?",
+                "💧 Irrigation Advice": "How much water does my crop need?",
+                "🍃 Disease Detection": "How can I identify a disease in my crop?",
+                "🌦️ Weather Information": "What weather conditions are suitable for farming?",
+                "🌱 Fertilizer Recommendation": "Which fertilizer is suitable for my crop?",
+                "🐛 Pest Management": "How can I manage pests in my crop?",
+                "📊 Market Prices": "What is the current market price of my crop?",
+                "🌍 Soil Health": "How can I improve my soil health?"
+            };
 
-            const question =
-                questions[action];
-
-
-            if (question && messageInput) {
-
-                messageInput.value =
-                    question;
-
-                sendMessage();
-
+            let question = "";
+            if (actionKey && questionMap[actionKey]) {
+                question = questionMap[actionKey][lang] || questionMap[actionKey]["en"];
+            } else {
+                const actionText = button.textContent.trim();
+                question = legacyQuestions[actionText] || actionText;
             }
 
+            if (question && messageInput) {
+                messageInput.value = question;
+                sendMessage();
+            }
         }
     );
-
 });
 
 

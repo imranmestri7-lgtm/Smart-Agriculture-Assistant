@@ -1,6 +1,9 @@
 """Stub config module providing a dummy DB connection for tests."""
 
 class _DummyCursor:
+    def __init__(self):
+        self.lastrowid = 1
+        self.rowcount = 1
     def execute(self, query, *args, **kwargs):
         pass
     def fetchone(self):

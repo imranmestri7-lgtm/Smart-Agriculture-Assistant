@@ -8,6 +8,119 @@ from utils.chatbot import MAX_MESSAGE_LENGTH, generate_response
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 
 
+def _fetch_farmer_context(user_id):
+    """Retrieve authenticated farmer's context for personal assistant answers."""
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, farm_name, location, total_area, area_unit
+            FROM farms
+            WHERE user_id = %s
+            ORDER BY farm_name ASC
+        """, (user_id,))
+        farms = cursor.fetchall() or []
+
+        cursor.execute("""
+            SELECT c.id, c.farm_id, c.crop_name, c.variety, c.planting_date, c.expected_harvest_date,
+                   c.growth_status, c.cultivated_area, c.area_unit, c.notes, c.updated_at,
+                   f.farm_name, f.location
+            FROM crops c
+            LEFT JOIN farms f ON f.id = c.farm_id
+            WHERE c.user_id = %s
+            ORDER BY c.created_at DESC
+        """, (user_id,))
+        crops = cursor.fetchall() or []
+
+        cursor.execute("""
+            SELECT predicted_class, confidence, diagnosis_date
+            FROM diagnosis_history
+            WHERE user_id = %s
+            ORDER BY diagnosis_date DESC
+            LIMIT 5
+        """, (user_id,))
+        diagnoses = cursor.fetchall() or []
+
+        cursor.execute("""
+            SELECT crop, soil_moisture, is_irrigation_needed, water_quantity_mm, recommendation_status, created_at
+            FROM irrigation_history
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+            LIMIT 5
+        """, (user_id,))
+        irrigations = cursor.fetchall() or []
+
+        cursor.execute("""
+            SELECT message, response, created_at
+            FROM chat_history
+            WHERE user_id = %s
+            ORDER BY created_at DESC, id DESC
+            LIMIT 5
+        """, (user_id,))
+        recent_chat = cursor.fetchall() or []
+
+        return {
+            "user_id": user_id,
+            "farms": farms,
+            "crops": crops,
+            "recent_diagnoses": diagnoses,
+            "recent_irrigations": irrigations,
+            "recent_chat": list(reversed(recent_chat))
+        }
+    except Exception as e:
+        print(f"Could not load farmer context: {e}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@chat_bp.route("/suggestions", methods=["GET"])
+def get_chat_suggestions():
+    """Return multilingual quick question suggestions for Farmer Assistant."""
+    lang = request.args.get("language", "en").lower()
+    if lang not in ("en", "mr", "hi"):
+        lang = "en"
+
+    suggestions = {
+        "en": [
+            {"id": "crop_status", "label": "🌾 My crop status", "query": "What is my crop status?"},
+            {"id": "irrigation_guidance", "label": "💧 Irrigation guidance", "query": "What irrigation guidance did I receive?"},
+            {"id": "disease_prevention", "label": "🍃 Disease prevention", "query": "Show my recent disease diagnosis and precautions."},
+            {"id": "weather_info", "label": "🌦️ Weather information", "query": "What is the weather forecast for my farm?"},
+            {"id": "harvest_reminders", "label": "⏱️ Harvest reminders", "query": "Which crops are ready for harvest?"},
+            {"id": "farm_summary", "label": "🏡 My farm summary", "query": "Give me a summary of my registered farms."}
+        ],
+        "mr": [
+            {"id": "crop_status", "label": "🌾 पिकांची स्थिती", "query": "माझ्या पिकांची सद्यस्थिती काय आहे?"},
+            {"id": "irrigation_guidance", "label": "💧 सिंचन मार्गदर्शन", "query": "मला कोणती सिंचन शिफारस मिळाली आहे?"},
+            {"id": "disease_prevention", "label": "🍃 रोग प्रतिबंध", "query": "माझे अलीकडील रोगनिदान आणि खबरदारी दाखवा."},
+            {"id": "weather_info", "label": "🌦️ हवामान माहिती", "query": "माझ्या शेतासाठी हवामान अंदाज काय आहे?"},
+            {"id": "harvest_reminders", "label": "⏱️ काढणी स्मरणपत्रे", "query": "कोणती पिके काढणीसाठी तयार आहेत?"},
+            {"id": "farm_summary", "label": "🏡 शेताचा सारांश", "query": "माझ्या नोंदणीकृत शेतांचा सारांश द्या."}
+        ],
+        "hi": [
+            {"id": "crop_status", "label": "🌾 फसल की स्थिति", "query": "मेरी फसलों की वर्तमान स्थिति क्या है?"},
+            {"id": "irrigation_guidance", "label": "💧 सिंचाई मार्गदर्शन", "query": "मुझे क्या सिंचाई सलाह प्राप्त हुई है?"},
+            {"id": "disease_prevention", "label": "🍃 रोग रोकथाम", "query": "मेरा हालिया रोग निदान और सावधानियां दिखाएं।"},
+            {"id": "weather_info", "label": "🌦️ मौसम जानकारी", "query": "मेरे खेत के लिए मौसम का पूर्वानुमान क्या है?"},
+            {"id": "harvest_reminders", "label": "⏱️ कटाई रिमाइंडर", "query": "कौन सी फसलें कटाई के लिए तैयार हैं?"},
+            {"id": "farm_summary", "label": "🏡 खेत का सारांश", "query": "मेरे पंजीकृत खेतों का विवरण दें।"}
+        ]
+    }
+
+    return jsonify({
+        "status": "success",
+        "language": lang,
+        "suggestions": suggestions[lang]
+    }), 200
+
+
 @chat_bp.route("/message", methods=["POST"])
 def chat_message():
     """Answer one farming question from an authenticated user and persist to history."""
@@ -64,7 +177,13 @@ def chat_message():
     else:
         language = "en"
 
-    result = generate_response(message, language=language)
+    # Phase 9: Fetch farmer context only for context-seeking queries
+    from utils.context_chat import is_context_relevant_query
+    context = None
+    if is_context_relevant_query(message):
+        context = _fetch_farmer_context(user_id)
+
+    result = generate_response(message, language=language, context=context)
     reply_text = result.get("reply", "")
 
     # Keep the legacy API knowledge field for response compatibility.

@@ -47,6 +47,10 @@
                 Welcome, Farmer
             </span>
 
+            <a href="#notificationSection" class="notification-nav-btn" id="navNotificationBtn" title="Alerts &amp; Notifications">
+                🔔 <span class="notification-nav-badge" id="navNotificationBadge" style="display:none;">0</span>
+            </a>
+
             <button class="profile-btn" id="profileButton">
                 👨‍🌾 <span id="profileName">Farmer</span>
             </button>
@@ -121,7 +125,7 @@
 
                 <!-- MY CROPS -->
 
-                <a href="crop.html" class="dashboard-card">
+                <a href="#farmCropSection" class="dashboard-card" id="myCropsDashboardCard">
 
                     <div class="dashboard-card-icon crop-icon">
                         🌾
@@ -263,6 +267,70 @@
                 </a>
 
 
+                <!-- SMART ANALYTICS (PHASE 7) -->
+
+                <a href="#analyticsSection" class="dashboard-card" id="analyticsDashboardCard">
+
+                    <div class="dashboard-card-icon analytics-icon">
+                        📊
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="analytics_title">
+                                Smart Analytics
+                            </h3>
+
+                        </div>
+
+                        <p data-i18n="analytics_card_desc">
+                            Explore crop distributions, disease frequencies, irrigation trends and farm metrics.
+                        </p>
+
+                        <span class="card-link" data-i18n="analytics_card_link">
+                            View Analytics →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <!-- NOTIFICATIONS & ALERTS (PHASE 8) -->
+
+                <a href="#notificationSection" class="dashboard-card" id="notificationsDashboardCard">
+
+                    <div class="dashboard-card-icon notification-card-icon">
+                        🔔
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="notification_center_title">
+                                Alerts &amp; Notifications
+                            </h3>
+
+                            <span class="notification-card-badge" id="cardNotificationBadge" style="display: none;">0</span>
+
+                        </div>
+
+                        <p data-i18n="notification_card_desc">
+                            View crop harvest reminders, irrigation alerts, weather warnings, and disease follow-ups.
+                        </p>
+
+                        <span class="card-link" data-i18n="view_notifications_btn">
+                            View Alerts →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
                 <!-- FARMER ASSISTANT -->
 
                 <a href="#assistant" class="dashboard-card">
@@ -292,6 +360,349 @@
 
             </div>
 
+        </section>
+
+
+        <!-- =================================================
+             FARM & CROP MANAGEMENT (PHASE 6)
+        ================================================== -->
+
+        <section class="farm-crop-section" id="farmCropSection">
+
+            <div class="farm-crop-header">
+                <div class="section-title-wrap">
+                    <span class="dashboard-label">MY FARMS &amp; CROPS</span>
+                    <h2 data-i18n="farm_crop_management_title">Farm &amp; Crop Management</h2>
+                    <p data-i18n="farm_crop_management_desc">Manage your registered farms, track planted crops, and update growth progress.</p>
+                </div>
+                <div class="farm-crop-actions">
+                    <button type="button" class="btn-farm-action btn-add-farm" id="openAddFarmBtn" data-i18n="btn_add_farm">➕ Add Farm</button>
+                    <button type="button" class="btn-farm-action btn-add-crop" id="openAddCropBtn" data-i18n="btn_add_crop">➕ Register Crop</button>
+                </div>
+            </div>
+
+            <!-- DASHBOARD SUMMARY CARDS -->
+            <div class="farm-summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon icon-farms">🏡</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="summaryTotalFarms">0</span>
+                        <span class="summary-label" data-i18n="summary_total_farms">Registered Farms</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon icon-crops">🌾</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="summaryTotalCrops">0</span>
+                        <span class="summary-label" data-i18n="summary_total_crops">Registered Crops</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon icon-growing">🌱</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="summaryCropsGrowing">0</span>
+                        <span class="summary-label" data-i18n="summary_crops_growing">Currently Growing</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon icon-harvest">🌽</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="summaryCropsHarvest">0</span>
+                        <span class="summary-label" data-i18n="summary_ready_harvest">Ready for Harvest</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS & VIEW SELECTOR -->
+            <div class="farm-crop-nav">
+                <div class="tab-buttons">
+                    <button type="button" class="tab-btn active" id="tabCropsBtn" data-i18n="tab_my_crops">🌾 My Crops &amp; Growth</button>
+                    <button type="button" class="tab-btn" id="tabFarmsBtn" data-i18n="tab_my_farms">🏡 My Farms</button>
+                </div>
+            </div>
+
+            <!-- TAB PANE: CROPS & GROWTH TRACKING -->
+            <div class="tab-pane active" id="cropsPane">
+                <div class="pane-filter-bar">
+                    <label for="filterCropFarm" class="filter-label">Filter by Farm:</label>
+                    <select id="filterCropFarm" class="farm-select">
+                        <option value="">All Farms</option>
+                    </select>
+                </div>
+                <div id="cropsList" class="crops-grid">
+                    <!-- Populated dynamically by farm_crop.js -->
+                </div>
+            </div>
+
+            <!-- TAB PANE: FARMS -->
+            <div class="tab-pane" id="farmsPane" style="display: none;">
+                <div id="farmsList" class="farms-grid">
+                    <!-- Populated dynamically by farm_crop.js -->
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SMART ANALYTICS DASHBOARD (PHASE 7)
+        ================================================== -->
+        <section class="analytics-section" id="analyticsSection">
+            <!-- SECTION HEADER -->
+            <div class="analytics-header">
+                <div class="section-title-wrap">
+                    <span class="dashboard-label">SMART ANALYTICS &amp; INSIGHTS</span>
+                    <h2 data-i18n="analytics_dashboard_title">Smart Analytics Dashboard</h2>
+                    <p data-i18n="analytics_dashboard_desc">Real-time agricultural insights, crop distributions, health trends, and irrigation analytics from your farm data.</p>
+                </div>
+                <div class="analytics-header-actions">
+                    <button type="button" class="btn-analytics-refresh" id="refreshAnalyticsBtn" title="Refresh Analytics Data">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE FILTERS BAR -->
+            <div class="analytics-filters-card">
+                <div class="filters-card-header">
+                    <div class="filters-title">
+                        <span>⚙️</span>
+                        <strong data-i18n="analytics_filter_title">Interactive Filters</strong>
+                    </div>
+                    <div class="filter-actions-inline">
+                        <button type="button" class="btn-filter-apply" id="applyAnalyticsFiltersBtn" data-i18n="btn_apply_filters">🔍 Apply Filters</button>
+                        <button type="button" class="btn-filter-reset" id="resetAnalyticsFiltersBtn" data-i18n="btn_reset_filters">↺ Reset Filters</button>
+                    </div>
+                </div>
+                <div class="filters-controls-grid">
+                    <div class="filter-group">
+                        <label for="analyticsFilterFarm" data-i18n="filter_farm_label">Filter by Farm</label>
+                        <select id="analyticsFilterFarm" class="analytics-select">
+                            <option value="" data-i18n="filter_all_farms">All Farms</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsFilterCrop" data-i18n="filter_crop_label">Filter by Crop</label>
+                        <select id="analyticsFilterCrop" class="analytics-select">
+                            <option value="" data-i18n="filter_all_crops">All Crops</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsStartDate" data-i18n="filter_from_date">From Date</label>
+                        <input type="date" id="analyticsStartDate" class="analytics-input">
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsEndDate" data-i18n="filter_to_date">To Date</label>
+                        <input type="date" id="analyticsEndDate" class="analytics-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARY METRICS CARDS (6 CARDS) -->
+            <div class="analytics-summary-grid">
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-farms">🏡</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_total_farms">Registered Farms</span>
+                        <strong class="metric-number" id="metricTotalFarms">0</strong>
+                    </div>
+                </div>
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-crops">🌾</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_total_crops">Registered Crops</span>
+                        <strong class="metric-number" id="metricTotalCrops">0</strong>
+                    </div>
+                </div>
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-diagnoses">🍃</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_total_diagnoses">Total Diagnoses</span>
+                        <strong class="metric-number" id="metricTotalDiagnoses">0</strong>
+                    </div>
+                </div>
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-irrigations">💧</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_total_irrigations">Irrigation Records</span>
+                        <strong class="metric-number" id="metricTotalIrrigations">0</strong>
+                    </div>
+                </div>
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-growing">🌱</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_crops_growing">Currently Growing</span>
+                        <strong class="metric-number" id="metricCropsGrowing">0</strong>
+                    </div>
+                </div>
+                <div class="analytics-metric-card">
+                    <div class="metric-icon icon-ready">🌾</div>
+                    <div class="metric-info">
+                        <span class="metric-label" data-i18n="metric_crops_ready">Ready for Harvest</span>
+                        <strong class="metric-number" id="metricCropsReady">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS CONTENT TABS / PANELS -->
+            <div class="analytics-content-grid">
+                
+                <!-- 1. CROP ANALYTICS -->
+                <div class="analytics-panel" id="cropAnalyticsPanel">
+                    <div class="panel-header">
+                        <h3 data-i18n="crop_analytics_title">🌾 Crop Analytics</h3>
+                    </div>
+                    <div class="panel-body-grid">
+                        <div class="chart-box">
+                            <h4 data-i18n="crop_dist_by_name">Crop Distribution by Name</h4>
+                            <div id="cropDistByNameChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 data-i18n="crop_growth_stages">Crop Growth-Stage Distribution</h4>
+                            <div id="cropGrowthStageChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body-grid second-row">
+                        <div class="chart-box">
+                            <h4 data-i18n="crops_per_farm_title">Crops Registered per Farm</h4>
+                            <div id="cropsPerFarmChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="chart-box timeline-box">
+                            <h4 data-i18n="crop_timeline_title">Crop Planting &amp; Harvest Timeline</h4>
+                            <div id="cropTimelineList" class="timeline-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DISEASE ANALYTICS -->
+                <div class="analytics-panel" id="diseaseAnalyticsPanel">
+                    <div class="panel-header">
+                        <h3 data-i18n="disease_analytics_title">🍃 Disease Analytics</h3>
+                    </div>
+                    <div class="panel-body-grid">
+                        <div class="chart-box">
+                            <h4 data-i18n="disease_breakdown_title">Healthy vs Diseased Plants</h4>
+                            <div id="diseaseHealthBreakdownChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 data-i18n="top_diseases_title">Most Frequently Detected Diseases</h4>
+                            <div id="topDiseasesChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body-grid second-row">
+                        <div class="chart-box">
+                            <h4 data-i18n="crop_disease_dist_title">Crop-wise Disease Distribution</h4>
+                            <div id="cropDiseaseDistChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 data-i18n="disease_trends_title">Disease Trends Over Time</h4>
+                            <div id="diseaseTrendsChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. IRRIGATION ANALYTICS -->
+                <div class="analytics-panel" id="irrigationAnalyticsPanel">
+                    <div class="panel-header">
+                        <h3 data-i18n="irrigation_analytics_title">💧 Smart Irrigation Analytics</h3>
+                    </div>
+                    <div class="irrigation-stats-strip">
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Total Water Usage</span>
+                            <strong class="stat-pill-value" id="irrigStatTotalWater">0 mm</strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-label" data-i18n="avg_water_label">Avg Water / Event</span>
+                            <strong class="stat-pill-value" id="irrigStatAvgWater">0 mm</strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Irrigation Needed</span>
+                            <strong class="stat-pill-value text-amber" id="irrigStatNeeded">0</strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Sufficient Moisture</span>
+                            <strong class="stat-pill-value text-green" id="irrigStatSufficient">0</strong>
+                        </div>
+                    </div>
+                    <div class="panel-body-grid">
+                        <div class="chart-box">
+                            <h4 data-i18n="irrigation_activity_title">Irrigation Activity &amp; Moisture Trend</h4>
+                            <div id="irrigationActivityChart" class="chart-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 data-i18n="crop_irrigation_summary">Crop-wise Irrigation Summary</h4>
+                            <div id="cropIrrigationSummaryTable" class="table-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             SMART NOTIFICATIONS & ALERTS (PHASE 8)
+        ================================================== -->
+        <section class="notification-section" id="notificationSection">
+            <!-- SECTION HEADER -->
+            <div class="notification-header">
+                <div class="section-title-wrap">
+                    <span class="dashboard-label">SMART ALERTS &amp; REMINDERS</span>
+                    <h2 data-i18n="notification_center_heading">Notification Center</h2>
+                    <p data-i18n="notification_center_desc">Timely crop reminders, irrigation alerts, weather warnings, and disease prevention follow-ups.</p>
+                </div>
+                <div class="notification-header-actions">
+                    <button type="button" class="btn-notif-action" id="refreshNotificationsBtn" title="Refresh Notifications">
+                        🔄 Refresh
+                    </button>
+                    <button type="button" class="btn-notif-action" id="markAllReadBtn" data-i18n="btn_mark_all_read">
+                        ✓ Mark All Read
+                    </button>
+                    <button type="button" class="btn-notif-action btn-notif-clear" id="clearAllNotificationsBtn" data-i18n="btn_clear_all_notifications">
+                        🗑️ Clear All
+                    </button>
+                    <button type="button" class="btn-notif-action btn-notif-prefs" id="openNotificationPrefsBtn" data-i18n="btn_notification_prefs">
+                        ⚙️ Preferences
+                    </button>
+                </div>
+            </div>
+
+            <!-- FILTER CAPSULE TABS -->
+            <div class="notif-filter-tabs">
+                <button type="button" class="notif-tab active" data-category="all" id="notifFilterAll" data-i18n="notif_filter_all">All Alerts</button>
+                <button type="button" class="notif-tab" data-unread="true" id="notifFilterUnread" data-i18n="notif_filter_unread">Unread</button>
+                <button type="button" class="notif-tab" data-category="crop" id="notifFilterCrop" data-i18n="notif_filter_crop">🌾 Crops</button>
+                <button type="button" class="notif-tab" data-category="irrigation" id="notifFilterIrrigation" data-i18n="notif_filter_irrigation">💧 Irrigation</button>
+                <button type="button" class="notif-tab" data-category="weather" id="notifFilterWeather" data-i18n="notif_filter_weather">🌦️ Weather</button>
+                <button type="button" class="notif-tab" data-category="disease" id="notifFilterDisease" data-i18n="notif_filter_disease">🍃 Disease</button>
+            </div>
+
+            <!-- NOTIFICATIONS LIST -->
+            <div class="notifications-container" id="notificationsContainer">
+                <div id="notificationsList" class="notifications-list">
+                    <!-- Populated dynamically by js/notifications.js -->
+                </div>
+            </div>
         </section>
 
 
@@ -451,38 +862,30 @@
 
                     <!-- QUICK ACTIONS -->
 
-                    <div class="quick-actions">
+                    <div class="quick-actions" id="quickActions">
 
-                        <button type="button">
-                            🌾 Crop Recommendation
+                        <button type="button" class="quick-chip" data-quick-action="crop_status" data-i18n="quick_crop_status">
+                            🌾 My crop status
                         </button>
 
-                        <button type="button">
-                            💧 Irrigation Advice
+                        <button type="button" class="quick-chip" data-quick-action="irrigation_guidance" data-i18n="quick_irrigation_guidance">
+                            💧 Irrigation guidance
                         </button>
 
-                        <button type="button">
-                            🍃 Disease Detection
+                        <button type="button" class="quick-chip" data-quick-action="disease_prevention" data-i18n="quick_disease_prevention">
+                            🍃 Disease prevention
                         </button>
 
-                        <button type="button">
-                            🌦️ Weather Information
+                        <button type="button" class="quick-chip" data-quick-action="weather_info" data-i18n="quick_weather_info">
+                            🌦️ Weather information
                         </button>
 
-                        <button type="button">
-                            🌱 Fertilizer Recommendation
+                        <button type="button" class="quick-chip" data-quick-action="harvest_reminders" data-i18n="quick_harvest_reminders">
+                            ⏱️ Harvest reminders
                         </button>
 
-                        <button type="button">
-                            🐛 Pest Management
-                        </button>
-
-                        <button type="button">
-                            📊 Market Prices
-                        </button>
-
-                        <button type="button">
-                            🌍 Soil Health
+                        <button type="button" class="quick-chip" data-quick-action="farm_summary" data-i18n="quick_farm_summary">
+                            🏡 My farm summary
                         </button>
 
                     </div>
@@ -567,11 +970,174 @@
 
         </section>
 
+        <!-- =================================================
+             MODALS: FARM & CROP MANAGEMENT (PHASE 6)
+        ================================================== -->
+
+        <!-- FARM MODAL -->
+        <div class="farm-modal-backdrop" id="farmModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="farmModalTitle" data-i18n="btn_add_farm">Add Farm</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="farmForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="farmNameInput" data-i18n="farm_name_label">Farm Name *</label>
+                        <input type="text" id="farmNameInput" required maxlength="150" placeholder="e.g. Green Valley Farm">
+                    </div>
+                    <div class="form-group">
+                        <label for="farmLocationInput" data-i18n="farm_location_label">Location *</label>
+                        <input type="text" id="farmLocationInput" required maxlength="200" placeholder="e.g. Nashik, Maharashtra">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="farmAreaInput" data-i18n="total_area_label">Total Area *</label>
+                            <input type="number" id="farmAreaInput" step="0.01" min="0.01" required placeholder="e.g. 10.5">
+                        </div>
+                        <div class="form-group" style="width: 140px;">
+                            <label for="farmAreaUnitSelect" data-i18n="area_unit_label">Unit</label>
+                            <select id="farmAreaUnitSelect">
+                                <option value="acre" data-i18n="unit_acre">Acre</option>
+                                <option value="hectare" data-i18n="unit_hectare">Hectare</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" data-i18n="btn_save">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- CROP MODAL -->
+        <div class="farm-modal-backdrop" id="cropModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="cropModalTitle" data-i18n="btn_add_crop">Register Crop</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="cropForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="cropFarmId" data-i18n="select_farm_placeholder">Select Farm *</label>
+                        <select id="cropFarmId" required>
+                            <option value="">-- Choose Farm --</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="cropNameInput" data-i18n="crop_name_label">Crop Name *</label>
+                            <input type="text" id="cropNameInput" required maxlength="100" placeholder="e.g. Wheat, Sugarcane, Tomato">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="cropVarietyInput" data-i18n="crop_variety_label">Variety (Optional)</label>
+                            <input type="text" id="cropVarietyInput" maxlength="100" placeholder="e.g. Sharbati, Co 86032">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="cropPlantingDate" data-i18n="planting_date_label">Planting / Sowing Date *</label>
+                            <input type="date" id="cropPlantingDate" required>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="cropHarvestDate" data-i18n="expected_harvest_label">Expected Harvest Date</label>
+                            <input type="date" id="cropHarvestDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="cropAreaInput" data-i18n="cultivated_area_label">Cultivated Area *</label>
+                            <input type="number" id="cropAreaInput" step="0.01" min="0.01" required placeholder="e.g. 5.0">
+                        </div>
+                        <div class="form-group" style="width: 140px;">
+                            <label for="cropAreaUnit" data-i18n="area_unit_label">Unit</label>
+                            <select id="cropAreaUnit">
+                                <option value="acre" data-i18n="unit_acre">Acre</option>
+                                <option value="hectare" data-i18n="unit_hectare">Hectare</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cropGrowthStatus" data-i18n="growth_status_label">Current Growth Status</label>
+                        <select id="cropGrowthStatus">
+                            <option value="Newly Planted" data-i18n="status_newly_planted">🌱 Newly Planted</option>
+                            <option value="Growing" data-i18n="status_growing">🌿 Growing</option>
+                            <option value="Flowering" data-i18n="status_flowering">🌸 Flowering</option>
+                            <option value="Fruiting" data-i18n="status_fruiting">🍅 Fruiting</option>
+                            <option value="Ready for Harvest" data-i18n="status_ready_harvest">🌾 Ready for Harvest</option>
+                            <option value="Harvested" data-i18n="status_harvested">📦 Harvested</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cropNotesInput" data-i18n="crop_notes_label">Notes (Optional)</label>
+                        <textarea id="cropNotesInput" rows="2" placeholder="e.g. Field #2, organic fertilizer applied..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" data-i18n="btn_save">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- NOTIFICATION PREFERENCES MODAL (PHASE 8) -->
+        <div class="farm-modal-backdrop" id="notificationPrefsModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="prefsModalTitle" data-i18n="prefs_modal_title">Notification Preferences</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="notificationPrefsForm" class="modal-form">
+                    <p style="font-size: var(--font-sm); color: var(--text-secondary); margin-bottom: 14px;">
+                        Choose which categories of smart agricultural alerts and reminders you would like to receive.
+                    </p>
+                    <div class="pref-items-list">
+                        <label class="pref-item-card">
+                            <input type="checkbox" id="prefCropReminders" checked>
+                            <span class="pref-item-info">
+                                <strong>🌾 <span data-i18n="prefs_crop_label">Crop Reminders (harvest, growth stages, care)</span></strong>
+                                <small>Harvest readiness, growth stage care, and crop record updates.</small>
+                            </span>
+                        </label>
+                        <label class="pref-item-card">
+                            <input type="checkbox" id="prefIrrigationAlerts" checked>
+                            <span class="pref-item-info">
+                                <strong>💧 <span data-i18n="prefs_irrigation_label">Irrigation Alerts (moisture deficit, recommendations)</span></strong>
+                                <small>Soil moisture deficit warnings and water recommendations.</small>
+                            </span>
+                        </label>
+                        <label class="pref-item-card">
+                            <input type="checkbox" id="prefWeatherAlerts" checked>
+                            <span class="pref-item-info">
+                                <strong>🌦️ <span data-i18n="prefs_weather_label">Weather Warnings (heavy rain, high temperature)</span></strong>
+                                <small>Heavy rain advisories and high temperature warnings.</small>
+                            </span>
+                        </label>
+                        <label class="pref-item-card">
+                            <input type="checkbox" id="prefDiseaseReminders" checked>
+                            <span class="pref-item-info">
+                                <strong>🍃 <span data-i18n="prefs_disease_label">Disease Prevention Reminders (follow-ups & inspection)</span></strong>
+                                <small>Diagnosis follow-ups, field sanitation, and inspection advice.</small>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" data-i18n="btn_save">Save Preferences</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 
     <script src="js/i18n.js"></script>
     <script src="js/farmer.js"></script>
+    <script src="js/farm_crop.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/mobile-nav.js"></script>
 
 </body>

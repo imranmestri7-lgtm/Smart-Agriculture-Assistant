@@ -125,6 +125,108 @@ def run_database_migrations():
 
         conn.commit()
 
+        # ---------------------------------------------------------
+        # 3. Phase 6: Farms and Crops Schema
+        # ---------------------------------------------------------
+        print("\nStep 3: Checking farms and crops schema...")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS farms (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                farm_name VARCHAR(150) NOT NULL,
+                location VARCHAR(200) NOT NULL,
+                total_area DECIMAL(10, 2) NOT NULL,
+                area_unit VARCHAR(20) NOT NULL DEFAULT 'acre',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_farms_user (user_id),
+                CONSTRAINT fk_farms_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        """)
+
+        cur.execute("""
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'crops'
+        """)
+        crops_cols = {row["COLUMN_NAME"] for row in cur.fetchall()}
+
+        if "farm_id" not in crops_cols:
+            print("  -> Adding column 'farm_id' to crops...")
+            cur.execute("""
+                ALTER TABLE crops
+                ADD COLUMN farm_id INT NULL AFTER user_id,
+                ADD CONSTRAINT fk_crops_farm FOREIGN KEY (farm_id) REFERENCES farms (id) ON DELETE CASCADE
+            """)
+
+        if "cultivated_area" not in crops_cols:
+            print("  -> Adding column 'cultivated_area' to crops...")
+            cur.execute("""
+                ALTER TABLE crops
+                ADD COLUMN cultivated_area DECIMAL(10, 2) NULL AFTER planting_date
+            """)
+
+        if "area_unit" not in crops_cols:
+            print("  -> Adding column 'area_unit' to crops...")
+            cur.execute("""
+                ALTER TABLE crops
+                ADD COLUMN area_unit VARCHAR(20) NOT NULL DEFAULT 'acre' AFTER cultivated_area
+            """)
+
+        if "growth_status" not in crops_cols:
+            print("  -> Adding column 'growth_status' to crops...")
+            cur.execute("""
+                ALTER TABLE crops
+                ADD COLUMN growth_status VARCHAR(50) NOT NULL DEFAULT 'Newly Planted' AFTER area_unit
+            """)
+
+        if "updated_at" not in crops_cols:
+            print("  -> Adding column 'updated_at' to crops...")
+            cur.execute("""
+                ALTER TABLE crops
+                ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at
+            """)
+
+        # ---------------------------------------------------------
+        # 4. Phase 8: Notifications & Preferences Schema
+        # ---------------------------------------------------------
+        print("\nStep 4: Checking notifications and preferences schema...")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                category VARCHAR(50) NOT NULL,
+                title VARCHAR(200) NOT NULL,
+                message TEXT NOT NULL,
+                severity VARCHAR(20) NOT NULL DEFAULT 'info',
+                is_read TINYINT(1) NOT NULL DEFAULT 0,
+                link VARCHAR(255) NULL,
+                unique_key VARCHAR(150) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_notifications_user (user_id),
+                INDEX idx_notifications_user_read (user_id, is_read),
+                INDEX idx_notifications_user_key (user_id, unique_key),
+                INDEX idx_notifications_user_cat (user_id, category),
+                CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS notification_preferences (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL UNIQUE,
+                crop_reminders TINYINT(1) NOT NULL DEFAULT 1,
+                irrigation_alerts TINYINT(1) NOT NULL DEFAULT 1,
+                weather_alerts TINYINT(1) NOT NULL DEFAULT 1,
+                disease_reminders TINYINT(1) NOT NULL DEFAULT 1,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                CONSTRAINT fk_notification_prefs_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        """)
+
+        conn.commit()
+
         print("\n==================================================")
         print("Migration Completed Successfully!")
         print(f"Diseases Synced:      {diseases_synced}")

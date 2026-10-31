@@ -523,6 +523,9 @@ TRANSLATIONS = {
 
 def _localize_response(result, language):
     """Translate supported response text while preserving structured data."""
+    if result.get("is_custom_localized"):
+        return result
+
     if language not in ("en", "mr", "hi"):
         language = "en"
 
@@ -563,8 +566,19 @@ def _localize_response(result, language):
     return localized
 
 
-def generate_response(message, language="en"):
-    """Return a farming response in the selected supported language."""
+def generate_response(message, language="en", context=None):
+    """Return a farming response in the selected supported language, optionally context-aware."""
     language = language if language in ("en", "mr", "hi") else "en"
+
+    # Phase 9: Context-Aware Farming Guidance
+    if context:
+        try:
+            from utils.context_chat import handle_farmer_context
+            ctx_res = handle_farmer_context(message, language=language, context=context)
+            if ctx_res:
+                return ctx_res
+        except Exception as e:
+            print(f"Context-aware handling error: {e}")
+
     result = _generate_response(message, language=language)
     return _localize_response(result, language)

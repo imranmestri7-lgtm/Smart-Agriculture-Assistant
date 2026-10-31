@@ -16,6 +16,9 @@ from routes.disease_routes import disease_bp
 from routes.weather_routes import weather_bp
 from routes.crop_routes import crop_bp
 from routes.irrigation_routes import irrigation_bp
+from routes.farm_crop_routes import farm_bp, crop_mgmt_bp
+from routes.analytics_routes import analytics_bp
+from routes.notification_routes import notification_bp
 
 app = Flask(__name__)
 
@@ -34,6 +37,16 @@ app.register_blueprint(weather_bp)
 
 # Register crop recommendation routes
 app.register_blueprint(crop_bp)
+
+# Register farm and crop management routes
+app.register_blueprint(farm_bp)
+app.register_blueprint(crop_mgmt_bp)
+
+# Register smart analytics routes
+app.register_blueprint(analytics_bp)
+
+# Register smart notifications and alerts routes
+app.register_blueprint(notification_bp)
 
 @app.route("/")
 def home():
