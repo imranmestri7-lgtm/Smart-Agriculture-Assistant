@@ -32,11 +32,11 @@
 
         <nav class="nav-links">
             <a href="index.html" data-i18n="home">Home</a>
-            <a href="farmer.html">Dashboard</a>
+            <a href="farmer.html" data-i18n="dashboard">Dashboard</a>
         </nav>
 
         <div class="nav-actions">
-            <button class="profile-btn" onclick="window.location.href='farmer.html'">
+            <button class="profile-btn" onclick="window.location.href='farmer.html'" data-i18n="farmer_role">
                 Farmer
             </button>
             <select id="lang-select" style="margin-left:10px;">
@@ -62,25 +62,25 @@
 
             <div class="hero-content">
 
-                <span class="hero-tag">
+                <span class="hero-tag" data-i18n="crop_rec_badge">
                     SMART AGRICULTURE
                 </span>
 
                 <h1>
-                    Find the Best Crop
-                    <span>for Your Soil</span>
+                    <span data-i18n="crop_rec_title_main">Crop Recommendation</span>
+                    <span data-i18n="crop_rec_title_sub">for Your Soil</span>
                 </h1>
 
-                <p>
+                <p data-i18n="crop_rec_desc">
                     Make smarter farming decisions using soil,
                     weather and agricultural data.
                 </p>
 
                 <div class="hero-points">
 
-                    <span>✓ Soil Analysis</span>
-                    <span>✓ Smart Recommendation</span>
-                    <span>✓ Data Driven</span>
+                    <span data-i18n="pill_soil_analysis">✓ Soil Analysis</span>
+                    <span data-i18n="pill_smart_rec">✓ Smart Recommendation</span>
+                    <span data-i18n="pill_data_driven">✓ Data Driven</span>
 
                 </div>
 
@@ -108,15 +108,15 @@
 
                 <div class="header-content">
 
-                    <span class="header-label">
+                    <span class="header-label" data-i18n="crop_rec_badge">
                         SMART AGRICULTURE
                     </span>
 
-                    <h2>
+                    <h2 data-i18n="crop_form_title">
                         Soil & Environmental Data
                     </h2>
 
-                    <p>
+                    <p data-i18n="crop_form_desc">
                         Provide accurate field conditions for a smarter crop recommendation.
                     </p>
 
@@ -124,7 +124,7 @@
 
                 <div class="step-badge">
 
-                    <span>STEP</span>
+                    <span data-i18n="step_label">STEP</span>
 
                     01 / 02
 
@@ -150,11 +150,11 @@
 
                         <div>
 
-                            <h3>
+                            <h3 data-i18n="step_nutrients">
                                 Soil Nutrients
                             </h3>
 
-                            <p>
+                            <p data-i18n="step_nutrients_desc">
                                 Enter the nutrient levels available in your soil.
                             </p>
 
@@ -170,7 +170,7 @@
 
                         <div class="input-group">
 
-                            <label for="nitrogen">
+                            <label for="nitrogen" data-i18n="lbl_nitrogen">
                                 Nitrogen (N)
                             </label>
 
@@ -178,12 +178,12 @@
                                 type="number"
                                 id="nitrogen"
                                 name="nitrogen"
-                                placeholder="Enter nitrogen level"
+                                data-i18n-placeholder="ph_nitrogen" placeholder="Enter nitrogen level"
                                 min="0"
                                 max="140"
                             >
 
-                            <small>
+                            <small data-i18n="range_n">
                                 Recommended range: 0–140 kg/ha
                             </small>
 
@@ -194,7 +194,7 @@
 
                         <div class="input-group">
 
-                            <label for="phosphorus">
+                            <label for="phosphorus" data-i18n="lbl_phosphorus">
                                 Phosphorus (P)
                             </label>
 
@@ -202,12 +202,12 @@
                                 type="number"
                                 id="phosphorus"
                                 name="phosphorus"
-                                placeholder="Enter phosphorus level"
+                                data-i18n-placeholder="ph_phosphorus" placeholder="Enter phosphorus level"
                                 min="0"
                                 max="145"
                             >
 
-                            <small>
+                            <small data-i18n="range_p">
                                 Recommended range: 0–145 kg/ha
                             </small>
 
@@ -218,7 +218,7 @@
 
                         <div class="input-group">
 
-                            <label for="potassium">
+                            <label for="potassium" data-i18n="lbl_potassium">
                                 Potassium (K)
                             </label>
 
@@ -226,12 +226,12 @@
                                 type="number"
                                 id="potassium"
                                 name="potassium"
-                                placeholder="Enter potassium level"
+                                data-i18n-placeholder="ph_potassium" placeholder="Enter potassium level"
                                 min="0"
                                 max="205"
                             >
 
-                            <small>
+                            <small data-i18n="range_k">
                                 Recommended range: 0–205 kg/ha
                             </small>
 
@@ -242,7 +242,7 @@
 
                         <div class="input-group">
 
-                            <label for="ph">
+                            <label for="ph" data-i18n="lbl_crop_ph">
                                 Soil pH
                             </label>
 
@@ -250,13 +250,13 @@
                                 type="number"
                                 id="ph"
                                 name="ph"
-                                placeholder="Enter soil pH"
+                                data-i18n-placeholder="ph_ph" placeholder="Enter soil pH"
                                 min="0"
                                 max="14"
                                 step="0.1"
                             >
 
-                            <small>
+                            <small data-i18n="scale_ph">
                                 Scale: 0–14
                             </small>
 
@@ -279,11 +279,11 @@
 
                         <div>
 
-                            <h3>
+                            <h3 data-i18n="step_climate">
                                 Environmental Conditions
                             </h3>
 
-                            <p>
+                            <p data-i18n="step_climate_desc">
                                 Enter the current environmental conditions.
                             </p>
 
@@ -299,7 +299,7 @@
 
                         <div class="input-group">
 
-                            <label for="temperature">
+                            <label for="temperature" data-i18n="lbl_crop_temp">
                                 🌡️ Temperature
                             </label>
 
@@ -307,11 +307,11 @@
                                 type="number"
                                 id="temperature"
                                 name="temperature"
-                                placeholder="Enter temperature"
+                                data-i18n-placeholder="ph_temp" placeholder="Enter temperature"
                                 step="0.1"
                             >
 
-                            <small>
+                            <small data-i18n="unit_c">
                                 Unit: °C
                             </small>
 
@@ -322,7 +322,7 @@
 
                         <div class="input-group">
 
-                            <label for="humidity">
+                            <label for="humidity" data-i18n="lbl_crop_humidity">
                                 💧 Humidity
                             </label>
 
@@ -330,13 +330,13 @@
                                 type="number"
                                 id="humidity"
                                 name="humidity"
-                                placeholder="Enter humidity"
+                                data-i18n-placeholder="ph_humidity" placeholder="Enter humidity"
                                 min="0"
                                 max="100"
                                 step="0.1"
                             >
 
-                            <small>
+                            <small data-i18n="unit_pct">
                                 Unit: %
                             </small>
 
@@ -347,7 +347,7 @@
 
                         <div class="input-group">
 
-                            <label for="rainfall">
+                            <label for="rainfall" data-i18n="lbl_crop_rainfall">
                                 🌧️ Rainfall
                             </label>
 
@@ -355,12 +355,12 @@
                                 type="number"
                                 id="rainfall"
                                 name="rainfall"
-                                placeholder="Enter rainfall"
+                                data-i18n-placeholder="ph_rainfall" placeholder="Enter rainfall"
                                 min="0"
                                 step="0.1"
                             >
 
-                            <small>
+                            <small data-i18n="unit_mm">
                                 Unit: mm
                             </small>
 
@@ -371,39 +371,39 @@
 
                         <div class="input-group">
 
-                            <label for="location">
+                            <label for="location" data-i18n="location_label">
                                 📍 Location
                             </label>
 
                             <select id="location" name="location">
 
-                                <option value="">
+                                <option value="" data-i18n="select_location_placeholder">
                                     Select location
                                 </option>
 
-                                <option value="maharashtra">
+                                <option value="maharashtra" data-i18n="opt_loc_maharashtra">
                                     Maharashtra
                                 </option>
 
-                                <option value="karnataka">
+                                <option value="karnataka" data-i18n="opt_loc_karnataka">
                                     Karnataka
                                 </option>
 
-                                <option value="goa">
+                                <option value="goa" data-i18n="opt_loc_goa">
                                     Goa
                                 </option>
 
-                                <option value="gujarat">
+                                <option value="gujarat" data-i18n="opt_loc_gujarat">
                                     Gujarat
                                 </option>
 
-                                <option value="other">
+                                <option value="other" data-i18n="opt_loc_other">
                                     Other
                                 </option>
 
                             </select>
 
-                            <small>
+                            <small data-i18n="desc_location">
                                 Select your farming region
                             </small>
 
@@ -421,6 +421,7 @@
                     <button
                         type="reset"
                         class="reset-button"
+                        data-i18n="btn_reset"
                     >
                         ↺ Reset
                     </button>
@@ -428,6 +429,7 @@
                     <button
                         type="submit"
                         class="recommend-button"
+                        data-i18n="btn_analyze_recommend"
                     >
                         🌱 Analyze & Recommend
                     </button>
@@ -451,28 +453,25 @@
 
                 <div class="info-content">
 
-                    <h3>
+                    <h3 data-i18n="why_need_info_title">
                         Why do we need this information?
                     </h3>
 
-                    <p>
-                        Soil nutrients, pH, temperature, humidity and rainfall
-                        influence crop growth. These values help our system
-                        understand the farming conditions and recommend a
-                        suitable crop.
+                    <p data-i18n="why_need_info_desc">
+                        Soil nutrients, pH, temperature, humidity and rainfall help us recommend the most suitable crop for your field.
                     </p>
 
                     <div class="info-points">
 
-                        <span>
+                        <span data-i18n="benefit_better_crop">
                             🌱 Better crop selection
                         </span>
 
-                        <span>
+                        <span data-i18n="benefit_understand_soil">
                             💧 Understand soil conditions
                         </span>
 
-                        <span>
+                        <span data-i18n="benefit_data_driven">
                             📊 Data-driven recommendation
                         </span>
 

@@ -423,19 +423,52 @@ def recommend_for_farmer():
     if not symptoms:
         symptoms = "Not sure"
 
-    # General safe actions suitable when the cause is unconfirmed
-    recommendations = [
-        "Take clear photos of the affected leaf, the whole plant, and any affected fruit.",
-        "Check nearby leaves and plants daily to see whether new spots appear.",
-        "Avoid handling affected plants and then healthy plants without cleaning your hands and tools.",
-        "Water near the soil rather than repeatedly wetting the leaves.",
-        "Do not apply pesticides or mix chemicals until the cause has been identified."
-    ]
+    from utils.i18n import get_request_language
+    req_lang = get_request_language()
 
-    actions_to_avoid = [
-        "Do not remove the whole plant based only on this image prediction.",
-        "Do not use a pesticide or home remedy without checking whether it is suitable for the crop and problem."
-    ]
+    if req_lang == "mr":
+        recommendations = [
+            "बाधित पान, संपूर्ण झाड आणि बाधित फळाचे स्पष्ट फोटो काढा.",
+            "नवीन डाग पडत आहेत का हे पाहण्यासाठी दररोज जवळची पाने आणि झाडे तपासा.",
+            "हात आणि अवजारे स्वच्छ केल्याशिवाय बाधित झाडे आणि नंतर निरोगी झाडांना स्पर्श करणे टाळा.",
+            "पानांवर वारंवार पाणी मारण्याऐवजी मुळांजवळ मातीमध्ये पाणी द्या.",
+            "रोगाचे नेमके कारण निश्चित होईपर्यंत कोणतेही रासायनिक कीटकनाशक किंवा औषध वापरू नका."
+        ]
+        actions_to_avoid = [
+            "केवळ या फोटो अंदाजावर आधारित संपूर्ण झाड उपटू नका.",
+            "रोग आणि पिकाची खात्री केल्याशिवाय कोणतेही कीटकनाशक किंवा घरगुती उपाय वापरू नका."
+        ]
+        disclaimer = "या सर्वसाधारण सावधगिरीच्या सूचना आहेत, कोणताही निश्चित वैद्यकीय किंवा औषधी सल्ला नाही."
+    elif req_lang == "hi":
+        recommendations = [
+            "प्रभावित पत्ती, पूरे पौधे और प्रभावित फल की स्पष्ट तस्वीरें लें।",
+            "नए धब्बे तो नहीं आ रहे हैं, यह देखने के लिए दैनिक रूप से पास के पत्तों और पौधों की जांच करें।",
+            "हाथ और उपकरण साफ किए बिना प्रभावित पौधों के बाद स्वस्थ पौधों को छूने से बचें।",
+            "पत्तियों को बार-बार गीला करने के बजाय मिट्टी के पास पानी दें।",
+            "कारण की पुष्टि होने तक कोई कीटनाशक या रासायनिक दवा न डालें।"
+        ]
+        actions_to_avoid = [
+            "केवल इस छवि भविष्यवाणी के आधार पर पूरे पौधे को न उखाड़ें।",
+            "समस्या और फसल की पुष्टि किए बिना कोई कीटनाशक या घरेलू उपचार न करें।"
+        ]
+        disclaimer = "ये सामान्य एहतियाती सुझाव हैं, कोई निश्चित निदान या कीटनाशक नुस्खा नहीं है।"
+    else:
+        # General safe actions suitable when the cause is unconfirmed
+        recommendations = [
+            "Take clear photos of the affected leaf, the whole plant, and any affected fruit.",
+            "Check nearby leaves and plants daily to see whether new spots appear.",
+            "Avoid handling affected plants and then healthy plants without cleaning your hands and tools.",
+            "Water near the soil rather than repeatedly wetting the leaves.",
+            "Do not apply pesticides or mix chemicals until the cause has been identified."
+        ]
+        actions_to_avoid = [
+            "Do not remove the whole plant based only on this image prediction.",
+            "Do not use a pesticide or home remedy without checking whether it is suitable for the crop and problem."
+        ]
+        disclaimer = (
+            "These are general precautionary suggestions, not a confirmed diagnosis. "
+            "No pesticide or medicine is prescribed by this endpoint."
+        )
 
     follow_up_questions = []
 
@@ -567,10 +600,7 @@ def recommend_for_farmer():
         "follow_up_questions": follow_up_questions,
         "next_step": next_step,
         "knowledge": knowledge,
-        "disclaimer": (
-            "These are general precautionary suggestions, not a confirmed diagnosis. "
-            "No pesticide or medicine is prescribed by this endpoint."
-        )
+        "disclaimer": disclaimer
     }), 200
 
 

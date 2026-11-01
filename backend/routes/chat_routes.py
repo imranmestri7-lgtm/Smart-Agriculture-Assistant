@@ -164,11 +164,15 @@ def chat_message():
             ),
         }), 400
 
-    # Valid explicit languages are respected. Missing/"auto" detects the message;
+    # Valid explicit languages are respected. Missing/"auto" detects the message or headers;
     # invalid explicit language codes safely fall back to English.
     requested_language = data.get("language")
+    x_language = request.headers.get("X-Language")
+
     if requested_language in ("en", "mr", "hi"):
         language = requested_language
+    elif x_language in ("en", "mr", "hi"):
+        language = x_language
     elif requested_language is None or requested_language == "auto":
         from utils.chatbot import _detect_language
         language = _detect_language(message)
@@ -226,6 +230,7 @@ def chat_message():
     response_data = {
         "status": "success",
         "reply": reply_text,
+        "language": language,
         "category": result["category"],
         "history_saved": history_saved
     }

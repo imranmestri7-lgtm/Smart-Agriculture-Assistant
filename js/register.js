@@ -222,7 +222,9 @@ registerForm.addEventListener(
 
                             headers: {
                                 "Content-Type":
-                                    "application/json"
+                                    "application/json",
+                                "X-Language":
+                                    (window.i18n ? window.i18n.getLang() : "en")
                             },
 
                             body: JSON.stringify({
@@ -258,7 +260,7 @@ registerForm.addEventListener(
 
 
                 showMessage(
-                    "Account created successfully! Redirecting to login...",
+                    (window.i18n ? window.i18n.t("msg_reg_success") : "Account created successfully! Redirecting to login..."),
                     "success"
                 );
 
@@ -366,7 +368,9 @@ registerForm.addEventListener(
 
                         headers: {
                             "Content-Type":
-                                "application/json"
+                                "application/json",
+                            "X-Language":
+                                (window.i18n ? window.i18n.getLang() : "en")
                         },
 
                         body: JSON.stringify({
@@ -408,7 +412,7 @@ registerForm.addEventListener(
 
 
             showMessage(
-                "Account created successfully! Redirecting to login...",
+                (window.i18n ? window.i18n.t("msg_reg_success") : "Account created successfully! Redirecting to login..."),
                 "success"
             );
 

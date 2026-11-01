@@ -33,10 +33,10 @@
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">☰</button>
         <nav class="nav-links">
             <a href="index.html" data-i18n="home">Home</a>
-            <a href="farmer.html">Dashboard</a>
+            <a href="farmer.html" data-i18n="dashboard">Dashboard</a>
         </nav>
         <div class="nav-actions">
-            <button class="profile-btn" onclick="window.location.href='farmer.html'">Farmer</button>
+            <button class="profile-btn" onclick="window.location.href='farmer.html'" data-i18n="farmer_role">Farmer</button>
             <select id="lang-select" style="margin-left:10px;">
                 <option value="en" data-i18n="english">English</option>
                 <option value="mr" data-i18n="marathi">मराठी</option>
@@ -70,17 +70,17 @@
 
             <div class="hero-content">
 
-                <span class="hero-badge">
+                <span class="hero-badge" data-i18n="disease_badge">
                     🌿 AI-Powered Agriculture
                 </span>
 
 
-                <h1>
+                <h1 data-i18n="disease_hero_title">
                     Plant Disease Detection
                 </h1>
 
 
-                <p>
+                <p data-i18n="disease_hero_desc">
                     Upload or capture a crop leaf image
                     and let our AI system help identify
                     possible plant diseases.
@@ -89,7 +89,8 @@
 
                 <a
                     href="#scanner"
-                    class="hero-button">
+                    class="hero-button"
+                    data-i18n="disease_hero_btn">
 
                     Start Disease Scan →
 
@@ -123,17 +124,17 @@
 
                     <div>
 
-                        <span class="small-title">
+                        <span class="small-title" data-i18n="scanner_badge">
                             SMART SCANNER
                         </span>
 
 
-                        <h2>
+                        <h2 data-i18n="scanner_title">
                             Disease Scanner
                         </h2>
 
 
-                        <p>
+                        <p data-i18n="scanner_desc">
                             Provide a clear image of the
                             affected leaf.
                         </p>
@@ -152,7 +153,7 @@
 
                         🍃 Crop
 
-                        <span>
+                        <span data-i18n="lbl_optional">
                             (Optional)
                         </span>
 
@@ -161,31 +162,31 @@
 
                     <select id="crop">
 
-                        <option value="">
+                        <option value="" data-i18n="opt_select_crop">
                             Select Crop
                         </option>
 
-                        <option value="tomato">
+                        <option value="tomato" data-i18n="opt_crop_tomato">
                             Tomato
                         </option>
 
-                        <option value="potato">
+                        <option value="potato" data-i18n="opt_crop_potato">
                             Potato
                         </option>
 
-                        <option value="rice">
+                        <option value="rice" data-i18n="opt_crop_rice">
                             Rice
                         </option>
 
-                        <option value="wheat">
+                        <option value="wheat" data-i18n="opt_crop_wheat">
                             Wheat
                         </option>
 
-                        <option value="maize">
+                        <option value="maize" data-i18n="opt_crop_corn">
                             Maize
                         </option>
 
-                        <option value="cotton">
+                        <option value="cotton" data-i18n="opt_crop_cotton">
                             Cotton
                         </option>
 
@@ -215,12 +216,12 @@
                         </div>
 
 
-                        <h3>
+                        <h3 data-i18n="lbl_add_leaf_image">
                             Add Leaf Image
                         </h3>
 
 
-                        <p>
+                        <p data-i18n="desc_choose_clear_image">
                             Choose a clear image of
                             the affected leaf.
                         </p>
@@ -230,7 +231,8 @@
 
                         <label
                             for="leafImage"
-                            class="upload-btn">
+                            class="upload-btn"
+                            data-i18n="btn_upload_image">
 
                             📁 Upload Image
 
@@ -255,7 +257,8 @@
                         <button
                             type="button"
                             class="camera-btn"
-                            id="cameraButton">
+                            id="cameraButton"
+                            data-i18n="btn_use_camera">
 
                             📷 Use Camera
 
@@ -283,12 +286,12 @@
 
                     <div>
 
-                        <h3>
+                        <h3 data-i18n="lbl_image_ready">
                             Image Ready
                         </h3>
 
 
-                        <p>
+                        <p data-i18n="desc_image_ready">
                             Your leaf image is ready
                             for analysis.
                         </p>
@@ -320,7 +323,8 @@
                         <button
                             type="button"
                             id="captureButton"
-                            class="capture-btn">
+                            class="capture-btn"
+                            data-i18n="btn_capture_leaf">
 
                             📸 Capture Leaf
 
@@ -330,7 +334,8 @@
                         <button
                             type="button"
                             id="closeCameraButton"
-                            class="close-camera-btn">
+                            class="close-camera-btn"
+                            data-i18n="btn_close_camera">
 
                             ✕ Close Camera
 
@@ -347,14 +352,15 @@
                 <button
                     type="button"
                     class="analyze-btn"
-                    id="analyzeButton">
+                    id="analyzeButton"
+                    data-i18n="btn_analyze_disease">
 
                     🔍 Analyze Disease
 
                 </button>
 
 
-                <p class="analysis-note">
+                <p class="analysis-note" data-i18n="note_model_analysis">
 
                     Your image will be analyzed using
                     the AI disease detection system.
@@ -382,12 +388,12 @@
 
                     <div>
 
-                        <span class="small-title">
+                        <span class="small-title" data-i18n="badge_better_results">
                             BETTER RESULTS
                         </span>
 
 
-                        <h2>
+                        <h2 data-i18n="title_detection_tips">
                             Tips for Better Detection
                         </h2>
 
@@ -404,11 +410,11 @@
 
                         <span>☀️</span>
 
-                        <h3>
+                        <h3 data-i18n="tip_lighting_title">
                             Good Lighting
                         </h3>
 
-                        <p>
+                        <p data-i18n="tip_lighting_desc">
                             Take the photo in clear
                             natural light.
                         </p>
@@ -420,11 +426,11 @@
 
                         <span>🍃</span>
 
-                        <h3>
+                        <h3 data-i18n="tip_focus_title">
                             Focus on Leaf
                         </h3>
 
-                        <p>
+                        <p data-i18n="tip_focus_desc">
                             Make sure the affected leaf
                             is clearly visible.
                         </p>
@@ -436,11 +442,11 @@
 
                         <span>📷</span>
 
-                        <h3>
+                        <h3 data-i18n="tip_clear_title">
                             Clear Image
                         </h3>
 
-                        <p>
+                        <p data-i18n="tip_clear_desc">
                             Avoid blurry or low-quality
                             photos.
                         </p>
@@ -452,11 +458,11 @@
 
                         <span>🔍</span>
 
-                        <h3>
+                        <h3 data-i18n="tip_symptoms_title">
                             Show Symptoms
                         </h3>
 
-                        <p>
+                        <p data-i18n="tip_symptoms_desc">
                             Capture spots or damage
                             clearly.
                         </p>
@@ -486,12 +492,12 @@
 
                     <div>
 
-                        <span class="small-title">
+                        <span class="small-title" data-i18n="badge_protect_crop">
                             PROTECT YOUR CROP
                         </span>
 
 
-                        <h2>
+                        <h2 data-i18n="title_why_early">
                             Why Early Detection?
                         </h2>
 
@@ -511,12 +517,12 @@
                         </div>
 
 
-                        <h3>
+                        <h3 data-i18n="early_step1_title">
                             Identify Problems Early
                         </h3>
 
 
-                        <p>
+                        <p data-i18n="early_step1_desc">
                             Detect possible diseases before
                             they spread throughout the crop.
                         </p>
@@ -531,12 +537,12 @@
                         </div>
 
 
-                        <h3>
+                        <h3 data-i18n="early_step2_title">
                             Get Suitable Guidance
                         </h3>
 
 
-                        <p>
+                        <p data-i18n="early_step2_desc">
                             Understand possible treatment
                             and management practices.
                         </p>
@@ -551,12 +557,12 @@
                         </div>
 
 
-                        <h3>
+                        <h3 data-i18n="early_step3_title">
                             Protect Your Crop
                         </h3>
 
 
-                        <p>
+                        <p data-i18n="early_step3_desc">
                             Take timely action and reduce
                             the risk of disease spreading.
                         </p>
@@ -587,18 +593,18 @@
                 <div class="assistant-content">
 
 
-                    <span class="small-title">
+                    <span class="small-title" data-i18n="badge_smart_assistant">
                         SMART FARMER ASSISTANT
                     </span>
 
 
-                    <h2>
+                    <h2 data-i18n="title_guidance_awaiting">
                         Get Your Disease Guidance
                         Through Farmer Assistant
                     </h2>
 
 
-                    <p>
+                    <p data-i18n="desc_guidance_awaiting">
                         After disease analysis, the
                         Farmer Assistant will provide
                         disease information, symptoms,
@@ -626,7 +632,8 @@
             <button
                 type="button"
                 class="scan-again-btn"
-                id="scanAgainButton">
+                id="scanAgainButton"
+                data-i18n="btn_scan_another">
 
                 🔄 Scan Another Leaf
 
@@ -670,7 +677,7 @@
             " data-i18n="refresh_history_btn">🔄 Refresh history</button>
         </div>
 
-        <p id="diagnosisHistoryMessage" role="status" aria-live="polite" style="font-size:14px; color:#475569; margin:15px 0;">
+        <p id="diagnosisHistoryMessage" role="status" aria-live="polite" style="font-size:14px; color:#475569; margin:15px 0;" data-i18n="history_loading">
             Loading diagnosis history...
         </p>
 

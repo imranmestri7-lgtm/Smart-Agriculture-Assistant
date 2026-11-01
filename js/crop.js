@@ -5,12 +5,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const submitBtn = form.querySelector('button.recommend-button');
     const resultDiv = document.getElementById('cropResult');
-if (!submitBtn || !resultDiv) {
-    console.warn('Crop form UI elements missing');
-    return;
-}
+    if (!submitBtn || !resultDiv) {
+        console.warn('Crop form UI elements missing');
+        return;
+    }
 
-    const getVal = (id) => document.getElementById(id).value;
+    let lastResult = null;
+
+    function t(key, fallback) {
+        if (window.i18n && typeof window.i18n.t === 'function') {
+            const val = window.i18n.t(key);
+            if (val && val !== key) return val;
+        }
+        return fallback || key;
+    }
+
+    function renderCropResult(result) {
+        resultDiv.replaceChildren();
+        if (!result) return;
+
+        if (result.isError) {
+            const errMsg = document.createElement('p');
+            errMsg.textContent = result.message;
+            resultDiv.appendChild(errMsg);
+            return;
+        }
+
+        const title = document.createElement('h3');
+        title.setAttribute('data-i18n', 'recommended_crop_title');
+        title.textContent = t('recommended_crop_title', 'Recommended Crop');
+
+        const crop = document.createElement('p');
+        crop.textContent = result.recommendation || t('no_crop_rec_returned', 'No recommendation returned');
+
+        resultDiv.appendChild(title);
+        resultDiv.appendChild(crop);
+
+        if (result.details) {
+            const details = document.createElement('pre');
+            details.textContent = typeof result.details === 'string'
+                ? result.details
+                : JSON.stringify(result.details, null, 2);
+            resultDiv.appendChild(details);
+        }
+    }
+
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value : '';
+    };
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -21,7 +64,7 @@ if (!submitBtn || !resultDiv) {
         // Prepare result area
         resultDiv.replaceChildren();
         resultDiv.style.display = 'block';
-        resultDiv.textContent = 'Loading...';
+        resultDiv.textContent = t('loading_crop_rec', 'Loading recommendation...');
 
         // Disable button during request
         submitBtn.disabled = true;
@@ -38,13 +81,18 @@ if (!submitBtn || !resultDiv) {
             location: getVal('location')
         };
 
+        const activeLang = (window.i18n && window.i18n.currentLang) || localStorage.getItem('lang') || 'en';
+
         try {
             const resp = await fetch('/api/crop/recommend', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Language': activeLang
+                },
                 body: JSON.stringify(data)
             });
-            // Attempt to parse JSON response safely
+
             let result = null;
             let parseError = false;
             const contentType = resp.headers.get('content-type') || '';
@@ -58,39 +106,40 @@ if (!submitBtn || !resultDiv) {
                 parseError = true;
             }
 
-            // Clear loading message
             resultDiv.textContent = '';
 
             if (parseError) {
-                const errMsg = document.createElement('p');
-                errMsg.textContent = 'Unexpected response from server. Please try again later.';
-                resultDiv.appendChild(errMsg);
+                lastResult = {
+                    isError: true,
+                    message: t('err_unexpected_response', 'Unexpected response from server. Please try again later.')
+                };
             } else if (resp.ok && result.status === 'success') {
-                const title = document.createElement('h3');
-                title.textContent = 'Recommended Crop';
-                const crop = document.createElement('p');
-                crop.textContent = result.recommendation || 'No recommendation returned';
-                resultDiv.appendChild(title);
-                resultDiv.appendChild(crop);
-
-                if (result.details) {
-                    const details = document.createElement('pre');
-                    details.textContent = JSON.stringify(result.details, null, 2);
-                    resultDiv.appendChild(details);
-                }
+                lastResult = result;
             } else {
-                const errMsg = document.createElement('p');
-                errMsg.textContent = (result && result.message) || 'Failed to get recommendation';
-                resultDiv.appendChild(errMsg);
+                lastResult = {
+                    isError: true,
+                    message: (result && result.message) || t('err_crop_rec_failed', 'Failed to get crop recommendation')
+                };
             }
+
+            renderCropResult(lastResult);
 
         } catch (err) {
             console.error('Crop recommendation error:', err);
-            resultDiv.textContent = 'Network error while requesting recommendation.';
+            lastResult = {
+                isError: true,
+                message: t('err_network', 'Network error while requesting recommendation.')
+            };
+            renderCropResult(lastResult);
         } finally {
-            // Re‑enable button
             submitBtn.disabled = false;
             submitBtn.removeAttribute('aria-disabled');
+        }
+    });
+
+    window.addEventListener('languageChanged', function () {
+        if (lastResult) {
+            renderCropResult(lastResult);
         }
     });
 });

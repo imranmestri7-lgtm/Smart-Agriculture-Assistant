@@ -92,7 +92,7 @@ sendOtpBtn.addEventListener("click", async () => {
     if (!/^\d{10}$/.test(mobile)) {
 
         showMessage(
-            "Please enter a valid 10-digit mobile number.",
+            (window.i18n ? window.i18n.t("msg_invalid_mobile") : "Please enter a valid 10-digit mobile number."),
             "error"
         );
 
@@ -100,7 +100,7 @@ sendOtpBtn.addEventListener("click", async () => {
     }
 
     sendOtpBtn.disabled = true;
-    sendOtpBtn.textContent = "Sending...";
+    sendOtpBtn.textContent = (window.i18n ? window.i18n.t("login_send_otp_btn") : "Sending...");
 
     try {
 
@@ -110,7 +110,8 @@ sendOtpBtn.addEventListener("click", async () => {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "X-Language": (window.i18n ? window.i18n.getLang() : "en")
                 },
 
                 body: JSON.stringify({
@@ -123,12 +124,12 @@ sendOtpBtn.addEventListener("click", async () => {
 
         if (!response.ok) {
             throw new Error(
-                data.message || "Unable to send OTP."
+                data.message || (window.i18n ? window.i18n.t("invalid_otp") : "Unable to send OTP.")
             );
         }
 
         showMessage(
-            data.message || "OTP sent successfully.",
+            data.message || (window.i18n ? window.i18n.t("msg_otp_sent") : "OTP sent successfully."),
             "success"
         );
 
@@ -183,7 +184,7 @@ phoneLoginForm.addEventListener("submit", async (event) => {
     if (!/^\d{6}$/.test(otpValueEntered)) {
 
         showMessage(
-            "Please enter the 6-digit OTP.",
+            (window.i18n ? window.i18n.t("msg_enter_otp") : "Please enter the 6-digit OTP."),
             "error"
         );
 
@@ -191,7 +192,7 @@ phoneLoginForm.addEventListener("submit", async (event) => {
     }
 
     verifyOtpBtn.disabled = true;
-    verifyOtpBtn.textContent = "Verifying...";
+    verifyOtpBtn.textContent = (window.i18n ? window.i18n.t("login_verify_otp_btn") : "Verifying...");
 
     try {
 
@@ -201,7 +202,8 @@ phoneLoginForm.addEventListener("submit", async (event) => {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "X-Language": (window.i18n ? window.i18n.getLang() : "en")
                 },
 
                 body: JSON.stringify({
@@ -215,7 +217,7 @@ phoneLoginForm.addEventListener("submit", async (event) => {
 
         if (!response.ok) {
             throw new Error(
-                data.message || "OTP verification failed."
+                data.message || (window.i18n ? window.i18n.t("invalid_otp") : "OTP verification failed.")
             );
         }
 
@@ -235,12 +237,16 @@ phoneLoginForm.addEventListener("submit", async (event) => {
             const langMap = { "English": "en", "Marathi": "mr", "Hindi": "hi" };
             const langCode = langMap[data.user.preferred_language] || data.user.preferred_language;
             if (["en", "mr", "hi"].includes(langCode)) {
-                localStorage.setItem("lang", langCode);
+                if (window.i18n && typeof window.i18n.setLang === "function") {
+                    window.i18n.setLang(langCode);
+                } else {
+                    localStorage.setItem("lang", langCode);
+                }
             }
         }
 
         showMessage(
-            "Login successful! Redirecting...",
+            (window.i18n ? window.i18n.t("msg_login_success") : "Login successful! Redirecting..."),
             "success"
         );
 
@@ -278,7 +284,7 @@ emailLoginForm.addEventListener("submit", async (event) => {
     if (!emailValue) {
 
         showMessage(
-            "Please enter your email address.",
+            (window.i18n ? window.i18n.t("msg_enter_email") : "Please enter your email address."),
             "error"
         );
 
@@ -288,7 +294,7 @@ emailLoginForm.addEventListener("submit", async (event) => {
     if (!passwordValue) {
 
         showMessage(
-            "Please enter your password.",
+            (window.i18n ? window.i18n.t("msg_enter_password") : "Please enter your password."),
             "error"
         );
 
@@ -296,7 +302,7 @@ emailLoginForm.addEventListener("submit", async (event) => {
     }
 
     emailLoginBtn.disabled = true;
-    emailLoginBtn.textContent = "Logging in...";
+    emailLoginBtn.textContent = (window.i18n ? window.i18n.t("login_submit_btn") : "Logging in...");
 
     try {
 
@@ -306,7 +312,8 @@ emailLoginForm.addEventListener("submit", async (event) => {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "X-Language": (window.i18n ? window.i18n.getLang() : "en")
                 },
 
                 body: JSON.stringify({
@@ -320,7 +327,7 @@ emailLoginForm.addEventListener("submit", async (event) => {
 
         if (!response.ok) {
             throw new Error(
-                data.message || "Login failed."
+                data.message || (window.i18n ? window.i18n.t("invalid_credentials") : "Login failed.")
             );
         }
 
@@ -340,12 +347,16 @@ emailLoginForm.addEventListener("submit", async (event) => {
             const langMap = { "English": "en", "Marathi": "mr", "Hindi": "hi" };
             const langCode = langMap[data.user.preferred_language] || data.user.preferred_language;
             if (["en", "mr", "hi"].includes(langCode)) {
-                localStorage.setItem("lang", langCode);
+                if (window.i18n && typeof window.i18n.setLang === "function") {
+                    window.i18n.setLang(langCode);
+                } else {
+                    localStorage.setItem("lang", langCode);
+                }
             }
         }
 
         showMessage(
-            "Login successful! Redirecting...",
+            (window.i18n ? window.i18n.t("msg_login_success") : "Login successful! Redirecting..."),
             "success"
         );
 

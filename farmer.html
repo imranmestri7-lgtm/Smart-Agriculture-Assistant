@@ -52,12 +52,10 @@
             </a>
 
             <button class="profile-btn" id="profileButton">
-                👨‍🌾 <span id="profileName">Farmer</span>
+                👨‍🌾 <span id="profileName" data-i18n="farmer_role">Farmer</span>
             </button>
 
-            <button class="logout-btn" id="logoutButton">
-                Logout
-            </button>
+            <button class="logout-btn" id="logoutButton" data-i18n="logout">Logout</button>
 
         </div>
 
@@ -84,7 +82,7 @@
                 </span>
 
                 <h1>
-                    Welcome back, <span id="farmerName">Farmer</span> 👋
+                    Welcome back, <span id="farmerName" data-i18n="farmer_role">Farmer</span> 👋
                 </h1>
 
                 <p>
@@ -113,7 +111,7 @@
                     FARMING TOOLS
                 </span>
 
-                <h2>
+                <h2 data-i18n="farming_tools_heading">
                     What would you like to do?
                 </h2>
 
@@ -133,16 +131,14 @@
 
                     <div class="dashboard-card-content">
 
-                        <h3>
-                            My Crops
-                        </h3>
+                        <h3 data-i18n="card_crops_title">My Crops</h3>
 
-                        <p>
+                        <p data-i18n="card_crops_desc">
                             Add and manage your crops, varieties,
                             planting dates and field information.
                         </p>
 
-                        <span class="card-link">
+                        <span class="card-link" data-i18n="card_crops_link">
                             Manage Crops →
                         </span>
 
@@ -161,16 +157,14 @@
 
                     <div class="dashboard-card-content">
 
-                        <h3>
-                            Disease Detection
-                        </h3>
+                        <h3 data-i18n="card_disease_title">Disease Detection</h3>
 
-                        <p>
+                        <p data-i18n="card_disease_desc">
                             Upload a plant image and get information
                             about possible crop problems.
                         </p>
 
-                        <span class="card-link">
+                        <span class="card-link" data-i18n="card_disease_link">
                             Check Plant →
                         </span>
 
@@ -189,16 +183,14 @@
 
                     <div class="dashboard-card-content">
 
-                        <h3>
-                            Irrigation
-                        </h3>
+                        <h3 data-i18n="card_irrigation_title">Irrigation</h3>
 
-                        <p>
+                        <p data-i18n="card_irrigation_desc">
                             Get irrigation guidance and manage
                             your crop water requirements.
                         </p>
 
-                        <span class="card-link">
+                        <span class="card-link" data-i18n="card_irrigation_link">
                             View Irrigation →
                         </span>
 
@@ -217,16 +209,14 @@
 
                     <div class="dashboard-card-content">
 
-                        <h3>
-                            Weather
-                        </h3>
+                        <h3 data-i18n="card_weather_title">Weather</h3>
 
-                        <p>
+                        <p data-i18n="card_weather_desc">
                             Check weather information to support
                             better farming decisions.
                         </p>
 
-                        <span class="card-link">
+                        <span class="card-link" data-i18n="card_weather_link">
                             Check Weather →
                         </span>
 
@@ -347,7 +337,7 @@
                                 Smart Farm Monitoring
                             </h3>
 
-                            <span class="iot-card-badge" id="cardIotBadge">IoT Ready</span>
+                            <span class="iot-card-badge" id="cardIotBadge" data-i18n="badge_iot_ready">IoT Ready</span>
 
                         </div>
 
@@ -374,16 +364,14 @@
 
                     <div class="dashboard-card-content">
 
-                        <h3>
-                            Farmer Assistant
-                        </h3>
+                        <h3 data-i18n="card_assistant_title">Farmer Assistant</h3>
 
-                        <p>
+                        <p data-i18n="card_assistant_desc">
                             Ask questions about crops, pests,
                             irrigation, weather and farming.
                         </p>
 
-                        <span class="card-link">
+                        <span class="card-link" data-i18n="card_assistant_link">
                             Ask Assistant →
                         </span>
 
@@ -404,7 +392,7 @@
 
             <div class="farm-crop-header">
                 <div class="section-title-wrap">
-                    <span class="dashboard-label">MY FARMS &amp; CROPS</span>
+                    <span class="dashboard-label" data-i18n="badge_my_farms_crops">MY FARMS &amp; CROPS</span>
                     <h2 data-i18n="farm_crop_management_title">Farm &amp; Crop Management</h2>
                     <p data-i18n="farm_crop_management_desc">Manage your registered farms, track planted crops, and update growth progress.</p>
                 </div>
@@ -457,9 +445,9 @@
             <!-- TAB PANE: CROPS & GROWTH TRACKING -->
             <div class="tab-pane active" id="cropsPane">
                 <div class="pane-filter-bar">
-                    <label for="filterCropFarm" class="filter-label">Filter by Farm:</label>
+                    <label for="filterCropFarm" class="filter-label" data-i18n="lbl_filter_by_farm">Filter by Farm:</label>
                     <select id="filterCropFarm" class="farm-select">
-                        <option value="">All Farms</option>
+                        <option value="" data-i18n="opt_all_farms">All Farms</option>
                     </select>
                 </div>
                 <div id="cropsList" class="crops-grid">
@@ -484,7 +472,7 @@
             <!-- SECTION HEADER -->
             <div class="analytics-header">
                 <div class="section-title-wrap">
-                    <span class="dashboard-label">SMART ANALYTICS &amp; INSIGHTS</span>
+                    <span class="dashboard-label" data-i18n="badge_smart_analytics">SMART ANALYTICS &amp; INSIGHTS</span>
                     <h2 data-i18n="analytics_dashboard_title">Smart Analytics Dashboard</h2>
                     <p data-i18n="analytics_dashboard_desc">Real-time agricultural insights, crop distributions, health trends, and irrigation analytics from your farm data.</p>
                 </div>
@@ -657,7 +645,7 @@
                     </div>
                     <div class="irrigation-stats-strip">
                         <div class="stat-pill">
-                            <span class="stat-pill-label">Total Water Usage</span>
+                            <span class="stat-pill-label" data-i18n="stat_total_water">Total Water Usage</span>
                             <strong class="stat-pill-value" id="irrigStatTotalWater">0 mm</strong>
                         </div>
                         <div class="stat-pill">
@@ -665,11 +653,11 @@
                             <strong class="stat-pill-value" id="irrigStatAvgWater">0 mm</strong>
                         </div>
                         <div class="stat-pill">
-                            <span class="stat-pill-label">Irrigation Needed</span>
+                            <span class="stat-pill-label" data-i18n="stat_irrigation_needed">Irrigation Needed</span>
                             <strong class="stat-pill-value text-amber" id="irrigStatNeeded">0</strong>
                         </div>
                         <div class="stat-pill">
-                            <span class="stat-pill-label">Sufficient Moisture</span>
+                            <span class="stat-pill-label" data-i18n="stat_sufficient_moisture">Sufficient Moisture</span>
                             <strong class="stat-pill-value text-green" id="irrigStatSufficient">0</strong>
                         </div>
                     </div>
@@ -700,7 +688,7 @@
             <!-- SECTION HEADER -->
             <div class="notification-header">
                 <div class="section-title-wrap">
-                    <span class="dashboard-label">SMART ALERTS &amp; REMINDERS</span>
+                    <span class="dashboard-label" data-i18n="badge_smart_alerts">SMART ALERTS &amp; REMINDERS</span>
                     <h2 data-i18n="notification_center_heading">Notification Center</h2>
                     <p data-i18n="notification_center_desc">Timely crop reminders, irrigation alerts, weather warnings, and disease prevention follow-ups.</p>
                 </div>
@@ -748,7 +736,7 @@
             <!-- SECTION HEADER -->
             <div class="iot-header">
                 <div class="section-title-wrap">
-                    <span class="dashboard-label">IoT-READY SENSOR NETWORK</span>
+                    <span class="dashboard-label" data-i18n="badge_iot_network">IoT-READY SENSOR NETWORK</span>
                     <h2 data-i18n="iot_monitoring_heading">Smart Farm Monitoring</h2>
                     <p data-i18n="iot_monitoring_sub">Real-time field telemetry from soil probes, weather stations, and water level sensors.</p>
                 </div>
@@ -766,12 +754,12 @@
             <div class="iot-status-banner" id="iotStatusBanner">
                 <div class="status-indicator">
                     <span class="pulse-dot active"></span>
-                    <strong id="iotNetworkStatusText">IoT Telemetry Hub</strong>
+                    <strong id="iotNetworkStatusText" data-i18n="title_telemetry_hub">IoT Telemetry Hub</strong>
                     <span class="iot-device-counts" id="iotDeviceCounts">(0 online, 0 offline)</span>
                 </div>
                 <div class="iot-quick-refresh">
                     <button type="button" class="refresh-pill-btn" id="btnRefreshIoT">
-                        🔄 <span>Refresh Telemetry</span>
+                        🔄 <span data-i18n="btn_refresh_telemetry">Refresh Telemetry</span>
                     </button>
                 </div>
             </div>
@@ -783,8 +771,8 @@
                     <div class="iot-card-top">
                         <span class="iot-card-icon icon-moisture">💧</span>
                         <div class="iot-card-badges">
-                            <span class="iot-status-tag status-disconnected" id="statusSoilMoisture">No Sensor</span>
-                            <span class="iot-demo-tag" id="demoBadgeSoilMoisture" style="display:none;">DEMO</span>
+                            <span class="iot-status-tag status-disconnected" id="statusSoilMoisture" data-i18n="telemetry_no_sensor">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeSoilMoisture" style="display:none;" data-i18n="telemetry_demo_badge">DEMO</span>
                         </div>
                     </div>
                     <div class="iot-card-body">
@@ -806,8 +794,8 @@
                     <div class="iot-card-top">
                         <span class="iot-card-icon icon-temp">🌡️</span>
                         <div class="iot-card-badges">
-                            <span class="iot-status-tag status-disconnected" id="statusAirTemp">No Sensor</span>
-                            <span class="iot-demo-tag" id="demoBadgeAirTemp" style="display:none;">DEMO</span>
+                            <span class="iot-status-tag status-disconnected" id="statusAirTemp" data-i18n="telemetry_no_sensor">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeAirTemp" style="display:none;" data-i18n="telemetry_demo_badge">DEMO</span>
                         </div>
                     </div>
                     <div class="iot-card-body">
@@ -828,8 +816,8 @@
                     <div class="iot-card-top">
                         <span class="iot-card-icon icon-humidity">☁️</span>
                         <div class="iot-card-badges">
-                            <span class="iot-status-tag status-disconnected" id="statusAirHumidity">No Sensor</span>
-                            <span class="iot-demo-tag" id="demoBadgeAirHumidity" style="display:none;">DEMO</span>
+                            <span class="iot-status-tag status-disconnected" id="statusAirHumidity" data-i18n="telemetry_no_sensor">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeAirHumidity" style="display:none;" data-i18n="telemetry_demo_badge">DEMO</span>
                         </div>
                     </div>
                     <div class="iot-card-body">
@@ -850,8 +838,8 @@
                     <div class="iot-card-top">
                         <span class="iot-card-icon icon-soil-temp">🌱</span>
                         <div class="iot-card-badges">
-                            <span class="iot-status-tag status-disconnected" id="statusSoilTemp">No Sensor</span>
-                            <span class="iot-demo-tag" id="demoBadgeSoilTemp" style="display:none;">DEMO</span>
+                            <span class="iot-status-tag status-disconnected" id="statusSoilTemp" data-i18n="telemetry_no_sensor">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeSoilTemp" style="display:none;" data-i18n="telemetry_demo_badge">DEMO</span>
                         </div>
                     </div>
                     <div class="iot-card-body">
@@ -872,8 +860,8 @@
                     <div class="iot-card-top">
                         <span class="iot-card-icon icon-water-level">🚰</span>
                         <div class="iot-card-badges">
-                            <span class="iot-status-tag status-disconnected" id="statusWaterLevel">No Sensor</span>
-                            <span class="iot-demo-tag" id="demoBadgeWaterLevel" style="display:none;">DEMO</span>
+                            <span class="iot-status-tag status-disconnected" id="statusWaterLevel" data-i18n="telemetry_no_sensor">No Sensor</span>
+                            <span class="iot-demo-tag" id="demoBadgeWaterLevel" style="display:none;" data-i18n="telemetry_demo_badge">DEMO</span>
                         </div>
                     </div>
                     <div class="iot-card-body">
@@ -925,23 +913,23 @@
                         <div class="form-group-inline">
                             <label for="historySensorSelect" data-i18n="iot_select_sensor">Select Sensor:</label>
                             <select id="historySensorSelect" class="form-control-compact">
-                                <option value="">-- Choose a sensor --</option>
+                                <option value="" data-i18n="opt_choose_sensor">-- Choose a sensor --</option>
                             </select>
                         </div>
                         <div class="range-pills" id="historyRangePills">
-                            <button type="button" class="range-pill active" data-range="24h">24 Hours</button>
-                            <button type="button" class="range-pill" data-range="7d">7 Days</button>
-                            <button type="button" class="range-pill" data-range="30d">30 Days</button>
-                            <button type="button" class="range-pill" data-range="all">All</button>
+                            <button type="button" class="range-pill active" data-range="24h" data-i18n="filter_24h">24 Hours</button>
+                            <button type="button" class="range-pill" data-range="7d" data-i18n="filter_7d">7 Days</button>
+                            <button type="button" class="range-pill" data-range="30d" data-i18n="filter_30d">30 Days</button>
+                            <button type="button" class="range-pill" data-range="all" data-i18n="filter_all">All</button>
                         </div>
                     </div>
 
                     <!-- STATS SUMMARY (MIN, MAX, AVG) -->
                     <div class="history-stats-row" id="historyStatsRow">
-                        <div class="stat-pill"><span class="stat-label">Min:</span> <strong id="statMinVal">--</strong></div>
-                        <div class="stat-pill"><span class="stat-label">Avg:</span> <strong id="statAvgVal">--</strong></div>
-                        <div class="stat-pill"><span class="stat-label">Max:</span> <strong id="statMaxVal">--</strong></div>
-                        <div class="stat-pill"><span class="stat-label">Readings:</span> <strong id="statCountVal">0</strong></div>
+                        <div class="stat-pill"><span class="stat-label" data-i18n="stat_min">Min:</span> <strong id="statMinVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label" data-i18n="stat_avg">Avg:</span> <strong id="statAvgVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label" data-i18n="stat_max">Max:</span> <strong id="statMaxVal">--</strong></div>
+                        <div class="stat-pill"><span class="stat-label" data-i18n="stat_readings">Readings:</span> <strong id="statCountVal">0</strong></div>
                     </div>
 
                     <!-- SVG LINE CHART -->
@@ -956,10 +944,10 @@
                         <table class="iot-table">
                             <thead>
                                 <tr>
-                                    <th>Date &amp; Time</th>
-                                    <th>Measurement</th>
-                                    <th>Status</th>
-                                    <th>Type</th>
+                                    <th data-i18n="th_datetime">Date &amp; Time</th>
+                                    <th data-i18n="th_measurement">Measurement</th>
+                                    <th data-i18n="th_status">Status</th>
+                                    <th data-i18n="th_type">Type</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
@@ -972,16 +960,16 @@
                 <!-- TAB 3: HARDWARE INTEGRATION GUIDE -->
                 <div class="iot-tab-panel" id="hardwarePanel" style="display:none;">
                     <div class="hardware-guide-card">
-                        <h3>🔌 ESP32 &amp; Arduino Integration Specifications</h3>
-                        <p>Hardware microcontrollers can transmit telemetry directly to AgriSmart via HTTP/HTTPS POST without exposing farmer accounts or database credentials.</p>
+                        <h3 data-i18n="hw_spec_title">🔌 ESP32 &amp; Arduino Integration Specifications</h3>
+                        <p><span data-i18n="hw_spec_desc">Hardware microcontrollers can transmit telemetry directly to AgriSmart via HTTP/HTTPS POST without exposing farmer accounts or database credentials.</span></p>
                         
                         <div class="code-spec-box">
-                            <strong>Endpoint:</strong> <code>POST /api/iot/ingest</code><br>
-                            <strong>Headers:</strong>
+                            <strong data-i18n="hw_endpoint_label">Endpoint:</strong> <code>POST /api/iot/ingest</code><br>
+                            <strong data-i18n="hw_headers_label">Headers:</strong>
                             <pre>Content-Type: application/json
 X-Device-Id: &lt;YOUR_REGISTERED_DEVICE_ID&gt;
 X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
-                            <strong>Sample Soil Moisture JSON Payload:</strong>
+                            <strong data-i18n="hw_sample_payload">Sample Soil Moisture JSON Payload:</strong>
                             <pre>{
   "device_id": "ESP32-SOIL-01",
   "sensor_type": "soil_moisture",
@@ -989,7 +977,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
   "unit": "%",
   "timestamp": "2026-10-31T09:50:00Z"
 }</pre>
-                            <strong>Sample Combined DHT22 Payload:</strong>
+                            <strong data-i18n="hw_sample_dht22">Sample Combined DHT22 Payload:</strong>
                             <pre>{
   "device_id": "ESP32-DHT22-01",
   "readings": [
@@ -1137,21 +1125,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
 
                         <div class="message-content">
 
-                            <div class="message-name">
+                            <div class="message-name" data-i18n="brand_name">
                                 AgriSmart Assistant
                             </div>
 
                             <p>
-                                Hello <span id="chatFarmerName">Farmer</span>! 👋
+                                Hello <span id="chatFarmerName" data-i18n="farmer_role">Farmer</span>! 👋
                             </p>
 
-                            <p>
+                            <p data-i18n="assistant_welcome_msg">
                                 I can help you with crops, irrigation,
                                 weather, plant diseases, pests and
                                 general farming guidance.
                             </p>
 
-                            <span class="message-time">
+                            <span class="message-time" data-i18n="time_just_now">
                                 Just now
                             </span>
 
@@ -1222,7 +1210,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                             class="think-button"
                             id="thinkButton"
                         >
-                            🧠 <span>Think</span>
+                            🧠 <span data-i18n="msg_think">Think</span>
                         </button>
 
                         <button
@@ -1322,7 +1310,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                     <div class="form-group">
                         <label for="cropFarmId" data-i18n="select_farm_placeholder">Select Farm *</label>
                         <select id="cropFarmId" required>
-                            <option value="">-- Choose Farm --</option>
+                            <option value="" data-i18n="opt_choose_farm">-- Choose Farm --</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -1397,28 +1385,28 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                             <input type="checkbox" id="prefCropReminders" checked>
                             <span class="pref-item-info">
                                 <strong>🌾 <span data-i18n="prefs_crop_label">Crop Reminders (harvest, growth stages, care)</span></strong>
-                                <small>Harvest readiness, growth stage care, and crop record updates.</small>
+                                <small><span data-i18n="prefs_crop_desc">Harvest readiness, growth stage care, and crop record updates.</span></small>
                             </span>
                         </label>
                         <label class="pref-item-card">
                             <input type="checkbox" id="prefIrrigationAlerts" checked>
                             <span class="pref-item-info">
                                 <strong>💧 <span data-i18n="prefs_irrigation_label">Irrigation Alerts (moisture deficit, recommendations)</span></strong>
-                                <small>Soil moisture deficit warnings and water recommendations.</small>
+                                <small><span data-i18n="prefs_irrigation_desc">Soil moisture deficit warnings and water recommendations.</span></small>
                             </span>
                         </label>
                         <label class="pref-item-card">
                             <input type="checkbox" id="prefWeatherAlerts" checked>
                             <span class="pref-item-info">
                                 <strong>🌦️ <span data-i18n="prefs_weather_label">Weather Warnings (heavy rain, high temperature)</span></strong>
-                                <small>Heavy rain advisories and high temperature warnings.</small>
+                                <small><span data-i18n="prefs_weather_desc">Heavy rain advisories and high temperature warnings.</span></small>
                             </span>
                         </label>
                         <label class="pref-item-card">
                             <input type="checkbox" id="prefDiseaseReminders" checked>
                             <span class="pref-item-info">
                                 <strong>🍃 <span data-i18n="prefs_disease_label">Disease Prevention Reminders (follow-ups & inspection)</span></strong>
-                                <small>Diagnosis follow-ups, field sanitation, and inspection advice.</small>
+                                <small><span data-i18n="prefs_disease_desc">Diagnosis follow-ups, field sanitation, and inspection advice.</span></small>
                             </span>
                         </label>
                     </div>
@@ -1444,38 +1432,38 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </div>
                 <form id="sensorForm" class="modal-form">
                     <div class="form-group">
-                        <label for="sensorFarmSelect">🏡 Farm <span class="required">*</span></label>
+                        <label for="sensorFarmSelect" data-i18n="lbl_select_farm">🏡 Farm <span class="required">*</span></label>
                         <select id="sensorFarmSelect" class="form-control" required>
-                            <option value="">Loading farms...</option>
+                            <option value="" data-i18n="opt_loading_farms">Loading farms...</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="sensorCropSelect">🌾 Assigned Crop (Optional)</label>
+                        <label for="sensorCropSelect" data-i18n="lbl_assigned_crop">🌾 Assigned Crop (Optional)</label>
                         <select id="sensorCropSelect" class="form-control">
-                            <option value="">-- Optional: Assign Crop --</option>
+                            <option value="" data-i18n="opt_optional_assign_crop">-- Optional: Assign Crop --</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="sensorNameInput">🏷️ Sensor Name <span class="required">*</span></label>
+                        <label for="sensorNameInput" data-i18n="lbl_sensor_name">🏷️ Sensor Name <span class="required">*</span></label>
                         <input type="text" id="sensorNameInput" class="form-control" placeholder="e.g. North Field Soil Probe" required maxlength="150">
                     </div>
 
                     <div class="form-group">
-                        <label for="sensorTypeSelect">📡 Sensor Type <span class="required">*</span></label>
+                        <label for="sensorTypeSelect" data-i18n="lbl_sensor_type">📡 Sensor Type <span class="required">*</span></label>
                         <select id="sensorTypeSelect" class="form-control" required>
-                            <option value="soil_moisture">💧 Soil Moisture Sensor (%)</option>
-                            <option value="air_temp_humidity">🌡️ Air Temp &amp; Humidity (DHT22 / SHT30)</option>
-                            <option value="soil_temp">🌱 Soil Temperature (°C)</option>
-                            <option value="water_level">🚰 Water Level Sensor (%)</option>
+                            <option value="soil_moisture" data-i18n="opt_sensor_soil_moisture">💧 Soil Moisture Sensor (%)</option>
+                            <option value="air_temp_humidity" data-i18n="opt_sensor_dht22">🌡️ Air Temp &amp; Humidity (DHT22 / SHT30)</option>
+                            <option value="soil_temp" data-i18n="opt_sensor_soil_temp">🌱 Soil Temperature (°C)</option>
+                            <option value="water_level" data-i18n="opt_sensor_water_level">🚰 Water Level Sensor (%)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="sensorDeviceIdInput">🆔 Unique Device ID <span class="required">*</span></label>
+                        <label for="sensorDeviceIdInput" data-i18n="lbl_device_id">🆔 Unique Device ID <span class="required">*</span></label>
                         <input type="text" id="sensorDeviceIdInput" class="form-control" placeholder="e.g. ESP32-SOIL-01" required maxlength="100" style="text-transform:uppercase;">
-                        <small style="color:var(--text-tertiary); display:block; margin-top:4px;">Must be unique across your hardware devices (letters, digits, dashes).</small>
+                        <small style="color:var(--text-tertiary); display:block; margin-top:4px;"><span data-i18n="sensor_id_hint">Must be unique across your hardware devices (letters, digits, dashes).</span></small>
                     </div>
 
                     <div class="modal-actions">
@@ -1490,29 +1478,29 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
         <div class="farm-modal-backdrop" id="deviceKeyModal">
             <div class="farm-modal-dialog">
                 <div class="modal-header">
-                    <h3>🔑 Device Credentials Generated</h3>
+                    <h3 data-i18n="modal_credentials_title">🔑 Device Credentials Generated</h3>
                     <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
                 </div>
                 <div class="modal-body" style="padding: 18px 24px;">
                     <div class="alert-box-warning" style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px; margin-bottom:16px;">
-                        <strong style="color:#b45309;">⚠️ Important Security Notice:</strong>
+                        <strong style="color:#b45309;" data-i18n="security_notice_title">⚠️ Important Security Notice:</strong>
                         <p style="color:#92400e; font-size:13px; margin:4px 0 0 0;">
                             Copy this secret key and flash it to your ESP32 or Arduino. For security, this secret is hashed and will <strong>NEVER</strong> be displayed again.
                         </p>
                     </div>
                     <div class="form-group">
-                        <label>Device ID:</label>
+                        <label data-i18n="lbl_device_id">Device ID:</label>
                         <strong id="modalKeyDeviceId" style="display:block; font-size:16px; color:var(--text-primary); margin-top:4px;"></strong>
                     </div>
                     <div class="form-group">
-                        <label>Secret Device API Key:</label>
+                        <label data-i18n="lbl_secret_key">Secret Device API Key:</label>
                         <div style="display:flex; gap:8px; margin-top:4px;">
                             <input type="text" id="modalKeySecret" class="form-control" readonly style="background:#f8fafc; font-family:monospace; font-weight:600;">
-                            <button type="button" class="btn btn-primary" id="btnCopyDeviceKey">📋 Copy</button>
+                            <button type="button" class="btn btn-primary" id="btnCopyDeviceKey" data-i18n="btn_copy">📋 Copy</button>
                         </div>
                     </div>
                     <div class="modal-actions" style="margin-top:20px;">
-                        <button type="button" class="btn-primary modal-close-btn" style="width:100%;">I Have Saved This Key</button>
+                        <button type="button" class="btn-primary modal-close-btn" style="width:100%;" data-i18n="btn_saved_key">I Have Saved This Key</button>
                     </div>
                 </div>
             </div>
@@ -1522,23 +1510,23 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
         <div class="farm-modal-backdrop" id="demoModeModal">
             <div class="farm-modal-dialog">
                 <div class="modal-header">
-                    <h3>🧪 Manual IoT Demo Mode</h3>
+                    <h3 data-i18n="modal_demo_title">🧪 Manual IoT Demo Mode</h3>
                     <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
                 </div>
                 <form id="demoModeForm" class="modal-form">
                     <p style="color:var(--text-secondary); font-size:13px; margin-bottom:14px;">
-                        Inject simulated telemetry into your registered sensors to test dashboard gauges, graphs, and alert thresholds without physical hardware. All manual readings are tagged as <strong>[Demo Data]</strong>.
+                        Inject simulated telemetry into your registered sensors to test dashboard gauges, graphs, and alert thresholds without physical hardware. All manual readings are tagged as <strong data-i18n="demo_data_badge">[Demo Data]</strong>.
                     </p>
 
                     <div class="form-group">
-                        <label for="demoSensorSelect">Target Sensor <span class="required">*</span></label>
+                        <label for="demoSensorSelect" data-i18n="lbl_target_sensor">Target Sensor <span class="required">*</span></label>
                         <select id="demoSensorSelect" class="form-control" required>
-                            <option value="">-- Choose Sensor --</option>
+                            <option value="" data-i18n="opt_choose_sensor">-- Choose Sensor --</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="demoReadingValue">Sample Telemetry Value <span class="required">*</span></label>
+                        <label for="demoReadingValue" data-i18n="lbl_sample_telemetry">Sample Telemetry Value <span class="required">*</span></label>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <input type="number" id="demoReadingValue" class="form-control" step="0.1" placeholder="e.g. 32.5" required>
                             <span id="demoUnitLabel" style="font-weight:700; color:var(--text-secondary);">%</span>
@@ -1546,12 +1534,12 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                     </div>
 
                     <div class="modal-actions" style="justify-content:space-between; margin-top:20px;">
-                        <button type="button" class="btn btn-outline-danger" id="btnClearDemoData" style="color:#ef4444; border-color:#fca5a5; background:#fff;">
+                        <button type="button" class="btn btn-outline-danger" id="btnClearDemoData" style="color:#ef4444; border-color:#fca5a5; background:#fff;" data-i18n="btn_clear_demo">
                             🗑️ Clear Demo Data
                         </button>
                         <div style="display:flex; gap:8px;">
                             <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
-                            <button type="submit" class="btn-primary">Inject Reading</button>
+                            <button type="submit" class="btn-primary" data-i18n="btn_inject_reading">Inject Reading</button>
                         </div>
                     </div>
                 </form>

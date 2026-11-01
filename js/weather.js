@@ -12,6 +12,15 @@ const suggestionsBox = document.getElementById("suggestions");
 
 let selectedLocation = null;
 let searchTimer = null;
+let lastWeatherData = null;
+
+function t(key, fallback) {
+    if (window.i18n && typeof window.i18n.t === "function") {
+        const val = window.i18n.t(key);
+        if (val && val !== key) return val;
+    }
+    return fallback || key;
+}
 
 
 // ========================================
@@ -219,7 +228,7 @@ async function searchLocation() {
 // ========================================
 
 function updateWeather(data) {
-
+    lastWeatherData = data;
 
     // ========================================
     // LOCATION
@@ -229,11 +238,11 @@ function updateWeather(data) {
 
     const region = data.location.region;
 
-
-    document.querySelector(".weather-heading p").textContent =
-        "Current weather in " +
-        locationName +
-        (region ? ", " + region : "");
+    const placeStr = locationName + (region ? ", " + region : "");
+    const currentHeadingEl = document.querySelector(".weather-heading p");
+    if (currentHeadingEl) {
+        currentHeadingEl.textContent = t("weather_current_in", "Current weather in {0}").replace("{0}", placeStr);
+    }
 
 
     // ========================================
@@ -338,14 +347,11 @@ function updateWeather(data) {
         const date =
             new Date(day.date + "T00:00:00");
 
+        const englishShortDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+        const dayIdx = date.getDay();
+        const shortKey = "weather_day_" + englishShortDays[dayIdx];
 
-        const dayName =
-            date.toLocaleDateString(
-                "en-US",
-                {
-                    weekday: "short"
-                }
-            );
+        const dayName = t(shortKey, date.toLocaleDateString("en-US", { weekday: "short" }));
 
 
         // Day
@@ -474,28 +480,22 @@ function updateWeather(data) {
 
 function updateFarmingAdvice(data) {
 
-
     const adviceCards =
         document.querySelectorAll(".advice-card");
-
 
     if (adviceCards.length < 4) {
         return;
     }
 
-
     const tomorrow =
         data.forecast.forecastday[1];
-
 
     if (!tomorrow) {
         return;
     }
 
-
     const rainChance =
         tomorrow.day.daily_chance_of_rain;
-
 
     // ========================================
     // IRRIGATION
@@ -505,9 +505,8 @@ function updateFarmingAdvice(data) {
         .querySelector("p")
         .textContent =
         rainChance >= 50
-            ? "Not Recommended"
-            : "Recommended";
-
+            ? t("weather_rec_not_recommended", "Not Recommended")
+            : t("weather_rec_recommended", "Recommended");
 
     // ========================================
     // RAIN ALERT
@@ -517,13 +516,8 @@ function updateFarmingAdvice(data) {
         .querySelector("p")
         .textContent =
         rainChance >= 50
-            ? "Rain expected tomorrow (" +
-              rainChance +
-              "%)"
-            : "Low chance of rain tomorrow (" +
-              rainChance +
-              "%)";
-
+            ? t("weather_rain_expected", "Rain expected tomorrow ({0}%)").replace("{0}", rainChance)
+            : t("weather_low_rain", "Low chance of rain tomorrow ({0}%)").replace("{0}", rainChance);
 
     // ========================================
     // CROP PROTECTION
@@ -533,9 +527,8 @@ function updateFarmingAdvice(data) {
         .querySelector("p")
         .textContent =
         rainChance >= 60
-            ? "Protect crops from excess moisture."
-            : "Normal crop protection recommended.";
-
+            ? t("weather_protect_excess_moisture", "Protect crops from excess moisture.")
+            : t("weather_normal_protection", "Normal crop protection recommended.");
 
     // ========================================
     // FARM ACTIVITY
@@ -545,10 +538,16 @@ function updateFarmingAdvice(data) {
         .querySelector("p")
         .textContent =
         rainChance < 40
-            ? "Good weather for farm activities."
-            : "Avoid outdoor activities during rain.";
+            ? t("weather_good_activity", "Good weather for farm activities.")
+            : t("weather_avoid_outdoor_rain", "Avoid outdoor activities during rain.");
 
 }
+
+window.addEventListener("languageChanged", function () {
+    if (lastWeatherData) {
+        updateWeather(lastWeatherData);
+    }
+});
 
 
 // ========================================

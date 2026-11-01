@@ -606,3 +606,89 @@ def verify_otp():
 
     finally:
         close_database(cursor, connection)
+
+
+# ==================================================
+# UPDATE PREFERRED LANGUAGE
+# ==================================================
+
+@auth_bp.route("/preferred-language", methods=["PUT"])
+def update_preferred_language():
+    authorization = request.headers.get("Authorization", "")
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+    from utils.auth_tokens import get_user_id_from_token
+    user_id = get_user_id_from_token(token)
+    if not user_id:
+        return jsonify({"status": "error", "message": "Invalid or expired token"}), 401
+
+    data = request.get_json(silent=True) or {}
+    lang = data.get("preferred_language") or data.get("language")
+    if not lang:
+        return jsonify({"status": "error", "message": "Language parameter required"}), 400
+
+    from utils.i18n import normalize_language, t_backend
+    norm_lang = normalize_language(lang)
+    lang_name_map = {"en": "English", "mr": "Marathi", "hi": "Hindi"}
+    stored_name = lang_name_map.get(norm_lang, "English")
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("UPDATE users SET preferred_language = %s WHERE id = %s", (stored_name, user_id))
+        connection.commit()
+        return jsonify({
+            "status": "success",
+            "message": t_backend("lang_updated", lang=norm_lang, default="Preferred language updated successfully"),
+            "preferred_language": stored_name,
+            "lang_code": norm_lang
+        }), 200
+    except Exception as e:
+        print("Update language error:", e)
+        return jsonify({"status": "error", "message": "Failed to update preferred language"}), 500
+    finally:
+        close_database(cursor, connection)
+
+
+# ==================================================
+# GET USER PROFILE
+# ==================================================
+
+@auth_bp.route("/profile", methods=["GET"])
+def get_user_profile():
+    authorization = request.headers.get("Authorization", "")
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+    from utils.auth_tokens import get_user_id_from_token
+    user_id = get_user_id_from_token(token)
+    if not user_id:
+        return jsonify({"status": "error", "message": "Invalid or expired token"}), 401
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT id, full_name, mobile_number, email, preferred_language FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({"status": "error", "message": "User not found"}), 404
+        return jsonify({
+            "status": "success",
+            "user": {
+                "id": user["id"],
+                "full_name": user["full_name"],
+                "mobile_number": user["mobile_number"],
+                "email": user["email"],
+                "preferred_language": user.get("preferred_language") or "English"
+            }
+        }), 200
+    except Exception as e:
+        print("Profile fetch error:", e)
+        return jsonify({"status": "error", "message": "Failed to fetch profile"}), 500
+    finally:
+        close_database(cursor, connection)

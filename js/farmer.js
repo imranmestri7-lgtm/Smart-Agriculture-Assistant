@@ -119,7 +119,7 @@ if (logoutButton) {
     logoutButton.addEventListener("click", function () {
 
         const confirmLogout =
-            confirm("Are you sure you want to logout?");
+            confirm(window.i18n ? window.i18n.t("confirm_logout") : "Are you sure you want to logout?");
 
         if (!confirmLogout) {
             return;
@@ -128,6 +128,10 @@ if (logoutButton) {
         localStorage.removeItem("agriSmartUser");
         localStorage.removeItem("agriSmartToken");
         localStorage.removeItem("token");
+
+        // Revert to guest language choice without retaining private user preference
+        const guestLang = localStorage.getItem("guest_lang") || "en";
+        localStorage.setItem("lang", guestLang);
 
         window.location.href = "login.html";
 
@@ -1139,8 +1143,33 @@ if (voiceButton) {
 
 
 // =====================================================
-// INITIALIZE CHAT HISTORY ON LOAD
+// INITIALIZE CHAT HISTORY ON LOAD & LANGUAGE LISTENER
 // =====================================================
+
+window.addEventListener("languageChanged", function(e) {
+    if (window.i18n && typeof window.i18n.applyTranslations === "function") {
+        window.i18n.applyTranslations();
+    }
+    const lang = e.detail && e.detail.lang ? e.detail.lang : (window.i18n ? window.i18n.getLang() : "en");
+    if (Array.isArray(quickActions) || quickActions instanceof NodeList) {
+        quickActions.forEach(function (button) {
+            const actionKey = button.getAttribute("data-quick-action");
+            if (actionKey) {
+                const keyMap = {
+                    crop_status: "chip_crop_status",
+                    irrigation_guidance: "chip_irrigation",
+                    disease_prevention: "chip_disease",
+                    weather_info: "chip_weather",
+                    harvest_reminders: "chip_harvest",
+                    farm_summary: "chip_summary"
+                };
+                if (keyMap[actionKey] && window.i18n) {
+                    button.textContent = window.i18n.t(keyMap[actionKey]);
+                }
+            }
+        });
+    }
+});
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", loadChatHistory);

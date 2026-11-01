@@ -288,7 +288,10 @@
         timeline.forEach(item => {
             const daysLabel = t("days_since_planting_label", "days since planting");
             const varietyText = item.variety ? ` • ${escapeHtml(item.variety)}` : "";
-            const harvestText = item.expected_harvest_date ? `Harvest: ${item.expected_harvest_date}` : "";
+            const harvestLabel = t("timeline_harvest", "Harvest");
+            const harvestText = item.expected_harvest_date ? `${harvestLabel}: ${item.expected_harvest_date}` : "";
+            const stageKey = "stage_" + String(item.growth_status || "").toLowerCase().replace(/ /g, "_");
+            const localizedStage = t(stageKey, item.growth_status);
 
             html += `
                 <div class="timeline-card">
@@ -303,7 +306,7 @@
                         </div>
                     </div>
                     <div class="timeline-badge">
-                        ${escapeHtml(item.growth_status)}
+                        ${escapeHtml(localizedStage)}
                     </div>
                 </div>
             `;
@@ -460,10 +463,10 @@
             <table class="crop-summary-table">
                 <thead>
                     <tr>
-                        <th>Crop</th>
-                        <th>Records</th>
-                        <th>Avg Moisture</th>
-                        <th>Total Water (mm)</th>
+                        <th>${t("analytics_th_crop", "Crop")}</th>
+                        <th>${t("analytics_th_records", "Records")}</th>
+                        <th>${t("analytics_th_avg_moisture", "Avg Moisture")}</th>
+                        <th>${t("analytics_th_total_water", "Total Water (mm)")}</th>
                     </tr>
                 </thead>
                 <tbody>

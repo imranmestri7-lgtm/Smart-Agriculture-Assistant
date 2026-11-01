@@ -30,11 +30,11 @@
 
         <nav class="nav-links">
             <a href="index.html" data-i18n="home">Home</a>
-            <a href="farmer.html">Dashboard</a>
+            <a href="farmer.html" data-i18n="dashboard">Dashboard</a>
         </nav>
 
         <div class="nav-actions">
-            <button class="profile-btn" onclick="window.location.href='farmer.html'">
+            <button class="profile-btn" onclick="window.location.href='farmer.html'" data-i18n="farmer_role">
                 Farmer
             </button>
             <select id="lang-select" style="margin-left:10px;">
@@ -55,9 +55,9 @@
 
         <div class="weather-heading">
 
-            <h1>Weather Information</h1>
+            <h1 data-i18n="weather_hero_title">Weather Information</h1>
 
-            <p>
+            <p data-i18n="weather_hero_desc">
                 Check weather conditions and make better farming decisions.
             </p>
 
@@ -70,7 +70,7 @@
 
 <section class="location-section">
 
-    <label for="location">
+    <label for="location" data-i18n="lbl_search_location">
         📍 Search Location
     </label>
 
@@ -79,7 +79,7 @@
         <input
             type="text"
             id="location"
-            placeholder="Enter city, village or location"
+            data-i18n-placeholder="ph_search_city" placeholder="Enter city, village or location"
         >
 
         <button id="searchWeather" type="button" aria-label="Search">
@@ -103,7 +103,7 @@
 
                 <div>
                     <h2>28°C</h2>
-                    <p>Partly Cloudy</p>
+                    <p data-i18n="weather_partly_cloudy">Partly Cloudy</p>
                 </div>
 
             </div>
@@ -114,7 +114,7 @@
                 <div class="weather-detail">
                     <span>💧</span>
                     <div>
-                        <small>Humidity</small>
+                        <small data-i18n="weather_humidity">Humidity</small>
                         <strong>72%</strong>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                 <div class="weather-detail">
                     <span>💨</span>
                     <div>
-                        <small>Wind Speed</small>
+                        <small data-i18n="weather_wind">Wind Speed</small>
                         <strong>12 km/h</strong>
                     </div>
                 </div>
@@ -132,7 +132,7 @@
                 <div class="weather-detail">
                     <span>🌧️</span>
                     <div>
-                        <small>Rainfall</small>
+                        <small data-i18n="weather_rain">Rainfall</small>
                         <strong>10 mm</strong>
                     </div>
                 </div>
@@ -146,14 +146,14 @@
 
         <section class="forecast-section">
 
-            <h2>5-Day Forecast</h2>
+            <h2 data-i18n="forecast_title">5-Day Forecast</h2>
 
             <div class="forecast-container">
 
 
                 <div class="forecast-card">
 
-                    <h3>Mon</h3>
+                    <h3 data-i18n="weather_day_mon">Mon</h3>
 
                     <span class="forecast-icon">☀️</span>
 
@@ -168,7 +168,7 @@
 
                 <div class="forecast-card">
 
-                    <h3>Tue</h3>
+                    <h3 data-i18n="weather_day_tue">Tue</h3>
 
                     <span class="forecast-icon">🌦️</span>
 
@@ -183,7 +183,7 @@
 
                 <div class="forecast-card">
 
-                    <h3>Wed</h3>
+                    <h3 data-i18n="weather_day_wed">Wed</h3>
 
                     <span class="forecast-icon">🌧️</span>
 
@@ -198,7 +198,7 @@
 
                 <div class="forecast-card">
 
-                    <h3>Thu</h3>
+                    <h3 data-i18n="weather_day_thu">Thu</h3>
 
                     <span class="forecast-icon">☁️</span>
 
@@ -213,7 +213,7 @@
 
                 <div class="forecast-card">
 
-                    <h3>Fri</h3>
+                    <h3 data-i18n="weather_day_fri">Fri</h3>
 
                     <span class="forecast-icon">☀️</span>
 
@@ -234,15 +234,15 @@
 
         <section class="farming-advice">
 
-            <h2>🌱 Farming Advice</h2>
+            <h2 data-i18n="farming_advice_title">🌱 Farming Advice</h2>
 
             <div class="advice-container">
 
                 <div class="advice-card">
                     <span>💧</span>
                     <div>
-                        <h3>Irrigation</h3>
-                        <p>Recommended</p>
+                        <h3 data-i18n="advice_irrigation_title">Irrigation</h3>
+                        <p data-i18n="advice_irrigation_desc">Recommended</p>
                     </div>
                 </div>
 
@@ -250,8 +250,8 @@
                 <div class="advice-card">
                     <span>🌧️</span>
                     <div>
-                        <h3>Rain Alert</h3>
-                        <p>Rain expected tomorrow</p>
+                        <h3 data-i18n="advice_rain_title">Rain Alert</h3>
+                        <p data-i18n="advice_rain_desc">Rain expected tomorrow</p>
                     </div>
                 </div>
 
@@ -259,8 +259,8 @@
                 <div class="advice-card">
                     <span>🛡️</span>
                     <div>
-                        <h3>Crop Protection</h3>
-                        <p>Protect crops from excess moisture.</p>
+                        <h3 data-i18n="advice_protection_title">Crop Protection</h3>
+                        <p data-i18n="advice_protection_desc">Protect crops from excess moisture.</p>
                     </div>
                 </div>
 
@@ -268,8 +268,8 @@
                 <div class="advice-card">
                     <span>🌾</span>
                     <div>
-                        <h3>Farm Activity</h3>
-                        <p>Morning is suitable for farm activities.</p>
+                        <h3 data-i18n="advice_activity_title">Farm Activity</h3>
+                        <p data-i18n="advice_activity_desc">Morning is suitable for farm activities.</p>
                     </div>
                 </div>
 
@@ -282,34 +282,34 @@
 
         <section class="additional-info">
 
-            <h2>📊 Additional Information</h2>
+            <h2 data-i18n="additional_info_title">📊 Additional Information</h2>
 
             <div class="additional-container">
 
                 <div class="additional-card">
                     <span>🌅</span>
-                    <small>Sunrise</small>
+                    <small data-i18n="weather_sunrise">Sunrise</small>
                     <strong>6:12 AM</strong>
                 </div>
 
 
                 <div class="additional-card">
                     <span>🌇</span>
-                    <small>Sunset</small>
+                    <small data-i18n="weather_sunset">Sunset</small>
                     <strong>6:48 PM</strong>
                 </div>
 
 
                 <div class="additional-card">
                     <span>📈</span>
-                    <small>Pressure</small>
+                    <small data-i18n="weather_pressure">Pressure</small>
                     <strong>1012 hPa</strong>
                 </div>
 
 
                 <div class="additional-card">
                     <span>👁️</span>
-                    <small>Visibility</small>
+                    <small data-i18n="weather_visibility">Visibility</small>
                     <strong>8 km</strong>
                 </div>
 

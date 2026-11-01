@@ -86,17 +86,18 @@
                     statusEl.textContent = translate("iot_status_disconnected", "No Sensor");
                     statusEl.className = "iot-status-tag status-disconnected";
                 }
-                if (farmEl) farmEl.textContent = "Not assigned";
+                if (farmEl) farmEl.textContent = translate("iot_not_assigned", "Not assigned");
                 if (cropEl) cropEl.textContent = "-";
-                if (timeEl) timeEl.textContent = "Never";
+                if (timeEl) timeEl.textContent = translate("iot_never", "Never");
                 if (demoEl) demoEl.style.display = "none";
                 return;
             }
 
             if (valEl) valEl.textContent = typeof r.value === "number" ? r.value.toFixed(1) : r.value;
             if (statusEl) {
-                statusEl.textContent = r.status;
-                const statusClass = r.status.toLowerCase();
+                const statusKey = `iot_status_${(r.status || "").toLowerCase()}`;
+                statusEl.textContent = translate(statusKey, r.status);
+                const statusClass = (r.status || "").toLowerCase();
                 statusEl.className = `iot-status-tag status-${statusClass}`;
             }
             if (farmEl) farmEl.textContent = r.farm_name || "Assigned Farm";

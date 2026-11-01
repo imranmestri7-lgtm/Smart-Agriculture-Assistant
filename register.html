@@ -285,6 +285,7 @@
         <button
             class="farmer-btn"
             onclick="window.location.href='login.html'"
+            data-i18n="farmer_role"
         >
             Farmer
         </button>
@@ -305,9 +306,9 @@
             🌱
         </div>
 
-        <h1>Create Account</h1>
+        <h1 data-i18n="register_title">Create Account</h1>
 
-        <p class="auth-subtitle">
+        <p class="auth-subtitle" data-i18n="register_subtitle">
             Choose how you want to create your AgriSmart account.
         </p>
 
@@ -315,7 +316,7 @@
 
         <!-- AUTH METHOD -->
 
-        <div class="method-title">
+        <div class="method-title" data-i18n="register_tab_heading">
             How would you like to register?
         </div>
 
@@ -330,7 +331,7 @@
                     value="phone"
                     checked>
 
-                <label for="phoneMethod">
+                <label for="phoneMethod" data-i18n="reg_phone_option">
                     📱 Phone Number
                 </label>
 
@@ -344,7 +345,7 @@
                     name="authMethod"
                     value="email">
 
-                <label for="emailMethod">
+                <label for="emailMethod" data-i18n="reg_email_option">
                     📧 Email
                 </label>
 
@@ -358,7 +359,7 @@
 
             <div class="form-group">
 
-                <label for="fullName">
+                <label for="fullName" data-i18n="reg_fullname_label">
                     Full Name
                 </label>
 
@@ -366,6 +367,7 @@
                     type="text"
                     id="fullName"
                     name="full_name"
+                    data-i18n-placeholder="reg_fullname_placeholder"
                     placeholder="Enter your full name"
                     autocomplete="name"
                     required>
@@ -378,7 +380,7 @@
 
                 <div class="form-group">
 
-                    <label for="mobileNumber">
+                    <label for="mobileNumber" data-i18n="reg_mobile_label">
                         Mobile Number
                     </label>
 
@@ -386,6 +388,7 @@
                         type="tel"
                         id="mobileNumber"
                         name="mobile_number"
+                        data-i18n-placeholder="reg_mobile_placeholder"
                         placeholder="Enter 10-digit mobile number"
                         maxlength="10"
                         inputmode="numeric"
@@ -401,7 +404,7 @@
 
                 <div class="form-group">
 
-                    <label for="email">
+                    <label for="email" data-i18n="reg_email_label">
                         Email Address
                     </label>
 
@@ -409,6 +412,7 @@
                         type="email"
                         id="email"
                         name="email"
+                        data-i18n-placeholder="reg_email_placeholder"
                         placeholder="Enter your email"
                         autocomplete="email">
 
@@ -416,7 +420,7 @@
 
                 <div class="form-group">
 
-                    <label for="password">
+                    <label for="password" data-i18n="reg_password_label">
                         Password
                     </label>
 
@@ -424,6 +428,7 @@
                         type="password"
                         id="password"
                         name="password"
+                        data-i18n-placeholder="reg_password_placeholder"
                         placeholder="Enter password"
                         autocomplete="new-password">
 
@@ -431,7 +436,7 @@
 
                 <div class="form-group">
 
-                    <label for="confirmPassword">
+                    <label for="confirmPassword" data-i18n="reg_confirm_password_label">
                         Confirm Password
                     </label>
 
@@ -439,6 +444,7 @@
                         type="password"
                         id="confirmPassword"
                         name="confirm_password"
+                        data-i18n-placeholder="reg_confirm_password_placeholder"
                         placeholder="Re-enter password"
                         autocomplete="new-password">
 
@@ -450,7 +456,7 @@
 
             <div class="form-group">
 
-                <label for="language">
+                <label for="language" data-i18n="reg_lang_label">
                     Preferred Language
                 </label>
 
@@ -458,15 +464,15 @@
                     id="language"
                     name="preferred_language">
 
-                    <option value="English">
+                    <option value="English" data-i18n="english">
                         English
                     </option>
 
-                    <option value="Marathi">
+                    <option value="Marathi" data-i18n="marathi">
                         मराठी
                     </option>
 
-                    <option value="Hindi">
+                    <option value="Hindi" data-i18n="hindi">
                         हिंदी
                     </option>
 
@@ -477,7 +483,8 @@
             <button
                 type="submit"
                 class="auth-button"
-                id="registerButton">
+                id="registerButton"
+                data-i18n="reg_submit_btn">
 
                 Create Account
 
@@ -487,9 +494,9 @@
 
         <div class="auth-footer">
 
-            Already have an account?
+            <span data-i18n="reg_has_account">Already have an account?</span>
 
-            <a href="login.html">
+            <a href="login.html" data-i18n="reg_login_link">
                 Login
             </a>
 
@@ -497,7 +504,7 @@
 
         <div class="back-home">
 
-            <a href="index.html">
+            <a href="index.html" data-i18n="home">
                 ← Back to Home
             </a>
 

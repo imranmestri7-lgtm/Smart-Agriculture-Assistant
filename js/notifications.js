@@ -154,13 +154,13 @@
 
             let actionLinkHtml = "";
             if (n.link) {
-                let linkLabel = "View Details →";
-                if (n.category === "crop") linkLabel = "Manage Crops →";
-                else if (n.category === "irrigation") linkLabel = "View Irrigation →";
-                else if (n.category === "weather") linkLabel = "Check Weather →";
-                else if (n.category === "disease") linkLabel = "Check Diagnosis →";
+                let linkLabel = t("view_details_arrow", "View Details →");
+                if (n.category === "crop") linkLabel = t("manage_crops_arrow", "Manage Crops →");
+                else if (n.category === "irrigation") linkLabel = t("view_irrigation_arrow", "View Irrigation →");
+                else if (n.category === "weather") linkLabel = t("check_weather_arrow", "Check Weather →");
+                else if (n.category === "disease") linkLabel = t("check_diagnosis_arrow", "Check Diagnosis →");
 
-                actionLinkHtml = `<a href="${escapeHtml(n.link)}" class="notif-link-btn">${linkLabel}</a>`;
+                actionLinkHtml = `<a href="${escapeHtml(n.link)}" class="notif-link-btn">${escapeHtml(linkLabel)}</a>`;
             }
 
             const readBtnHtml = !n.is_read

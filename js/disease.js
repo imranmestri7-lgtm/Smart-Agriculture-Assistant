@@ -47,7 +47,7 @@ resultSection.style.cssText = `
 `;
 
 resultSection.innerHTML = `
-    <h2 style="margin-bottom: 20px; color: #245c32;">
+    <h2 style="margin-bottom: 20px; color: #245c32;" data-i18n="disease_result_heading">
         🌿 Disease Prediction Result
     </h2>
 
@@ -61,6 +61,7 @@ resultSection.innerHTML = `
             <img
                 id="resultImage"
                 alt="Analyzed plant image"
+                data-i18n-alt="analyzed_plant_image_alt"
                 style="
                     width: 100%;
                     max-width: 320px;
@@ -71,7 +72,7 @@ resultSection.innerHTML = `
         </div>
 
         <div style="flex: 2; min-width: 250px;">
-            <p style="color: #666; margin-bottom: 8px;">
+            <p style="color: #666; margin-bottom: 8px;" data-i18n="predicted_class_label">
                 Predicted class
             </p>
 
@@ -86,7 +87,7 @@ resultSection.innerHTML = `
             >--</h3>
 
             <p style="margin-bottom: 8px;">
-                Model confidence:
+                <span data-i18n="model_confidence_label">Model confidence:</span>
                 <strong id="confidence">--</strong>
             </p>
 
@@ -108,7 +109,7 @@ resultSection.innerHTML = `
                 ></div>
             </div>
 
-            <h4 style="margin-bottom: 12px;">
+            <h4 style="margin-bottom: 12px;" data-i18n="other_possible_predictions_heading">
                 Other possible predictions
             </h4>
 
@@ -129,8 +130,8 @@ resultSection.innerHTML = `
             line-height: 1.6;
         "
     >
-        <strong>⚠️ The prediction is uncertain.</strong>
-        <p style="margin-top: 8px;">
+        <strong data-i18n="uncertain_pred_title">⚠️ The prediction is uncertain.</strong>
+        <p style="margin-top: 8px;" data-i18n="uncertain_pred_desc">
             The model confidence is below 60%. Please answer the
             questions below to provide more information. Your answers
             do not confirm a disease, and the model prediction will
@@ -148,17 +149,17 @@ resultSection.innerHTML = `
             border-radius: 12px;
         "
     >
-        <h3 style="color: #245c32; margin-bottom: 8px;">
+        <h3 style="color: #245c32; margin-bottom: 8px;" data-i18n="farmer_qa_title">
             🌱 Tell us about your plant
         </h3>
 
-        <p style="margin-bottom: 18px; line-height: 1.6;">
+        <p style="margin-bottom: 18px; line-height: 1.6;" data-i18n="farmer_qa_desc">
             Don't know the disease name? That's okay. Answer what you
             know, or select "Not sure".
         </p>
 
         <form id="farmerQuestionsForm">
-            <label for="farmerPlant" style="display:block; margin-bottom:6px;">
+            <label for="farmerPlant" style="display:block; margin-bottom:6px;" data-i18n="qa_q1_plant">
                 1. Which plant or fruit is affected?
             </label>
             <select
@@ -167,17 +168,17 @@ resultSection.innerHTML = `
                 style="width:100%; padding:11px; margin-bottom:16px;"
                 required
             >
-                <option value="">Choose or select not sure</option>
-                <option>Tomato</option>
-                <option>Potato</option>
-                <option>Corn / Maize</option>
-                <option>Apple</option>
-                <option>Strawberry</option>
-                <option>Other plant or fruit</option>
-                <option>Not sure</option>
+                <option value="" data-i18n="qa_choose_plant">Choose or select not sure</option>
+                <option data-i18n="crop_tomato">Tomato</option>
+                <option data-i18n="crop_potato">Potato</option>
+                <option data-i18n="crop_corn">Corn / Maize</option>
+                <option data-i18n="crop_apple">Apple</option>
+                <option data-i18n="crop_strawberry">Strawberry</option>
+                <option data-i18n="qa_other_plant">Other plant or fruit</option>
+                <option data-i18n="qa_not_sure">Not sure</option>
             </select>
 
-            <label for="farmerSymptoms" style="display:block; margin-bottom:6px;">
+            <label for="farmerSymptoms" style="display:block; margin-bottom:6px;" data-i18n="qa_q2_symptoms">
                 2. What do you see on the plant?
             </label>
             <select
@@ -186,17 +187,17 @@ resultSection.innerHTML = `
                 style="width:100%; padding:11px; margin-bottom:16px;"
                 required
             >
-                <option value="">Choose a symptom</option>
-                <option>Brown or black spots</option>
-                <option>Yellow leaves</option>
-                <option>Curled or wilting leaves</option>
-                <option>Rotting fruit or stem</option>
-                <option>Insects or holes in leaves</option>
-                <option>Other symptoms</option>
-                <option>Not sure</option>
+                <option value="" data-i18n="qa_choose_symptom">Choose a symptom</option>
+                <option data-i18n="qa_sym_spots">Brown or black spots</option>
+                <option data-i18n="qa_sym_yellow">Yellow leaves</option>
+                <option data-i18n="qa_sym_curled">Curled or wilting leaves</option>
+                <option data-i18n="qa_sym_rot">Rotting fruit or stem</option>
+                <option data-i18n="qa_sym_insects">Insects or holes in leaves</option>
+                <option data-i18n="qa_sym_other">Other symptoms</option>
+                <option data-i18n="qa_not_sure">Not sure</option>
             </select>
 
-            <label for="farmerDuration" style="display:block; margin-bottom:6px;">
+            <label for="farmerDuration" style="display:block; margin-bottom:6px;" data-i18n="qa_q3_duration">
                 3. When did you first notice the problem?
             </label>
             <select
@@ -205,14 +206,14 @@ resultSection.innerHTML = `
                 style="width:100%; padding:11px; margin-bottom:16px;"
                 required
             >
-                <option value="">Choose a duration</option>
-                <option>Within the last 1–3 days</option>
-                <option>About one week ago</option>
-                <option>More than one week ago</option>
-                <option>Not sure</option>
+                <option value="" data-i18n="qa_choose_duration">Choose a duration</option>
+                <option data-i18n="qa_dur_1_3_days">Within the last 1–3 days</option>
+                <option data-i18n="qa_dur_1_week">About one week ago</option>
+                <option data-i18n="qa_dur_more_1_week">More than one week ago</option>
+                <option data-i18n="qa_not_sure">Not sure</option>
             </select>
 
-            <label for="farmerSpread" style="display:block; margin-bottom:6px;">
+            <label for="farmerSpread" style="display:block; margin-bottom:6px;" data-i18n="qa_q4_spread">
                 4. How much of the plant is affected?
             </label>
             <select
@@ -221,16 +222,17 @@ resultSection.innerHTML = `
                 style="width:100%; padding:11px; margin-bottom:18px;"
                 required
             >
-                <option value="">Choose an answer</option>
-                <option>Only one leaf or fruit</option>
-                <option>Several leaves or fruits</option>
-                <option>Most of the plant</option>
-                <option>Many plants are affected</option>
-                <option>Not sure</option>
+                <option value="" data-i18n="qa_choose_spread">Choose an answer</option>
+                <option data-i18n="qa_spread_one_leaf">Only one leaf or fruit</option>
+                <option data-i18n="qa_spread_several_leaves">Several leaves or fruits</option>
+                <option data-i18n="qa_spread_most_plant">Most of the plant</option>
+                <option data-i18n="qa_spread_many_plants">Many plants are affected</option>
+                <option data-i18n="qa_not_sure">Not sure</option>
             </select>
 
             <button
                 type="submit"
+                data-i18n="btn_submit_answers"
                 style="
                     padding: 12px 20px;
                     background: #2e7d32;
@@ -258,7 +260,7 @@ resultSection.innerHTML = `
             "
         ></div>
 
-        <p style="margin-top:14px; color:#666; font-size:13px; line-height:1.5;">
+        <p style="margin-top:14px; color:#666; font-size:13px; line-height:1.5;" data-i18n="farmer_answers_note">
             These answers are displayed on this page only. They are not
             saved to the database or used to change the model prediction.
         </p>
@@ -281,6 +283,9 @@ const scannerSection = document.getElementById("scanner");
 
 if (scannerSection) {
     scannerSection.insertAdjacentElement("afterend", resultSection);
+    if (window.i18n && typeof window.i18n.applyTranslations === "function") {
+        window.i18n.applyTranslations(resultSection);
+    }
 }
 
 // =====================================================
@@ -1193,6 +1198,9 @@ loadDiagnosisHistory();
 
 // Re-render when language selector changes
 window.addEventListener("languageChanged", function () {
+    if (window.i18n && typeof window.i18n.applyTranslations === "function") {
+        window.i18n.applyTranslations(resultSection);
+    }
     loadDiagnosisHistory();
 });
 

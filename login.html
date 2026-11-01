@@ -418,7 +418,7 @@
 
 
         <!-- Login Title -->
-        <h2 class="login-title">
+        <h2 class="login-title" data-i18n="login_heading">
             How would you like to login?
         </h2>
 
@@ -443,7 +443,7 @@
                     📱
                 </span>
 
-                <span class="method-text">
+                <span class="method-text" data-i18n="login_phone_tab">
                     Phone Number
                 </span>
 
@@ -462,7 +462,7 @@
                     📧
                 </span>
 
-                <span class="method-text">
+                <span class="method-text" data-i18n="login_email_tab">
                     Email
                 </span>
 
@@ -477,13 +477,14 @@
 
             <div class="form-group">
 
-                <label for="mobileNumber">
+                <label for="mobileNumber" data-i18n="login_mobile_label">
                     Mobile Number
                 </label>
 
                 <input
                     type="tel"
                     id="mobileNumber"
+                    data-i18n-placeholder="login_mobile_placeholder"
                     placeholder="Enter 10-digit mobile number"
                     maxlength="10"
                     autocomplete="tel"
@@ -497,6 +498,7 @@
                 <input
                     type="text"
                     id="otp"
+                    data-i18n-placeholder="login_otp_placeholder"
                     placeholder="Enter OTP"
                     maxlength="6"
                     inputmode="numeric"
@@ -506,6 +508,7 @@
                     type="button"
                     id="sendOtpBtn"
                     class="send-otp-btn"
+                    data-i18n="login_send_otp_btn"
                 >
                     Send OTP
                 </button>
@@ -517,7 +520,7 @@
                 id="developmentOtp"
                 class="development-otp"
             >
-                Development OTP:
+                <span data-i18n="dev_otp_label">Development OTP:</span>
                 <strong id="otpValue"></strong>
             </div>
 
@@ -526,6 +529,7 @@
                 type="submit"
                 id="verifyOtpBtn"
                 class="login-btn"
+                data-i18n="login_verify_otp_btn"
             >
                 Verify OTP & Login
             </button>
@@ -535,6 +539,7 @@
                 type="button"
                 id="changeNumberBtn"
                 class="change-number"
+                data-i18n="login_change_number"
             >
                 Change mobile number
             </button>
@@ -548,13 +553,14 @@
 
             <div class="form-group">
 
-                <label for="email">
+                <label for="email" data-i18n="login_email_label">
                     Email Address
                 </label>
 
                 <input
                     type="email"
                     id="email"
+                    data-i18n-placeholder="login_email_placeholder"
                     placeholder="Enter your email"
                     autocomplete="email"
                 >
@@ -564,13 +570,14 @@
 
             <div class="form-group">
 
-                <label for="password">
+                <label for="password" data-i18n="login_password_label">
                     Password
                 </label>
 
                 <input
                     type="password"
                     id="password"
+                    data-i18n-placeholder="login_password_placeholder"
                     placeholder="Enter your password"
                     autocomplete="current-password"
                 >
@@ -582,6 +589,7 @@
                 type="submit"
                 id="emailLoginBtn"
                 class="login-btn"
+                data-i18n="login_submit_btn"
             >
                 Login
             </button>
@@ -592,9 +600,9 @@
         <!-- Register -->
         <div class="register-link">
 
-            Don't have an account?
+            <span data-i18n="login_no_account">Don't have an account?</span>
 
-            <a href="register.html">
+            <a href="register.html" data-i18n="login_create_account">
                 Create Account
             </a>
 
