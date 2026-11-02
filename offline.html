@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="offline_page_title">AgriSmart — Offline Mode</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icons/icon-180x180.png">
+    <meta name="theme-color" content="#15803d">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        .offline-wrapper {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        .offline-card {
+            background: #ffffff;
+            border: 2px solid #bbf7d0;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 640px;
+            width: 100%;
+            padding: 36px 28px;
+            text-align: center;
+        }
+        .offline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .offline-icon {
+            font-size: 54px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        .offline-title {
+            color: #15803d;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .offline-desc {
+            color: #475569;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            text-align: left;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 540px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .feature-box {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+        }
+        .feature-box.available {
+            border-left: 4px solid #16a34a;
+        }
+        .feature-box.unavailable {
+            border-left: 4px solid #e11d48;
+        }
+        .feature-box h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .feature-box.available h4 { color: #15803d; }
+        .feature-box.unavailable h4 { color: #be123c; }
+        .feature-box ul {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .offline-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-retry {
+            background: #15803d;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-retry:hover { background: #166534; }
+        .btn-home {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-home:hover { background: #e2e8f0; }
+        .lang-pills {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        .lang-btn {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+        }
+        .lang-btn.active {
+            background: #15803d;
+            color: #ffffff;
+            border-color: #15803d;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-wrapper">
+        <div class="offline-card">
+            <div class="offline-badge">
+                <span>📡</span> <span data-i18n="offline_badge">No Internet Connection</span>
+            </div>
+            <div class="offline-icon">🌾</div>
+            <h1 class="offline-title" data-i18n="offline_title">You Are Offline</h1>
+            <p class="offline-desc" data-i18n="offline_desc">
+                AgriSmart is unable to reach the server. You can still view previously cached farm information, crop records, and educational resources.
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-box available">
+                    <h4><span>✓</span> <span data-i18n="offline_avail_title">Available Offline</span></h4>
+                    <ul>
+                        <li data-i18n="offline_avail_1">Cached Farmer Dashboard</li>
+                        <li data-i18n="offline_avail_2">Registered Farms & Crops list</li>
+                        <li data-i18n="offline_avail_3">Static guides and instructions</li>
+                        <li data-i18n="offline_avail_4">Offline action queue</li>
+                    </ul>
+                </div>
+                <div class="feature-box unavailable">
+                    <h4><span>✕</span> <span data-i18n="offline_unavail_title">Requires Internet</span></h4>
+                    <ul>
+                        <li data-i18n="offline_unavail_1">New AI disease detection</li>
+                        <li data-i18n="offline_unavail_2">Live weather forecasts</li>
+                        <li data-i18n="offline_unavail_3">AI chatbot conversations</li>
+                        <li data-i18n="offline_unavail_4">Live IoT telemetry ingestion</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="offline-actions">
+                <button class="btn-retry" onclick="checkConnection()" data-i18n="btn_retry_connection">
+                    🔄 Try Reconnecting
+                </button>
+                <a href="/farmer.html" class="btn-home" data-i18n="btn_back_dashboard">
+                    🏡 Go to Dashboard
+                </a>
+            </div>
+
+            <div class="lang-pills">
+                <button class="lang-btn active" onclick="setOfflineLang('en')">English</button>
+                <button class="lang-btn" onclick="setOfflineLang('mr')">मराठी</button>
+                <button class="lang-btn" onclick="setOfflineLang('hi')">हिन्दी</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const OFFLINE_TEXTS = {
+            en: {
+                offline_page_title: "AgriSmart — Offline Mode",
+                offline_badge: "No Internet Connection",
+                offline_title: "You Are Offline",
+                offline_desc: "AgriSmart is unable to reach the server. You can still view previously cached farm information, crop records, and educational resources.",
+                offline_avail_title: "Available Offline",
+                offline_avail_1: "Cached Farmer Dashboard",
+                offline_avail_2: "Registered Farms & Crops list",
+                offline_avail_3: "Static guides and instructions",
+                offline_avail_4: "Offline action queue",
+                offline_unavail_title: "Requires Internet",
+                offline_unavail_1: "New AI disease detection",
+                offline_unavail_2: "Live weather forecasts",
+                offline_unavail_3: "AI chatbot conversations",
+                offline_unavail_4: "Live IoT telemetry ingestion",
+                btn_retry_connection: "🔄 Try Reconnecting",
+                btn_back_dashboard: "🏡 Go to Dashboard"
+            },
+            mr: {
+                offline_page_title: "ॲग्रीस्मार्ट — ऑफलाइन मोड",
+                offline_badge: "इंटरनेट संपर्क नाही",
+                offline_title: "तुम्ही ऑफलाइन आहात",
+                offline_desc: "ॲग्रीस्मार्ट सर्व्हरशी संपर्क साधू शकत नाही. तुम्ही आधी कॅश केलेली शेती माहिती, पिकांच्या नोंदी आणि मार्गदर्शक पाहू शकता.",
+                offline_avail_title: "ऑफलाइन उपलब्ध",
+                offline_avail_1: "जतन केलेला शेतकरी डॅशबोर्ड",
+                offline_avail_2: "नोंदणीकृत शेत व पिकांची यादी",
+                offline_avail_3: "माहिती व कृषी मार्गदर्शक",
+                offline_avail_4: "ऑफलाइन कृती रांग (Queue)",
+                offline_unavail_title: "इंटरनेट आवश्यक",
+                offline_unavail_1: "नवीन AI वनस्पती रोगनिदान",
+                offline_unavail_2: "थेट हवामान अंदाज",
+                offline_unavail_3: "AI शेती सहाय्यक गप्पा",
+                offline_unavail_4: "थेट IoT सेन्सर डेटा सिंक",
+                btn_retry_connection: "🔄 पुन्हा प्रयत्न करा",
+                btn_back_dashboard: "🏡 डॅशबोर्डवर जा"
+            },
+            hi: {
+                offline_page_title: "एग्रीस्मार्ट — ऑफ़लाइन मोड",
+                offline_badge: "इंटरनेट कनेक्शन नहीं है",
+                offline_title: "आप ऑफ़लाइन हैं",
+                offline_desc: "एग्रीस्मार्ट सर्वर से जुड़ने में असमर्थ है। आप पहले से सहेजी गई खेत की जानकारी, फसल रिकॉर्ड और कृषि निर्देश देख सकते हैं।",
+                offline_avail_title: "ऑफ़लाइन उपलब्ध",
+                offline_avail_1: "सहेजा गया किसान डैशबोर्ड",
+                offline_avail_2: "पंजीकृत खेत और फसलों की सूची",
+                offline_avail_3: "कृषि निर्देश और गाइड",
+                offline_avail_4: "ऑफ़लाइन कार्य कतार (Queue)",
+                offline_unavail_title: "इंटरनेट आवश्यक है",
+                offline_unavail_1: "नया AI पौधा रोग निदान",
+                offline_unavail_2: "ताज़ा मौसम पूर्वानुमान",
+                offline_unavail_3: "AI कृषि सहायक चैट",
+                offline_unavail_4: "लाइव IoT सेंसर डेटा सिंक",
+                btn_retry_connection: "🔄 पुनः प्रयास करें",
+                btn_back_dashboard: "🏡 डैशबोर्ड पर जाएं"
+            }
+        };
+
+        function setOfflineLang(lang) {
+            localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
+            const dict = OFFLINE_TEXTS[lang] || OFFLINE_TEXTS.en;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const k = el.getAttribute('data-i18n');
+                if (dict[k]) el.textContent = dict[k];
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(lang === 'en' ? 'english' : (lang === 'mr' ? 'मराठी' : 'हिन्दी')));
+            });
+        }
+
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                alert(document.documentElement.lang === 'mr' ? 'अजूनही इंटरनेट जोडलेले नाही.' : (document.documentElement.lang === 'hi' ? 'अभी भी इंटरनेट कनेक्ट नहीं है।' : 'Still offline. Check your mobile network or Wi-Fi.'));
+            }
+        }
+
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // Init language from storage
+        const currentLang = localStorage.getItem('lang') || 'en';
+        setOfflineLang(currentLang);
+    </script>
+</body>
+</html>

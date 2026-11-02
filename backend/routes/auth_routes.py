@@ -3,9 +3,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from twilio.rest import Client
 
 import os
+import re
 
 from config import get_db_connection
 from utils.auth_tokens import create_access_token
+from utils.rate_limiter import rate_limit
 
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -88,6 +90,7 @@ def get_user_response(user, auth_method):
 # ==================================================
 
 @auth_bp.route("/register", methods=["POST"])
+@rate_limit(max_requests=10, window_seconds=60, scope="auth_register")
 def register():
 
     connection = None
@@ -214,10 +217,10 @@ def register():
         password = data.get("password", "")
         confirm_password = data.get("confirm_password", "")
 
-        if not email:
+        if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
             return jsonify({
                 "status": "error",
-                "message": "Email is required"
+                "message": "Please enter a valid email address"
             }), 400
 
         if not password:
@@ -230,6 +233,12 @@ def register():
             return jsonify({
                 "status": "error",
                 "message": "Password must contain at least 6 characters"
+            }), 400
+
+        if len(password) > 128:
+            return jsonify({
+                "status": "error",
+                "message": "Password must not exceed 128 characters"
             }), 400
 
         if password != confirm_password:
@@ -317,6 +326,7 @@ def register():
 # ==================================================
 
 @auth_bp.route("/login", methods=["POST"])
+@rate_limit(max_requests=10, window_seconds=60, scope="auth_login")
 def login():
 
     connection = None
@@ -402,6 +412,7 @@ def login():
 # ==================================================
 
 @auth_bp.route("/send-otp", methods=["POST"])
+@rate_limit(max_requests=5, window_seconds=300, scope="auth_send_otp")
 def send_otp():
 
     connection = None
@@ -483,11 +494,7 @@ def send_otp():
 
     
     except Exception as error:
-        import traceback
-
-        print("\n===== OTP ERROR DETAILS =====")
-        traceback.print_exc()
-        print("===== END OTP ERROR =====\n")
+        print("OTP Send Error:", str(error))
 
         return jsonify({
             "status": "error",
@@ -505,6 +512,7 @@ def send_otp():
 # ==================================================
 
 @auth_bp.route("/verify-otp", methods=["POST"])
+@rate_limit(max_requests=10, window_seconds=300, scope="auth_verify_otp")
 def verify_otp():
 
     connection = None
@@ -692,3 +700,17 @@ def get_user_profile():
         return jsonify({"status": "error", "message": "Failed to fetch profile"}), 500
     finally:
         close_database(cursor, connection)
+
+
+# ==================================================
+# LOGOUT
+# ==================================================
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    """Acknowledge client logout and session closure."""
+    return jsonify({
+        "status": "success",
+        "message": "Logged out successfully."
+    }), 200
+

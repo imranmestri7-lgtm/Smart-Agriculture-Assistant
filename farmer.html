@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/farmer.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icons/icon-180x180.png">
+    <meta name="theme-color" content="#15803d">
 </head>
 
 <body>
@@ -37,6 +40,8 @@
         </nav>
 
         <div class="navbar-right">
+            <button type="button" class="btn-pwa-install" style="display:none;" data-i18n="pwa_install_btn">📲 Install App</button>
+            <span id="offlineQueueBadge" class="offline-queue-badge" style="display:none;"></span>
             <select id="lang-select" style="margin-right:15px;">
                 <option value="en" data-i18n="english">English</option>
                 <option value="mr" data-i18n="marathi">मराठी</option>
@@ -1557,6 +1562,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
     <script src="js/iot_monitoring.js"></script>
     <script src="js/mobile-nav.js"></script>
 
+    <script src="js/pwa.js"></script>
 </body>
 
 </html>

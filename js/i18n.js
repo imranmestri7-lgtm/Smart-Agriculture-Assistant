@@ -755,6 +755,23 @@ const translations = {
   "stage_fruiting": "Fruiting",
   "stage_ready_for_harvest": "Ready for Harvest",
   "stage_harvested": "Harvested"
+,
+  "pwa_install_btn": "📲 Install App",
+  "pwa_install_title": "Install AgriSmart",
+  "pwa_install_desc": "Install AgriSmart on your device for fast access, home screen launching, and offline support.",
+  "pwa_install_guide_title": "How to Install AgriSmart",
+  "pwa_install_guide_ios": "Tap the Share button at the bottom of Safari, then scroll down and select \"Add to Home Screen\".",
+  "pwa_install_guide_desktop": "Click the install icon in the address bar (top right) or open browser settings and tap \"Install AgriSmart\".",
+  "pwa_offline_banner": "You are currently offline. Showing cached information.",
+  "pwa_online_banner": "Connection restored. You are back online.",
+  "offline_learn_more": "Learn what works offline →",
+  "pwa_update_available": "A new version of AgriSmart is available.",
+  "pwa_btn_refresh": "Update Now",
+  "pwa_offline_queue_badge": "Offline Actions Pending",
+  "pwa_cached_data_notice": "This section is displaying cached data recorded offline.",
+  "pwa_online_only_feature": "This feature requires an active internet connection.",
+  "farm_queued_offline": "Farm saved offline. It will be synchronized once connection returns.",
+  "crop_queued_offline": "Crop saved offline. It will be synchronized once connection returns."
 },
 mr: {
   "choose_language": "तुमची भाषा निवडा",
@@ -1510,6 +1527,23 @@ mr: {
   "stage_fruiting": "फळधारणा",
   "stage_ready_for_harvest": "कापणीस तयार",
   "stage_harvested": "कापणी पूर्ण"
+,
+  "pwa_install_btn": "📲 ॲप इन्स्टॉल करा",
+  "pwa_install_title": "ॲग्रीस्मार्ट इन्स्टॉल करा",
+  "pwa_install_desc": "जलद प्रवेश, होम स्क्रीन लाँच आणि ऑफलाइन सपोर्टसाठी ॲग्रीस्मार्ट इन्स्टॉल करा.",
+  "pwa_install_guide_title": "ॲग्रीस्मार्ट कसे इन्स्टॉल करावे",
+  "pwa_install_guide_ios": "सफारीच्या तळाशी असलेल्या शेअर बटनावर टॅप करा, नंतर खाली स्क्रोल करा आणि \"होम स्क्रीनवर जोडा\" निवडा.",
+  "pwa_install_guide_desktop": "ॲड्रेस बारमधील (वर उजवीकडे) इन्स्टॉल आयकॉनवर क्लिक करा किंवा ब्राउझर सेटिंग्ज उघडून \"ॲग्रीस्मार्ट इन्स्टॉल करा\" निवडा.",
+  "pwa_offline_banner": "तुम्ही सध्या ऑफलाइन आहात. कॅश केलेली माहिती दाखवत आहोत.",
+  "pwa_online_banner": "इंटरनेट संपर्क पूर्ववत झाला आहे. तुम्ही ऑनलाइन आहात.",
+  "offline_learn_more": "ऑफलाइन काय चालते ते पहा →",
+  "pwa_update_available": "ॲग्रीस्मार्टची नवीन आवृत्ती उपलब्ध आहे.",
+  "pwa_btn_refresh": "आता अपडेट करा",
+  "pwa_offline_queue_badge": "ऑफलाइन नोंदी प्रलंबित",
+  "pwa_cached_data_notice": "हा विभाग ऑफलाइन कॅश केलेला डेटा दाखवत आहे.",
+  "pwa_online_only_feature": "या सुविधेसाठी सक्रिय इंटरनेट कनेक्शन आवश्यक आहे.",
+  "farm_queued_offline": "शेत ऑफलाइन जतन केले. इंटरनेट सुरू झाल्यावर आपोआप सिंक होईल.",
+  "crop_queued_offline": "पीक नोंद ऑफलाइन जतन केली. इंटरनेट सुरू झाल्यावर आपोआप सिंक होईल."
 },
 hi: {
   "choose_language": "अपनी भाषा चुनें",
@@ -2263,7 +2297,23 @@ hi: {
   "stage_flowering": "फूल आ रहे हैं",
   "stage_fruiting": "फल आ रहे हैं",
   "stage_ready_for_harvest": "कटाई के लिए तैयार",
-  "stage_harvested": "कटाई पूर्ण"
+  "stage_harvested": "कटाई पूर्ण",
+  "pwa_install_btn": "📲 ऐप इंस्टॉल करें",
+  "pwa_install_title": "एग्रीस्मार्ट इंस्टॉल करें",
+  "pwa_install_desc": "त्वरित पहुंच, होम स्क्रीन लॉन्च और ऑफ़लाइन सहायता के लिए एग्रीस्मार्ट इंस्टॉल करें।",
+  "pwa_install_guide_title": "एग्रीस्मार्ट कैसे इंस्टॉल करें",
+  "pwa_install_guide_ios": "Safari में नीचे शेयर बटन पर टैप करें, फिर नीचे स्क्रॉल करें और \"होम स्क्रीन पर जोड़ें\" चुनें।",
+  "pwa_install_guide_desktop": "एड्रेस बार में (ऊपर दाईं ओर) इंस्टॉल आइकन पर क्लिक करें या ब्राउज़र सेटिंग्स खोलकर \"एग्रीस्मार्ट इंस्टॉल करें\" चुनें।",
+  "pwa_offline_banner": "आप वर्तमान में ऑफ़लाइन हैं। सहेजी गई जानकारी दिखाई जा रही है।",
+  "pwa_online_banner": "इंटरनेट कनेक्शन बहाल हो गया। आप ऑनलाइन वापस आ गए हैं।",
+  "offline_learn_more": "ऑफ़लाइन क्या काम करता है देखें →",
+  "pwa_update_available": "एग्रीस्मार्ट का नया संस्करण उपलब्ध है।",
+  "pwa_btn_refresh": "अभी अपडेट करें",
+  "pwa_offline_queue_badge": "ऑफ़लाइन कार्य लंबित",
+  "pwa_cached_data_notice": "यह अनुभाग ऑफ़लाइन सहेजा गया डेटा प्रदर्शित कर रहा है।",
+  "pwa_online_only_feature": "इस सुविधा के लिए सक्रिय इंटरनेट कनेक्शन की आवश्यकता है।",
+  "farm_queued_offline": "खेत ऑफ़लाइन सहेजा गया। इंटरनेट शुरू होने पर स्वतः सिंक हो जाएगा।",
+  "crop_queued_offline": "फसल ऑफ़लाइन सहेजी गई। इंटरनेट शुरू होने पर स्वतः सिंक हो जाएगी।"
 }
 };
 

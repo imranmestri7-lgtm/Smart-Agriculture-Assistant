@@ -116,7 +116,7 @@ const logoutButton =
 
 if (logoutButton) {
 
-    logoutButton.addEventListener("click", function () {
+    logoutButton.addEventListener("click", async function () {
 
         const confirmLogout =
             confirm(window.i18n ? window.i18n.t("confirm_logout") : "Are you sure you want to logout?");
@@ -125,9 +125,24 @@ if (logoutButton) {
             return;
         }
 
+        // Notify backend logout endpoint
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (e) {
+            // Ignore network errors during logout
+        }
+
+        // Purge private PWA cached user data
+        if (window.AgriSmartPWA && typeof window.AgriSmartPWA.clearPrivateCache === "function") {
+            try {
+                await window.AgriSmartPWA.clearPrivateCache();
+            } catch (e) {}
+        }
+
         localStorage.removeItem("agriSmartUser");
         localStorage.removeItem("agriSmartToken");
         localStorage.removeItem("token");
+        localStorage.removeItem("agriSmart_last_user_id");
 
         // Revert to guest language choice without retaining private user preference
         const guestLang = localStorage.getItem("guest_lang") || "en";

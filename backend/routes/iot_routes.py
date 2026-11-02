@@ -15,9 +15,15 @@ import hashlib
 import json
 import re
 import secrets
+import threading
+import time
 from flask import Blueprint, jsonify, request
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
+from utils.rate_limiter import rate_limit
+
+_recent_ingest_lock = threading.Lock()
+_recent_ingest_fingerprints = {}  # (sensor_id, s_type, str(recorded_at)) -> timestamp
 
 iot_bp = Blueprint("iot", __name__, url_prefix="/api/iot")
 
@@ -208,7 +214,16 @@ def _create_iot_notification(connection, cursor, user_id, category, title, messa
 # 1. HARDWARE DEVICE INGESTION API (ESP32 / Arduino)
 # =========================================================================
 
+def _get_device_rate_key():
+    dev_id = request.headers.get("X-Device-Id")
+    if not dev_id and request.is_json:
+        dev_id = (request.get_json(silent=True) or {}).get("device_id")
+    return str(dev_id or request.remote_addr or "unknown_device")
+
+
 @iot_bp.route("/ingest", methods=["POST"])
+@iot_bp.route("/telemetry/ingest", methods=["POST"])
+@rate_limit(max_requests=60, window_seconds=60, scope="iot_ingest", key_func=_get_device_rate_key)
 def ingest_sensor_reading():
     """
     Ingestion endpoint for hardware devices (ESP32, Arduino).
@@ -292,6 +307,26 @@ def ingest_sensor_reading():
                     "message": f"Value {val} is outside valid physical limits for {type_info['label']} ({type_info['min_limit']} to {type_info['max_limit']})."
                 }), 400
 
+            # Duplicate-reading protection: check if same reading at exact timestamp was recently ingested
+            fp = (sensor["id"], s_type, str(recorded_at))
+            now_epoch = time.time()
+            is_duplicate = False
+            with _recent_ingest_lock:
+                # Evict entries older than 10 minutes
+                expired_keys = [k for k, t in _recent_ingest_fingerprints.items() if now_epoch - t > 600]
+                for k in expired_keys:
+                    _recent_ingest_fingerprints.pop(k, None)
+
+                if fp in _recent_ingest_fingerprints:
+                    is_duplicate = True
+                else:
+                    _recent_ingest_fingerprints[fp] = now_epoch
+
+            if is_duplicate:
+                # Reading already stored, avoid duplicate row insertion
+                inserted_readings.append({"sensor_type": s_type, "value": val, "unit": unit, "duplicate": True})
+                continue
+
             cursor.execute("""
                 INSERT INTO sensor_readings (sensor_id, user_id, sensor_type, value, unit, is_demo, recorded_at, created_at)
                 VALUES (%s, %s, %s, %s, %s, 0, %s, CURRENT_TIMESTAMP)
@@ -321,7 +356,7 @@ def ingest_sensor_reading():
     except Exception as e:
         if connection:
             connection.rollback()
-        return jsonify({"status": "error", "message": f"Database error during ingestion: {str(e)}"}), 500
+        return jsonify({"status": "error", "message": "Failed to record sensor reading due to an internal error."}), 500
     finally:
         if cursor:
             cursor.close()

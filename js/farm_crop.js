@@ -342,6 +342,19 @@
         }
 
         const payload = { farm_name, location, total_area, area_unit };
+
+        if (!navigator.onLine && !editingFarmId && window.AgriSmartPWA) {
+            window.AgriSmartPWA.queueAction({
+                type: "add_farm",
+                endpoint: "/api/farms",
+                method: "POST",
+                payload
+            });
+            closeFarmModal();
+            alert(getI18n("farm_queued_offline", "Farm saved offline. It will be synchronized once connection returns."));
+            return;
+        }
+
         let res;
         if (editingFarmId) {
             res = await apiRequest(`/api/farms/${editingFarmId}`, "PUT", payload);
@@ -386,6 +399,18 @@
             growth_status,
             notes
         };
+
+        if (!navigator.onLine && !editingCropId && window.AgriSmartPWA) {
+            window.AgriSmartPWA.queueAction({
+                type: "add_crop",
+                endpoint: "/api/crops",
+                method: "POST",
+                payload
+            });
+            closeCropModal();
+            alert(getI18n("crop_queued_offline", "Crop saved offline. It will be synchronized once connection returns."));
+            return;
+        }
 
         let res;
         if (editingCropId) {

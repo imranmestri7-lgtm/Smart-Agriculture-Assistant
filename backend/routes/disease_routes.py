@@ -19,6 +19,7 @@ except Exception as e:
 from flask import Blueprint, jsonify, request
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
+from utils.rate_limiter import rate_limit
 from utils import disease_knowledge
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -187,10 +188,14 @@ def disease_model_status():
 
 
 # =========================================================
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+
+
 # DISEASE PREDICTION API
 # =========================================================
 
 @disease_bp.route("/predict", methods=["POST"])
+@rate_limit(max_requests=20, window_seconds=60, scope="disease_predict")
 def predict_disease():
     """
     Predict the most likely disease class from an uploaded leaf image.
@@ -222,6 +227,14 @@ def predict_disease():
             "message": "Please select an image."
         }), 400
 
+    # Extension check
+    _, ext = os.path.splitext(uploaded_file.filename)
+    if ext.lower() not in ALLOWED_IMAGE_EXTENSIONS:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid image format. Supported formats: JPG, PNG, WEBP."
+        }), 400
+
     # 3. Read image with a 10 MB limit
     image_bytes = uploaded_file.read(MAX_IMAGE_SIZE + 1)
 
@@ -236,6 +249,22 @@ def predict_disease():
             "status": "error",
             "message": "Image size must not exceed 10 MB."
         }), 413
+
+    # Validate image header integrity via PIL
+    try:
+        from io import BytesIO
+        with Image.open(BytesIO(image_bytes)) as test_img:
+            test_img.verify()
+            if test_img.format not in ("JPEG", "PNG", "WEBP"):
+                return jsonify({
+                    "status": "error",
+                    "message": "Uploaded file is not a supported image type."
+                }), 400
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "Corrupted or invalid image file."
+        }), 400
 
     # 4. Prepare image for the trained model
     try:
@@ -849,7 +878,7 @@ def get_diagnosis_image(filename):
     if not os.path.isfile(file_path):
         return jsonify({"status": "error", "message": "Image not found."}), 404
 
-    # Security check: verify ownership if an authentication token is provided
+    # Security check: verify ownership for private diagnosis records
     auth_header = request.headers.get("Authorization", "")
     token = None
     if auth_header.startswith("Bearer "):
@@ -857,27 +886,35 @@ def get_diagnosis_image(filename):
     elif request.args.get("token"):
         token = request.args.get("token").strip()
 
-    if token:
+    connection = None
+    cursor = None
+    image_owner_id = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT user_id FROM diagnosis_history WHERE image_path = %s LIMIT 1",
+            (safe_name,)
+        )
+        rec = cursor.fetchone()
+        if rec and rec.get("user_id") is not None:
+            image_owner_id = rec.get("user_id")
+    except Exception:
+        pass
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+    # If the image is associated with a registered user, enforce strict ownership
+    if image_owner_id is not None:
+        if not token:
+            return jsonify({"status": "error", "message": "Authentication required to access this image."}), 401
         user_id = get_user_id_from_token(token)
-        if user_id:
-            connection = None
-            cursor = None
-            try:
-                connection = get_db_connection()
-                cursor = connection.cursor(dictionary=True)
-                cursor.execute(
-                    "SELECT user_id FROM diagnosis_history WHERE image_path = %s LIMIT 1",
-                    (safe_name,)
-                )
-                rec = cursor.fetchone()
-                if rec and rec["user_id"] != user_id:
-                    return jsonify({"status": "error", "message": "Access denied to this image."}), 403
-            except Exception:
-                pass
-            finally:
-                if cursor:
-                    cursor.close()
-                if connection:
-                    connection.close()
+        if not user_id:
+            return jsonify({"status": "error", "message": "Invalid or expired token."}), 401
+        if user_id != image_owner_id:
+            return jsonify({"status": "error", "message": "Access denied to this image."}), 403
 
     return send_from_directory(upload_dir, safe_name)

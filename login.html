@@ -371,6 +371,9 @@
             }
         }
     </style>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icons/icon-180x180.png">
+    <meta name="theme-color" content="#15803d">
 </head>
 
 <body>
@@ -385,6 +388,7 @@
             <a href="index.html" data-i18n="home">Home</a>
         </nav>
         <div class="nav-actions">
+            <button type="button" class="btn-pwa-install" style="display:none;" data-i18n="pwa_install_btn">📲 Install App</button>
             <select id="lang-select">
                 <option value="en" data-i18n="english">English</option>
                 <option value="mr" data-i18n="marathi">मराठी</option>
@@ -616,6 +620,7 @@
     <script src="js/login.js"></script>
     <script src="js/mobile-nav.js"></script>
 
+    <script src="js/pwa.js"></script>
 </body>
 
 </html>
