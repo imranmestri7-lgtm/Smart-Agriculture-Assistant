@@ -135,6 +135,10 @@
                 </div>
             `;
         }).join("");
+
+        if (window.AgriSmartAnimations && typeof window.AgriSmartAnimations.refresh === "function") {
+            window.AgriSmartAnimations.refresh();
+        }
     }
 
     function updateFarmDropdowns() {
@@ -251,6 +255,10 @@
                 </div>
             `;
         }).join("");
+
+        if (window.AgriSmartAnimations && typeof window.AgriSmartAnimations.refresh === "function") {
+            window.AgriSmartAnimations.refresh();
+        }
     }
 
     // =========================================================================

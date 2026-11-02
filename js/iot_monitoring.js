@@ -93,7 +93,14 @@
                 return;
             }
 
-            if (valEl) valEl.textContent = typeof r.value === "number" ? r.value.toFixed(1) : r.value;
+            if (valEl) {
+                const numVal = typeof r.value === "number" ? r.value.toFixed(1) : r.value;
+                valEl.textContent = numVal;
+                if (typeof r.value === "number" && window.AgriSmartAnimations && typeof window.AgriSmartAnimations.countUp === "function") {
+                    valEl.dataset.counted = "false";
+                    window.AgriSmartAnimations.countUp(valEl, 600);
+                }
+            }
             if (statusEl) {
                 const statusKey = `iot_status_${(r.status || "").toLowerCase()}`;
                 statusEl.textContent = translate(statusKey, r.status);

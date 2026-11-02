@@ -459,3 +459,67 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   SMART IRRIGATION UI/UX ENHANCEMENTS
+   ========================================================= */
+
+/* Soil & Method Radio Option Cards */
+.option-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease,
+                background-color 0.25s ease,
+                box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.option-card:hover {
+    transform: translateY(-3px);
+    border-color: #86efac;
+    box-shadow: 0 8px 20px -2px rgba(21, 128, 61, 0.12);
+}
+
+.option-card.selected,
+input[type="radio"]:checked + .option-card,
+.radio-card.active {
+    border-color: var(--primary) !important;
+    background: #f0fdf4 !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px -2px rgba(21, 128, 61, 0.16);
+}
+
+/* Result Output Banner */
+.irrigation-result {
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.irrigation-result.visible,
+.irrigation-result[style*="display: block"] {
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.water-amount {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #15803d;
+    letter-spacing: -0.02em;
+}
+
+/* Benefit Cards */
+.benefit-card {
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.26s ease;
+}
+
+.benefit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -4px rgba(15, 41, 30, 0.10);
+}
+
+.benefit-icon {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.benefit-card:hover .benefit-icon {
+    transform: scale(1.15) rotate(4deg);
+}

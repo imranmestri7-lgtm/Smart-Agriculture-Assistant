@@ -185,6 +185,7 @@ CLEAN_URL_MAP = {
     "crop": "crop.html",
     "weather": "weather.html",
     "irrigation": "irrigation.html",
+    "offline": "offline.html",
     "index": "index.html",
 }
 

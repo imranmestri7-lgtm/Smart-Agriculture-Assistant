@@ -94,6 +94,83 @@
     flex-wrap: wrap;
 }
 
+.primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    color: #ffffff !important;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(21, 128, 61, 0.35);
+    transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring), background 0.25s ease;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(21, 128, 61, 0.45);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff !important;
+}
+
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 26px;
+    background: #ffffff;
+    color: var(--forest-main) !important;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    border: 1.5px solid var(--border-default);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring), border-color 0.25s ease, background 0.25s ease;
+}
+
+.secondary-button:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-400);
+    background: var(--primary-50);
+    color: var(--primary-800) !important;
+    box-shadow: 0 6px 18px rgba(15, 41, 30, 0.08);
+}
+
+/* Hero Background Ambient Floating Elements */
+.hero-particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(40px);
+    animation: floatGentle 9s ease-in-out infinite alternate;
+}
+
+.hero-particle-1 {
+    width: 320px;
+    height: 320px;
+    top: 5%;
+    left: -80px;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.22) 0%, transparent 70%);
+}
+
+.hero-particle-2 {
+    width: 360px;
+    height: 360px;
+    bottom: 5%;
+    right: -60px;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.16) 0%, transparent 70%);
+    animation-delay: -4s;
+}
+
 /* Hero Visual & Interactive Floating Card */
 .hero-visual {
     display: flex;
@@ -257,6 +334,11 @@
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     border: 1px solid #86efac;
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    transition: transform 0.3s var(--ease-spring);
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.12) rotate(4deg);
 }
 
 .feature-card h3 {

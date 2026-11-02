@@ -467,3 +467,44 @@
         padding: var(--space-5);
     }
 }
+
+/* =========================================================
+   CROP RECOMMENDATION UI/UX ENHANCEMENTS
+   ========================================================= */
+
+.recommendation-card {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.28s ease;
+}
+
+.recommendation-card:hover {
+    box-shadow: 0 16px 36px -4px rgba(15, 41, 30, 0.12);
+}
+
+.form-section {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-section:focus-within {
+    border-color: #86efac;
+    box-shadow: 0 8px 24px -4px rgba(22, 101, 52, 0.08);
+}
+
+.recommend-button {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+}
+
+.recommend-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(21, 128, 61, 0.35);
+}
+
+.recommend-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.crop-result {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}

@@ -193,6 +193,9 @@
 
         listContainer.innerHTML = html;
         bindCardActions();
+        if (window.AgriSmartAnimations && typeof window.AgriSmartAnimations.refresh === "function") {
+            window.AgriSmartAnimations.refresh();
+        }
     }
 
     /**

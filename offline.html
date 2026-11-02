@@ -26,6 +26,12 @@
             width: 100%;
             padding: 36px 28px;
             text-align: center;
+            animation: springPopIn 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.28s var(--ease-spring), box-shadow 0.28s ease;
+        }
+        .offline-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px -4px rgba(22, 101, 52, 0.12);
         }
         .offline-badge {
             display: inline-flex;
@@ -113,9 +119,16 @@
             font-weight: 700;
             font-size: 15px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease, background 0.2s;
         }
-        .btn-retry:hover { background: #166534; }
+        .btn-retry:hover {
+            background: #166534;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(21, 128, 61, 0.35);
+        }
+        .btn-retry:active {
+            transform: translateY(0) scale(0.98);
+        }
         .btn-home {
             background: #f1f5f9;
             color: #334155;
@@ -127,6 +140,16 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease, background 0.2s;
+        }
+        .btn-home:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .btn-home:active {
+            transform: translateY(0) scale(0.98);
+        }
             justify-content: center;
         }
         .btn-home:hover { background: #e2e8f0; }
@@ -290,5 +313,6 @@
         const currentLang = localStorage.getItem('lang') || 'en';
         setOfflineLang(currentLang);
     </script>
+    <script src="/js/scroll-reveal.js"></script>
 </body>
 </html>

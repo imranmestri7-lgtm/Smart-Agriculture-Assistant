@@ -3074,3 +3074,156 @@
         overflow-x: auto;
     }
 }
+
+/* =========================================================
+   DASHBOARD UI/UX ENHANCEMENTS & MICRO-INTERACTIONS
+   ========================================================= */
+
+/* Hero Banner Glow */
+.dashboard-welcome {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dashboard-welcome:hover {
+    box-shadow: 0 24px 50px -8px rgba(12, 43, 32, 0.32),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+/* Quick Action Dashboard Cards */
+.dashboard-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-card-icon {
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.32s ease;
+}
+
+.dashboard-card:hover .dashboard-card-icon {
+    transform: scale(1.12) rotate(3deg);
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.28);
+}
+
+/* Analytics Summary Cards */
+.analytics-summary-card {
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.26s ease;
+}
+
+.analytics-summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -4px rgba(21, 128, 61, 0.14),
+                0 0 0 1px rgba(34, 197, 94, 0.22);
+}
+
+/* Animated Tab Indicator */
+.tab-btn {
+    position: relative;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-btn.active {
+    box-shadow: 0 4px 14px rgba(21, 128, 61, 0.22);
+    transform: translateY(-1px);
+}
+
+/* Notification Items Hover & Slide */
+.notif-card {
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.24s ease,
+                border-color 0.24s ease;
+}
+
+.notif-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 22px -2px rgba(15, 41, 30, 0.08);
+}
+
+.notif-card.unread .notif-icon-col {
+    position: relative;
+}
+
+.notif-card.unread .notif-icon-col::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e11d48;
+    box-shadow: 0 0 0 2px #ffffff;
+    animation: statusDotPulse 2s infinite ease-in-out;
+}
+
+/* IoT Status Live Pulse */
+.iot-status-tag.status-optimal::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #16a34a;
+    margin-right: 6px;
+    animation: statusDotPulse 2s infinite;
+}
+
+.iot-status-tag.status-warning::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    margin-right: 6px;
+    animation: statusDotPulse 1.5s infinite;
+}
+
+.iot-status-tag.status-critical::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e11d48;
+    margin-right: 6px;
+    animation: statusDotPulse 1s infinite;
+}
+
+/* Chat Message Entrance */
+.chat-message,
+.message {
+    animation: messageSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quick prompt pills hover */
+.prompt-chip,
+.suggestion-chip {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.prompt-chip:hover,
+.suggestion-chip:hover {
+    transform: translateY(-2px);
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+/* Modals Spring Animation */
+.farm-modal-backdrop.open .farm-modal-dialog {
+    animation: springPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Touch targets on mobile */
+@media (max-width: 640px) {
+    .btn,
+    .tab-btn,
+    .btn-notif-circle {
+        min-height: 42px;
+    }
+}

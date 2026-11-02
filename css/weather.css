@@ -471,3 +471,46 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   WEATHER FORECAST & ADVISORY ENHANCEMENTS
+   ========================================================= */
+
+.current-weather-card {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s ease;
+}
+
+.current-weather-card:hover {
+    box-shadow: 0 20px 48px -6px rgba(2, 132, 199, 0.22);
+}
+
+.forecast-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+}
+
+.forecast-card:hover {
+    transform: translateY(-5px);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.18);
+}
+
+.weather-icon-large {
+    animation: floatGentle 6s ease-in-out infinite alternate;
+}
+
+.advice-card,
+.additional-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+}
+
+.advice-card:hover,
+.additional-card:hover {
+    transform: translateY(-4px);
+    border-color: #86efac;
+    box-shadow: 0 14px 28px -4px rgba(21, 128, 61, 0.12);
+}

@@ -146,12 +146,27 @@
 
         // 1. Summary Metrics
         const s = data.summary || {};
+        const metricIds = [
+            "metricTotalFarms", "metricTotalCrops", "metricTotalDiagnoses",
+            "metricTotalIrrigations", "metricCropsGrowing", "metricCropsReady"
+        ];
         document.getElementById("metricTotalFarms").textContent = s.total_farms || 0;
         document.getElementById("metricTotalCrops").textContent = s.total_crops || 0;
         document.getElementById("metricTotalDiagnoses").textContent = s.total_diagnoses || 0;
         document.getElementById("metricTotalIrrigations").textContent = s.total_irrigations || 0;
         document.getElementById("metricCropsGrowing").textContent = s.crops_growing || 0;
         document.getElementById("metricCropsReady").textContent = s.crops_ready_for_harvest || 0;
+
+        // Animate count-up with actual data
+        if (window.AgriSmartAnimations && typeof window.AgriSmartAnimations.countUp === "function") {
+            metricIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.dataset.counted = "false";
+                    window.AgriSmartAnimations.countUp(el);
+                }
+            });
+        }
 
         // 2. Crop Analytics
         const ca = data.crop_analytics || {};
@@ -172,6 +187,10 @@
         renderIrrigationStats(ia);
         renderIrrigationActivity(ia.activity_over_time || []);
         renderCropIrrigationSummary(ia.crop_summaries || []);
+
+        if (window.AgriSmartAnimations && typeof window.AgriSmartAnimations.refresh === "function") {
+            window.AgriSmartAnimations.refresh();
+        }
     }
 
     /**
