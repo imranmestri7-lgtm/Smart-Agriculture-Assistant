@@ -273,14 +273,37 @@ function loadChatHistory() {
                 // Historical user message
                 const userMsg = document.createElement("div");
                 userMsg.className = "message user-message";
+
+                let imageHtml = "";
+                let displayMsg = item.clean_message || item.message || "";
+                let itemImgUrl = item.image_url;
+
+                if (!itemImgUrl && typeof item.message === "string") {
+                    const match = item.message.match(/\[image:(\/api\/chat\/image\/[^\]]+)\]/);
+                    if (match) {
+                        itemImgUrl = match[1];
+                        displayMsg = item.message.replace(/\[image:\/api\/chat\/image\/[^\]]+\]\s*/, "");
+                    }
+                }
+
+                if (itemImgUrl) {
+                    const authenticatedImgUrl = itemImgUrl + (itemImgUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(token);
+                    imageHtml = `
+                        <div class="user-chat-image-wrap">
+                            <img src="${authenticatedImgUrl}" class="user-chat-image" alt="Historical plant photo" onclick="window.open(this.src, '_blank')">
+                        </div>
+                    `;
+                }
+
                 userMsg.innerHTML = `
                     <div class="message-content">
+                        ${imageHtml}
                         <p></p>
                         <span class="message-time">${formatChatTime(item.created_at)}</span>
                     </div>
                     <div class="message-avatar">👨‍🌾</div>
                 `;
-                userMsg.querySelector("p").textContent = item.message;
+                userMsg.querySelector("p").textContent = displayMsg;
                 chatArea.appendChild(userMsg);
 
                 // Historical assistant message
@@ -384,82 +407,175 @@ if (clearChatBtn) {
 
 
 // =====================================================
-// SEND MESSAGE
+// CHAT IMAGE ATTACHMENT STATE & HELPERS
+// =====================================================
+
+let currentChatImageFile = null;
+
+const chatFileInput = document.getElementById("chatFileInput");
+const chatImagePreviewBar = document.getElementById("chatImagePreviewBar");
+const chatImagePreviewThumb = document.getElementById("chatImagePreviewThumb");
+const chatImagePreviewName = document.getElementById("chatImagePreviewName");
+const chatImagePreviewSize = document.getElementById("chatImagePreviewSize");
+const btnRemoveChatImage = document.getElementById("btnRemoveChatImage");
+
+function formatFileSize(bytes) {
+    if (!bytes || bytes <= 0) return "0 B";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function clearChatImage() {
+    currentChatImageFile = null;
+    if (chatFileInput) {
+        chatFileInput.value = "";
+    }
+    if (chatImagePreviewThumb) {
+        chatImagePreviewThumb.src = "";
+    }
+    if (chatImagePreviewBar) {
+        chatImagePreviewBar.style.display = "none";
+    }
+}
+
+function setChatImage(file) {
+    if (!file) return;
+
+    // Format validation
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    const ext = file.name ? file.name.substring(file.name.lastIndexOf(".")).toLowerCase() : "";
+    const validExts = [".jpg", ".jpeg", ".png", ".webp"];
+    if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
+        const msg = window.i18n ? window.i18n.t("image_invalid_type") : "Invalid image format. Supported formats: JPG, PNG, WEBP.";
+        alert(msg);
+        return;
+    }
+
+    // Size validation: max 5 MB
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+        const msg = window.i18n ? window.i18n.t("image_oversize_error") : "Image size must not exceed 5 MB.";
+        alert(msg);
+        return;
+    }
+
+    currentChatImageFile = file;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        if (chatImagePreviewThumb) {
+            chatImagePreviewThumb.src = e.target.result;
+        }
+        if (chatImagePreviewName) {
+            chatImagePreviewName.textContent = file.name || "plant_image.jpg";
+        }
+        if (chatImagePreviewSize) {
+            chatImagePreviewSize.textContent = formatFileSize(file.size);
+        }
+        if (chatImagePreviewBar) {
+            chatImagePreviewBar.style.display = "flex";
+        }
+        if (addMenu) {
+            addMenu.classList.remove("show");
+        }
+        if (messageInput) {
+            messageInput.focus();
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+if (btnRemoveChatImage) {
+    btnRemoveChatImage.addEventListener("click", function (e) {
+        e.stopPropagation();
+        clearChatImage();
+    });
+}
+
+if (chatFileInput) {
+    chatFileInput.addEventListener("change", function () {
+        if (chatFileInput.files && chatFileInput.files.length > 0) {
+            setChatImage(chatFileInput.files[0]);
+        }
+    });
+}
+
+
+// =====================================================
+// SEND MESSAGE (TEXT OR MULTIMODAL IMAGE VISION)
 // =====================================================
 
 function sendMessage() {
-
     if (!messageInput || !chatArea) {
         return;
     }
 
+    let message = messageInput.value.trim();
+    const hasImage = Boolean(currentChatImageFile);
 
-    const message =
-        messageInput.value.trim();
-
-
-    // Empty message
-
-    if (message === "") {
+    // If both message and image are empty, do nothing
+    if (message === "" && !hasImage) {
         return;
     }
 
+    const lang = getChatLanguage();
+
+    // If sending image with empty text, assign a sensible default prompt
+    if (hasImage && message === "") {
+        if (lang === "mr") {
+            message = "कृपया या वनस्पतीचे फोटो तपासा आणि यावर कोणताही रोग आहे का किंवा काय काळजी घ्यावी ते सांगा.";
+        } else if (lang === "hi") {
+            message = "कृपया इस पौधे की तस्वीर का विश्लेषण करें और बताएं कि क्या इसमें कोई बीमारी है या क्या देखभाल आवश्यक है।";
+        } else {
+            message = "Please analyze this plant image and tell me if it has any disease or needs care.";
+        }
+    }
 
     // -------------------------------------------------
-    // CREATE FARMER MESSAGE
+    // CREATE FARMER MESSAGE BUBBLE
     // -------------------------------------------------
+    const userMessage = document.createElement("div");
+    userMessage.className = "message user-message";
 
-    const userMessage =
-        document.createElement("div");
-
-    userMessage.className =
-        "message user-message";
-
+    let imageHtml = "";
+    if (hasImage && chatImagePreviewThumb && chatImagePreviewThumb.src) {
+        imageHtml = `
+            <div class="user-chat-image-wrap">
+                <img src="${chatImagePreviewThumb.src}" class="user-chat-image" alt="Uploaded plant image" onclick="window.open(this.src, '_blank')">
+            </div>
+        `;
+    }
 
     userMessage.innerHTML = `
-
         <div class="message-content">
-
+            ${imageHtml}
             <p></p>
             <span class="message-time">${formatChatTime(new Date())}</span>
-
         </div>
-
         <div class="message-avatar">
             👨‍🌾
         </div>
-
     `;
 
-
-    // Safely insert user text
-
-    userMessage
-        .querySelector("p")
-        .textContent = message;
-
-
+    userMessage.querySelector("p").textContent = message;
     chatArea.appendChild(userMessage);
 
+    // Snapshot image to send and clear selection bar
+    const imageToSend = currentChatImageFile;
+    clearChatImage();
 
     // Clear input
-
     messageInput.value = "";
 
-
     // Scroll
-
     scrollToBottom();
 
-
-    // Show thinking
-
+    // Show thinking indicator
     showThinking();
 
-
-    // Send the question to the authenticated Flask chatbot.
     const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
-
     if (!token) {
         removeThinking();
         addAssistantMessage("Your login session is missing. Please log in again to use the farming assistant.");
@@ -470,14 +586,32 @@ function sendMessage() {
         sendButton.disabled = true;
     }
 
-    fetch("/api/chat/message", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ message: message, language: getChatLanguage() })
-    })
+    let requestPromise;
+    if (imageToSend) {
+        const formData = new FormData();
+        formData.append("image", imageToSend);
+        formData.append("message", message);
+        formData.append("language", lang);
+
+        requestPromise = fetch("/api/chat/message", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+    } else {
+        requestPromise = fetch("/api/chat/message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ message: message, language: lang })
+        });
+    }
+
+    requestPromise
         .then(async function (response) {
             const data = await response.json().catch(function () {
                 return {};
@@ -513,7 +647,6 @@ function sendMessage() {
             );
             console.error("AgriSmart chat request failed:", error);
         });
-
 }
 
 
@@ -939,63 +1072,203 @@ if (addButton && addMenu) {
 
 
 // =====================================================
-// ADD MENU OPTIONS
+// ADD MENU OPTIONS (UPLOAD IMAGE & OPEN CAMERA)
 // =====================================================
 
-const uploadLeaf =
-    document.getElementById("uploadLeaf");
+const uploadLeaf = document.getElementById("uploadLeaf");
+const openCamera = document.getElementById("openCamera");
 
-const uploadFile =
-    document.getElementById("uploadFile");
+// Camera DOM elements
+const cameraModalBackdrop = document.getElementById("cameraModalBackdrop");
+const cameraVideo = document.getElementById("cameraVideo");
+const cameraCanvas = document.getElementById("cameraCanvas");
+const cameraCapturedPreview = document.getElementById("cameraCapturedPreview");
+const cameraOverlayBox = document.getElementById("cameraOverlayBox");
+const cameraErrorMessage = document.getElementById("cameraErrorMessage");
+const cameraErrorText = document.getElementById("cameraErrorText");
+const cameraLiveControls = document.getElementById("cameraLiveControls");
+const cameraPreviewControls = document.getElementById("cameraPreviewControls");
+const btnCapturePhoto = document.getElementById("btnCapturePhoto");
+const btnFlipCamera = document.getElementById("btnFlipCamera");
+const btnCancelCamera = document.getElementById("btnCancelCamera");
+const btnCloseCameraModal = document.getElementById("btnCloseCameraModal");
+const btnRetakePhoto = document.getElementById("btnRetakePhoto");
+const btnUsePhoto = document.getElementById("btnUsePhoto");
 
-const openCamera =
-    document.getElementById("openCamera");
+let activeCameraStream = null;
+let currentFacingMode = "environment";
+let capturedPhotoBlob = null;
 
+async function startCamera() {
+    if (cameraErrorMessage) cameraErrorMessage.style.display = "none";
+    if (cameraCapturedPreview) cameraCapturedPreview.style.display = "none";
+    if (cameraVideo) cameraVideo.style.display = "block";
+    if (cameraOverlayBox) cameraOverlayBox.style.display = "block";
+    if (cameraLiveControls) cameraLiveControls.style.display = "flex";
+    if (cameraPreviewControls) cameraPreviewControls.style.display = "none";
 
+    stopCameraStream();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showCameraError(window.i18n ? window.i18n.t("camera_error_unavailable") : "Camera is not supported on this browser or device.");
+        return;
+    }
+
+    try {
+        const constraints = {
+            video: {
+                facingMode: currentFacingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 960 }
+            },
+            audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        activeCameraStream = stream;
+        if (cameraVideo) {
+            cameraVideo.srcObject = stream;
+            cameraVideo.play().catch(function () {});
+        }
+    } catch (err) {
+        console.warn("Camera access error with facingMode:", err);
+        // Fallback without facingMode
+        try {
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            activeCameraStream = fallbackStream;
+            if (cameraVideo) {
+                cameraVideo.srcObject = fallbackStream;
+                cameraVideo.play().catch(function () {});
+            }
+        } catch (fallbackErr) {
+            console.error("Camera fallback failed:", fallbackErr);
+            const isDenied = fallbackErr.name === "NotAllowedError" || fallbackErr.name === "PermissionDeniedError";
+            const msg = isDenied
+                ? (window.i18n ? window.i18n.t("camera_error_denied") : "Camera access denied. Please enable camera permissions in your browser or upload an image file instead.")
+                : (window.i18n ? window.i18n.t("camera_error_unavailable") : "Camera device not found or unavailable on this device.");
+            showCameraError(msg);
+        }
+    }
+}
+
+function showCameraError(msg) {
+    if (cameraErrorText) cameraErrorText.textContent = msg;
+    if (cameraErrorMessage) cameraErrorMessage.style.display = "flex";
+    if (cameraOverlayBox) cameraOverlayBox.style.display = "none";
+    if (cameraLiveControls) cameraLiveControls.style.display = "none";
+}
+
+function stopCameraStream() {
+    if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(function (track) {
+            try {
+                track.stop();
+            } catch (e) {}
+        });
+        activeCameraStream = null;
+    }
+    if (cameraVideo) {
+        cameraVideo.srcObject = null;
+    }
+}
+
+function openCameraModal() {
+    if (addMenu) addMenu.classList.remove("show");
+    if (cameraModalBackdrop) cameraModalBackdrop.style.display = "flex";
+    capturedPhotoBlob = null;
+    startCamera();
+}
+
+function closeCameraModal() {
+    stopCameraStream();
+    capturedPhotoBlob = null;
+    if (cameraModalBackdrop) cameraModalBackdrop.style.display = "none";
+}
+
+function capturePhoto() {
+    if (!cameraVideo || !cameraCanvas) return;
+    const width = cameraVideo.videoWidth || 640;
+    const height = cameraVideo.videoHeight || 480;
+    cameraCanvas.width = width;
+    cameraCanvas.height = height;
+    const ctx = cameraCanvas.getContext("2d");
+    ctx.drawImage(cameraVideo, 0, 0, width, height);
+
+    const dataUrl = cameraCanvas.toDataURL("image/jpeg", 0.92);
+    if (cameraCapturedPreview) {
+        cameraCapturedPreview.src = dataUrl;
+        cameraCapturedPreview.style.display = "block";
+    }
+    if (cameraVideo) cameraVideo.style.display = "none";
+    if (cameraOverlayBox) cameraOverlayBox.style.display = "none";
+    if (cameraLiveControls) cameraLiveControls.style.display = "none";
+    if (cameraPreviewControls) cameraPreviewControls.style.display = "flex";
+
+    cameraCanvas.toBlob(function (blob) {
+        capturedPhotoBlob = blob;
+    }, "image/jpeg", 0.92);
+}
+
+function retakePhoto() {
+    capturedPhotoBlob = null;
+    if (cameraCapturedPreview) cameraCapturedPreview.style.display = "none";
+    if (cameraVideo) cameraVideo.style.display = "block";
+    if (cameraOverlayBox) cameraOverlayBox.style.display = "block";
+    if (cameraLiveControls) cameraLiveControls.style.display = "flex";
+    if (cameraPreviewControls) cameraPreviewControls.style.display = "none";
+}
+
+function usePhoto() {
+    if (capturedPhotoBlob) {
+        const file = new File([capturedPhotoBlob], "plant_camera_capture.jpg", { type: "image/jpeg" });
+        setChatImage(file);
+        closeCameraModal();
+    } else if (cameraCanvas) {
+        cameraCanvas.toBlob(function (blob) {
+            const file = new File([blob || new Blob()], "plant_camera_capture.jpg", { type: "image/jpeg" });
+            setChatImage(file);
+            closeCameraModal();
+        }, "image/jpeg", 0.92);
+    }
+}
+
+function flipCamera() {
+    currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+    startCamera();
+}
+
+// Bind camera modal events
+if (btnCapturePhoto) btnCapturePhoto.addEventListener("click", capturePhoto);
+if (btnRetakePhoto) btnRetakePhoto.addEventListener("click", retakePhoto);
+if (btnUsePhoto) btnUsePhoto.addEventListener("click", usePhoto);
+if (btnFlipCamera) btnFlipCamera.addEventListener("click", flipCamera);
+if (btnCancelCamera) btnCancelCamera.addEventListener("click", closeCameraModal);
+if (btnCloseCameraModal) btnCloseCameraModal.addEventListener("click", closeCameraModal);
+if (cameraModalBackdrop) {
+    cameraModalBackdrop.addEventListener("click", function (e) {
+        if (e.target === cameraModalBackdrop) {
+            closeCameraModal();
+        }
+    });
+}
+
+// Option 1: Upload Image (triggers file input)
 if (uploadLeaf) {
-
-    uploadLeaf.addEventListener(
-        "click",
-        function () {
-
-            window.location.href =
-                "disease.html";
-
+    uploadLeaf.addEventListener("click", function (event) {
+        event.stopPropagation();
+        if (addMenu) addMenu.classList.remove("show");
+        if (chatFileInput) {
+            chatFileInput.click();
         }
-    );
-
+    });
 }
 
-
-if (uploadFile) {
-
-    uploadFile.addEventListener(
-        "click",
-        function () {
-
-            alert(
-                "File upload will be connected with the assistant later."
-            );
-
-        }
-    );
-
-}
-
-
+// Option 2: Open Camera
 if (openCamera) {
-
-    openCamera.addEventListener(
-        "click",
-        function () {
-
-            alert(
-                "Camera-based plant detection will be connected in the disease detection module."
-            );
-
-        }
-    );
-
+    openCamera.addEventListener("click", function (event) {
+        event.stopPropagation();
+        openCameraModal();
+    });
 }
 
 

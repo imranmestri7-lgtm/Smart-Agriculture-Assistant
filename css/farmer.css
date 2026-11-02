@@ -699,7 +699,7 @@
     transform: scale(1.05);
 }
 
-/* Popover Menu */
+/* Popover Attachment Menu */
 .add-menu {
     position: absolute;
     bottom: calc(100% + 8px);
@@ -707,13 +707,13 @@
     background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
     padding: 6px;
     display: none;
     flex-direction: column;
     gap: 4px;
     z-index: 100;
-    min-width: 200px;
+    min-width: 210px;
     animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -736,12 +736,372 @@
     color: var(--text-body);
     text-align: left;
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.add-menu button .menu-item-icon {
+    font-size: 17px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
 }
 
 .add-menu button:hover {
     background: var(--primary-50);
     color: var(--primary-800);
+}
+
+/* Chat Image Preview Bar (Above Input) */
+.chat-image-preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border: 1px solid rgba(22, 163, 74, 0.25);
+    border-radius: var(--radius-md);
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.chat-image-preview-thumb-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: #e2e8f0;
+    flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-image-preview-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.chat-image-preview-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-image-preview-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-image-preview-size {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.chat-image-remove-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.chat-image-remove-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+/* User Message Chat Image */
+.user-chat-image-wrap {
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    max-width: 260px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.user-chat-image {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.user-chat-image:hover {
+    transform: scale(1.02);
+}
+
+/* Camera Modal Styles */
+.camera-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 16px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.camera-modal-card {
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.camera-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.camera-modal-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.camera-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #94a3b8;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.camera-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.camera-viewfinder-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#cameraVideo,
+#cameraCapturedPreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.camera-overlay-box {
+    position: absolute;
+    width: 72%;
+    height: 72%;
+    pointer-events: none;
+}
+
+.camera-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #22c55e;
+    border-style: solid;
+    border-width: 0;
+}
+
+.camera-corner.top-left {
+    top: 0;
+    left: 0;
+    border-top-width: 3px;
+    border-left-width: 3px;
+    border-top-left-radius: 6px;
+}
+
+.camera-corner.top-right {
+    top: 0;
+    right: 0;
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-top-right-radius: 6px;
+}
+
+.camera-corner.bottom-left {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    border-bottom-left-radius: 6px;
+}
+
+.camera-corner.bottom-right {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+    border-bottom-right-radius: 6px;
+}
+
+.camera-overlay-hint {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.65);
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+}
+
+.camera-error-message {
+    position: absolute;
+    inset: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.95);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    color: #fca5a5;
+    z-index: 10;
+}
+
+.camera-error-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.camera-error-message p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.camera-modal-actions {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0f172a;
+}
+
+.camera-live-controls,
+.camera-preview-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px;
+    gap: 16px;
+}
+
+.camera-shutter-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    padding: 0;
+}
+
+.camera-shutter-btn:hover {
+    transform: scale(1.05);
+}
+
+.camera-shutter-btn:active .shutter-inner {
+    transform: scale(0.85);
+}
+
+.shutter-inner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform 0.15s ease;
+    display: block;
+}
+
+.camera-action-btn {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border: none;
+    padding: 9px 15px;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--transition-fast);
+}
+
+.camera-action-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.camera-use-btn {
+    background: #16a34a !important;
+    color: #ffffff !important;
+}
+
+.camera-use-btn:hover {
+    background: #15803d !important;
+    transform: scale(1.03);
 }
 
 /* ================= RESPONSIVE ================= */

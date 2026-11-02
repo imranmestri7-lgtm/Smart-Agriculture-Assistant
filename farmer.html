@@ -1192,16 +1192,45 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
 
                 <div class="chat-input-wrapper">
 
+                    <!-- ATTACHED IMAGE PREVIEW BAR -->
+                    <div class="chat-image-preview-bar" id="chatImagePreviewBar" style="display: none;">
+                        <div class="chat-image-preview-thumb-wrap">
+                            <img id="chatImagePreviewThumb" src="" alt="Selected plant image preview">
+                        </div>
+                        <div class="chat-image-preview-meta">
+                            <span class="chat-image-preview-name" id="chatImagePreviewName">leaf_photo.jpg</span>
+                            <span class="chat-image-preview-size" id="chatImagePreviewSize">1.2 MB</span>
+                        </div>
+                        <button
+                            type="button"
+                            class="chat-image-remove-btn"
+                            id="btnRemoveChatImage"
+                            title="Remove image"
+                            aria-label="Remove image"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
                     <div class="chat-input-area">
 
                         <button
                             type="button"
                             class="add-button"
                             id="addButton"
-                            title="Add"
+                            title="Add attachment"
+                            aria-haspopup="true"
+                            aria-expanded="false"
                         >
                             +
                         </button>
+
+                        <input
+                            type="file"
+                            id="chatFileInput"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
+                            style="display: none;"
+                        >
 
                         <input
                             type="text"
@@ -1239,20 +1268,18 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                     </div>
 
 
-                    <!-- ADD MENU -->
+                    <!-- ADD ATTACHMENT MENU -->
 
-                    <div class="add-menu" id="addMenu">
+                    <div class="add-menu" id="addMenu" role="menu" aria-label="Attachment options">
 
-                        <button type="button" id="uploadLeaf">
-                            🍃 Upload Leaf Image
+                        <button type="button" class="add-menu-item" id="uploadLeaf" role="menuitem">
+                            <span class="menu-item-icon">📁</span>
+                            <span data-i18n="chat_menu_upload_image">Upload Image</span>
                         </button>
 
-                        <button type="button" id="uploadFile">
-                            📎 Upload File
-                        </button>
-
-                        <button type="button" id="openCamera">
-                            📷 Use Camera
+                        <button type="button" class="add-menu-item" id="openCamera" role="menuitem">
+                            <span class="menu-item-icon">📷</span>
+                            <span data-i18n="chat_menu_open_camera">Open Camera</span>
                         </button>
 
                     </div>
@@ -1262,6 +1289,62 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
             </section>
 
         </section>
+
+        <!-- =================================================
+             CAMERA VISION MODAL
+        ================================================== -->
+        <div class="camera-modal-backdrop" id="cameraModalBackdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="cameraModalTitle">
+            <div class="camera-modal-card">
+                <div class="camera-modal-header">
+                    <h3 id="cameraModalTitle">
+                        <span class="camera-modal-icon">📷</span>
+                        <span data-i18n="camera_modal_title">Capture Plant Photo</span>
+                    </h3>
+                    <button type="button" class="camera-modal-close" id="btnCloseCameraModal" aria-label="Close camera">✕</button>
+                </div>
+                <div class="camera-viewfinder-container">
+                    <video id="cameraVideo" autoplay playsinline muted></video>
+                    <canvas id="cameraCanvas" style="display: none;"></canvas>
+                    <img id="cameraCapturedPreview" style="display: none;" alt="Captured preview">
+                    <!-- Target overlay framing guide for leaf -->
+                    <div class="camera-overlay-box" id="cameraOverlayBox">
+                        <div class="camera-corner top-left"></div>
+                        <div class="camera-corner top-right"></div>
+                        <div class="camera-corner bottom-left"></div>
+                        <div class="camera-corner bottom-right"></div>
+                        <span class="camera-overlay-hint" data-i18n="camera_overlay_hint">Align plant leaf inside this frame</span>
+                    </div>
+                    <!-- Camera error alert inside modal if permission denied or unavailable -->
+                    <div class="camera-error-message" id="cameraErrorMessage" style="display: none;">
+                        <span class="camera-error-icon">⚠️</span>
+                        <p id="cameraErrorText" data-i18n="camera_error_denied">Camera access denied. Please enable camera permissions in your browser or upload an image file instead.</p>
+                    </div>
+                </div>
+                <div class="camera-modal-actions">
+                    <!-- Live controls -->
+                    <div class="camera-live-controls" id="cameraLiveControls">
+                        <button type="button" class="camera-action-btn camera-flip-btn" id="btnFlipCamera" title="Switch Camera" aria-label="Switch Camera">
+                            🔄 <span data-i18n="camera_flip">Flip</span>
+                        </button>
+                        <button type="button" class="camera-shutter-btn" id="btnCapturePhoto" title="Take Photo" aria-label="Take Photo">
+                            <span class="shutter-inner"></span>
+                        </button>
+                        <button type="button" class="camera-action-btn camera-cancel-btn" id="btnCancelCamera">
+                            <span data-i18n="camera_cancel">Cancel</span>
+                        </button>
+                    </div>
+                    <!-- Preview controls after capture -->
+                    <div class="camera-preview-controls" id="cameraPreviewControls" style="display: none;">
+                        <button type="button" class="camera-action-btn camera-retake-btn" id="btnRetakePhoto">
+                            🔄 <span data-i18n="camera_retake">Retake</span>
+                        </button>
+                        <button type="button" class="camera-action-btn camera-use-btn" id="btnUsePhoto">
+                            ✓ <span data-i18n="camera_use">Use Photo</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- =================================================
              MODALS: FARM & CROP MANAGEMENT (PHASE 6)

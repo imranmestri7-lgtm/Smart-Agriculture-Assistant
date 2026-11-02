@@ -1,9 +1,19 @@
 """Authenticated API endpoints for the AgriSmart farming assistant."""
 
-from flask import Blueprint, jsonify, request
+import os
+import re
+from flask import Blueprint, jsonify, request, send_from_directory
+from werkzeug.utils import secure_filename
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
 from utils.chatbot import MAX_MESSAGE_LENGTH, generate_response
+from utils.image_chat import (
+    UPLOADS_DIR,
+    analyze_leaf_image,
+    get_default_prompt,
+    save_chat_image,
+    validate_image_file,
+)
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 
@@ -122,8 +132,9 @@ def get_chat_suggestions():
 
 
 @chat_bp.route("/message", methods=["POST"])
+@chat_bp.route("/image-message", methods=["POST"])
 def chat_message():
-    """Answer one farming question from an authenticated user and persist to history."""
+    """Answer one farming question (text or image-based) from an authenticated user and persist to history."""
     authorization = request.headers.get("Authorization", "")
     scheme, separator, token = authorization.partition(" ")
 
@@ -140,35 +151,32 @@ def chat_message():
             "message": "Your session is invalid or expired. Please log in again.",
         }), 401
 
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return jsonify({
-            "status": "error",
-            "message": "Send a JSON object containing a message.",
-        }), 400
+    is_multipart = bool(request.content_type and "multipart/form-data" in request.content_type)
+    image_file = None
 
-    message = data.get("message")
-    if not isinstance(message, str) or not message.strip():
-        return jsonify({
-            "status": "error",
-            "message": "Please enter a farming question.",
-        }), 400
+    if is_multipart:
+        message = (request.form.get("message") or "").strip()
+        requested_language = request.form.get("language")
+        if "image" in request.files:
+            image_file = request.files["image"]
+        elif "file" in request.files:
+            image_file = request.files["file"]
+    else:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Send a JSON object containing a message.",
+            }), 400
+        message = data.get("message")
+        if not isinstance(message, str):
+            message = ""
+        else:
+            message = message.strip()
+        requested_language = data.get("language")
 
-    message = message.strip()
-    if len(message) > MAX_MESSAGE_LENGTH:
-        return jsonify({
-            "status": "error",
-            "message": (
-                f"Your message must be {MAX_MESSAGE_LENGTH} "
-                "characters or fewer."
-            ),
-        }), 400
-
-    # Valid explicit languages are respected. Missing/"auto" detects the message or headers;
-    # invalid explicit language codes safely fall back to English.
-    requested_language = data.get("language")
+    # Determine language
     x_language = request.headers.get("X-Language")
-
     if requested_language in ("en", "mr", "hi"):
         language = requested_language
     elif x_language in ("en", "mr", "hi"):
@@ -180,6 +188,96 @@ def chat_message():
             language = "en"
     else:
         language = "en"
+
+    # CASE A: IMAGE UPLOAD / CAMERA VISION
+    if image_file and image_file.filename:
+        # If user did not provide custom question, use sensible localized default
+        if not message:
+            message = get_default_prompt(language)
+
+        if len(message) > MAX_MESSAGE_LENGTH:
+            return jsonify({
+                "status": "error",
+                "message": f"Your message must be {MAX_MESSAGE_LENGTH} characters or fewer.",
+            }), 400
+
+        # Validate image file
+        image_bytes, val_err, status_code = validate_image_file(image_file)
+        if val_err:
+            return jsonify({
+                "status": "error",
+                "message": val_err
+            }), status_code
+
+        # Save image with user isolation prefix
+        safe_filename = save_chat_image(image_bytes, user_id, image_file.filename)
+        image_url = f"/api/chat/image/{safe_filename}"
+
+        # Analyze plant leaf with CNN model
+        analysis = analyze_leaf_image(image_bytes, language=language)
+        reply_text = analysis["reply"]
+
+        # Persist conversation to chat_history
+        db_message = f"[image:{image_url}] {message}"
+        history_saved = False
+        connection = None
+        cursor = None
+        try:
+            connection = get_db_connection()
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                INSERT INTO chat_history (user_id, message, response)
+                VALUES (%s, %s, %s)
+                """,
+                (user_id, db_message, reply_text)
+            )
+            connection.commit()
+            history_saved = True
+        except Exception as db_err:
+            print(f"Could not persist chat image message: {db_err}")
+            if connection:
+                try:
+                    connection.rollback()
+                except Exception:
+                    pass
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+
+        return jsonify({
+            "status": "success",
+            "reply": reply_text,
+            "language": language,
+            "category": "disease",
+            "image_url": image_url,
+            "prediction": {
+                "class_name": analysis["predicted_class"],
+                "confidence": analysis["confidence"],
+                "is_confident": analysis["is_confident"],
+                "top_predictions": analysis.get("top_predictions", [])
+            },
+            "knowledge": analysis["knowledge"],
+            "history_saved": history_saved
+        }), 200
+
+    # CASE B: TEXT-ONLY QUESTION
+    if not message:
+        return jsonify({
+            "status": "error",
+            "message": "Please enter a farming question.",
+        }), 400
+
+    if len(message) > MAX_MESSAGE_LENGTH:
+        return jsonify({
+            "status": "error",
+            "message": (
+                f"Your message must be {MAX_MESSAGE_LENGTH} "
+                "characters or fewer."
+            ),
+        }), 400
 
     # Phase 9: Fetch farmer context only for context-seeking queries
     from utils.context_chat import is_context_relevant_query
@@ -298,12 +396,22 @@ def get_chat_history():
         history = []
         for row in reversed(rows):
             created_at = row.get("created_at")
-            history.append({
+            raw_msg = row.get("message") or ""
+            img_match = re.search(r"\[image:(/api/chat/image/[^\]]+)\]", raw_msg)
+            image_url = img_match.group(1) if img_match else None
+            clean_message = re.sub(r"\[image:/api/chat/image/[^\]]+\]\s*", "", raw_msg) if image_url else raw_msg
+
+            item = {
                 "id": row["id"],
-                "message": row["message"],
+                "message": raw_msg,
                 "response": row["response"],
                 "created_at": created_at.isoformat() if created_at else None
-            })
+            }
+            if image_url:
+                item["image_url"] = image_url
+                item["clean_message"] = clean_message
+
+            history.append(item)
 
         return jsonify({
             "status": "success",
@@ -379,3 +487,59 @@ def clear_chat_history():
             cursor.close()
         if connection:
             connection.close()
+
+
+@chat_bp.route("/image/<filename>", methods=["GET"])
+def get_chat_image(filename):
+    """Serve uploaded chat leaf image with strict path traversal checks and farmer isolation."""
+    safe_name = secure_filename(filename)
+    if not safe_name or safe_name != filename:
+        return jsonify({"status": "error", "message": "Invalid image filename."}), 400
+
+    file_path = os.path.join(UPLOADS_DIR, safe_name)
+    if not os.path.isfile(file_path):
+        return jsonify({"status": "error", "message": "Image not found."}), 404
+
+    # Security check: verify authentication
+    auth_header = request.headers.get("Authorization", "")
+    token = None
+    if auth_header.startswith("Bearer "):
+        token = auth_header[len("Bearer "):].strip()
+    elif request.args.get("token"):
+        token = request.args.get("token").strip()
+
+    if not token:
+        return jsonify({"status": "error", "message": "Authentication required to access this image."}), 401
+
+    user_id = get_user_id_from_token(token)
+    if user_id is None:
+        return jsonify({"status": "error", "message": "Invalid or expired session token."}), 401
+
+    # Strict isolation: check filename pattern chat_leaf_{user_id}_
+    expected_prefix = f"chat_leaf_{user_id}_"
+    if not safe_name.startswith(expected_prefix):
+        # Fallback check if user owns any message referencing this image
+        is_owner = False
+        connection = None
+        cursor = None
+        try:
+            connection = get_db_connection()
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT id FROM chat_history WHERE user_id = %s AND message LIKE %s LIMIT 1",
+                (user_id, f"%{safe_name}%")
+            )
+            if cursor.fetchone():
+                is_owner = True
+        except Exception:
+            pass
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+
+        if not is_owner:
+            return jsonify({"status": "error", "message": "Access denied to this image."}), 403
+
+    return send_from_directory(UPLOADS_DIR, safe_name)
