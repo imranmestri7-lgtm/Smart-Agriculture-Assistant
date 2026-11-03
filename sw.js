@@ -5,13 +5,12 @@
  * and friendly fallback to offline.html.
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `agrismart-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `agrismart-pages-${CACHE_VERSION}`;
 const DATA_CACHE = `agrismart-data-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
-    '/',
     '/index.html',
     '/farmer.html',
     '/disease.html',
@@ -141,19 +140,30 @@ self.addEventListener('fetch', (event) => {
 
     // Strategy A: HTML Page Navigation (Network-First -> Cache -> offline.html)
     if (request.mode === 'navigate' || request.destination === 'document') {
+        const isRoot = url.pathname === '/' || url.pathname === '';
+        const navRequest = isRoot ? new Request('/index.html', { headers: request.headers, mode: request.mode, credentials: request.credentials }) : request;
+
         event.respondWith(
-            fetch(request)
+            fetch(navRequest)
                 .then((networkResponse) => {
                     if (networkResponse && networkResponse.status === 200) {
                         const copy = networkResponse.clone();
-                        caches.open(PAGES_CACHE).then((cache) => cache.put(request, copy));
+                        caches.open(PAGES_CACHE).then((cache) => {
+                            cache.put(request, copy.clone());
+                            if (isRoot) {
+                                cache.put('/index.html', copy);
+                            }
+                        });
                     }
                     return networkResponse;
                 })
                 .catch(() => {
-                    return caches.match(request).then((cachedResponse) => {
+                    return caches.match(navRequest).then((cachedResponse) => {
                         if (cachedResponse) {
                             return cachedResponse;
+                        }
+                        if (isRoot) {
+                            return caches.match('/index.html');
                         }
                         // Fallback to offline page
                         return caches.match('/offline.html');

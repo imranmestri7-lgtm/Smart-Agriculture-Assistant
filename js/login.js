@@ -229,6 +229,7 @@ phoneLoginForm.addEventListener("submit", async (event) => {
 
         if (data.token) {
             localStorage.setItem("agriSmartToken", data.token);
+            localStorage.setItem("token", data.token);
         } else {
             throw new Error("Login token was not returned by the server.");
         }
@@ -339,6 +340,7 @@ emailLoginForm.addEventListener("submit", async (event) => {
 
         if (data.token) {
             localStorage.setItem("agriSmartToken", data.token);
+            localStorage.setItem("token", data.token);
         } else {
             throw new Error("Login token was not returned by the server.");
         }

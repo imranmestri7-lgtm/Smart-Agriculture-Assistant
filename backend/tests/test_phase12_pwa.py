@@ -39,7 +39,7 @@ class Phase12PWATests(unittest.TestCase):
         self.assertEqual(data.get("name"), "AgriSmart — Smart Agriculture Assistant")
         self.assertEqual(data.get("short_name"), "AgriSmart")
         self.assertEqual(data.get("display"), "standalone")
-        self.assertEqual(data.get("start_url"), "/")
+        self.assertEqual(data.get("start_url"), "/index.html")
         self.assertEqual(data.get("scope"), "/")
         self.assertEqual(data.get("theme_color"), "#15803d")
         self.assertEqual(data.get("background_color"), "#ffffff")

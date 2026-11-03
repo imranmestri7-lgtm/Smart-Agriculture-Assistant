@@ -24,7 +24,7 @@
     let latestAnalyticsData = null;
 
     function getAuthToken() {
-        return localStorage.getItem("token");
+        return localStorage.getItem("agriSmartToken") || localStorage.getItem("token") || "";
     }
 
     function t(key, fallback) {
@@ -101,6 +101,7 @@
     async function loadAnalytics() {
         const token = getAuthToken();
         if (!token) {
+            renderAllEmptyStates();
             return;
         }
 
@@ -123,6 +124,12 @@
             });
 
             if (resp.status === 401) {
+                renderAllEmptyStates();
+                return;
+            }
+
+            if (!resp.ok) {
+                renderAllEmptyStates();
                 return;
             }
 
@@ -132,9 +139,11 @@
                 renderAnalytics(data);
             } else {
                 console.warn("Analytics error response:", data.message);
+                renderAllEmptyStates();
             }
         } catch (err) {
             console.error("Failed to load smart analytics:", err);
+            renderAllEmptyStates();
         }
     }
 
@@ -194,17 +203,41 @@
     }
 
     /**
-     * Render empty state in container
+     * Render friendly localized empty state in container
      */
-    function renderEmptyState(container, message) {
+    function renderEmptyState(container, messageKey, defaultMessage, icon) {
         if (!container) return;
-        const msg = message || t("no_data_label", "No records found for the selected criteria.");
+        let msg = defaultMessage;
+        if (messageKey) {
+            msg = t(messageKey, defaultMessage);
+        }
+        if (!msg) {
+            msg = t("no_data_label", "No records found for the selected criteria.");
+        }
+        const displayIcon = icon || "📊";
         container.innerHTML = `
             <div class="empty-chart-state">
-                <span class="empty-icon">📊</span>
+                <span class="empty-icon">${displayIcon}</span>
                 <p>${escapeHtml(msg)}</p>
             </div>
         `;
+    }
+
+    /**
+     * Render friendly localized empty states across all analytics panels
+     */
+    function renderAllEmptyStates() {
+        renderCropDistribution([]);
+        renderGrowthStages([]);
+        renderCropsPerFarm([]);
+        renderCropTimeline([]);
+        renderDiseaseBreakdown({});
+        renderTopDiseases([]);
+        renderCropDiseaseDistribution([]);
+        renderDiseaseTrends([]);
+        renderIrrigationStats({});
+        renderIrrigationActivity([]);
+        renderCropIrrigationSummary([]);
     }
 
     // =========================================================================
@@ -216,7 +249,7 @@
         if (!container) return;
 
         if (!crops || crops.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_crop_dist", "No crops registered yet. Add crops to view distribution by name.", "🌱");
             return;
         }
 
@@ -247,9 +280,9 @@
         const container = document.getElementById("cropGrowthStageChart");
         if (!container) return;
 
-        const nonZero = stages.filter(s => s.count > 0);
+        const nonZero = (stages || []).filter(s => s.count > 0);
         if (nonZero.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_growth_stages", "No crop growth stage records found. Add your crop stages to see the distribution.", "📈");
             return;
         }
 
@@ -268,7 +301,7 @@
         if (!container) return;
 
         if (!farmList || farmList.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_crops_per_farm", "No farm crop records available. Add farms and crops to see crops per farm.", "🏡");
             return;
         }
 
@@ -299,7 +332,7 @@
         if (!container) return;
 
         if (!timeline || timeline.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_crop_timeline", "No active planting or harvest timelines. Add crops with planting dates to track progress.", "⏱️");
             return;
         }
 
@@ -343,12 +376,12 @@
         const container = document.getElementById("diseaseHealthBreakdownChart");
         if (!container) return;
 
-        const healthy = da.healthy_count || 0;
-        const diseased = da.diseased_count || 0;
+        const healthy = (da && da.healthy_count) || 0;
+        const diseased = (da && da.diseased_count) || 0;
         const total = healthy + diseased;
 
         if (total === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_disease_breakdown", "No plant health scans recorded yet. Diagnose crops to view health breakdown.", "🍃");
             return;
         }
 
@@ -365,7 +398,7 @@
         if (!container) return;
 
         if (!diseases || diseases.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_top_diseases", "No crop diseases detected. Your diagnosed crops are healthy or no scans done yet.", "🩺");
             return;
         }
 
@@ -397,7 +430,7 @@
         if (!container) return;
 
         if (!cropDist || cropDist.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_crop_disease_dist", "No crop disease distribution data. Scan crops to see disease patterns across varieties.", "🌾");
             return;
         }
 
@@ -428,7 +461,7 @@
         if (!container) return;
 
         if (!trends || trends.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_disease_trends", "No disease trend history recorded yet. Historical trends appear as diagnoses are made over time.", "📉");
             return;
         }
 
@@ -448,10 +481,10 @@
         const neededElem = document.getElementById("irrigStatNeeded");
         const sufficientElem = document.getElementById("irrigStatSufficient");
 
-        if (totalWaterElem) totalWaterElem.textContent = `${ia.total_estimated_water_mm || 0} mm`;
-        if (avgWaterElem) avgWaterElem.textContent = `${ia.avg_water_mm || 0} mm`;
-        if (neededElem) neededElem.textContent = ia.irrigation_needed_count || 0;
-        if (sufficientElem) sufficientElem.textContent = ia.irrigation_not_needed_count || 0;
+        if (totalWaterElem) totalWaterElem.textContent = `${(ia && ia.total_estimated_water_mm) || 0} mm`;
+        if (avgWaterElem) avgWaterElem.textContent = `${(ia && ia.avg_water_mm) || 0} mm`;
+        if (neededElem) neededElem.textContent = (ia && ia.irrigation_needed_count) || 0;
+        if (sufficientElem) sufficientElem.textContent = (ia && ia.irrigation_not_needed_count) || 0;
     }
 
     function renderIrrigationActivity(activity) {
@@ -459,7 +492,7 @@
         if (!container) return;
 
         if (!activity || activity.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_irrigation_activity", "No irrigation records found for this period. Run irrigation advisories to track moisture trends.", "💧");
             return;
         }
 
@@ -474,7 +507,7 @@
         if (!container) return;
 
         if (!summaries || summaries.length === 0) {
-            renderEmptyState(container);
+            renderEmptyState(container, "empty_crop_irrigation_summary", "No crop irrigation summaries available yet.", "📊");
             return;
         }
 
@@ -689,8 +722,13 @@
         window.addEventListener("languageChanged", () => {
             if (latestAnalyticsData) {
                 renderAnalytics(latestAnalyticsData);
+            } else {
+                renderAllEmptyStates();
             }
         });
+
+        // Initialize friendly empty states immediately so no panel is ever blank
+        renderAllEmptyStates();
 
         // Load data on page ready
         loadFilterOptions();
@@ -701,7 +739,8 @@
     window.agriSmartAnalytics = {
         loadFilterOptions,
         loadAnalytics,
-        renderAnalytics
+        renderAnalytics,
+        renderAllEmptyStates
     };
 
     if (document.readyState === "loading") {

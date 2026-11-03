@@ -2,7 +2,7 @@
   "name": "AgriSmart — Smart Agriculture Assistant",
   "short_name": "AgriSmart",
   "description": "Smart Agriculture Assistant for farm and crop management, disease diagnosis, precision irrigation, weather updates, and farm analytics.",
-  "start_url": "/",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

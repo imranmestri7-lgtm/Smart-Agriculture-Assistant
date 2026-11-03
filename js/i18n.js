@@ -194,6 +194,16 @@ const translations = {
   "healthy_label": "Healthy",
   "diseased_label": "Diseased",
   "no_data_label": "No records found for the selected criteria.",
+  "empty_crop_dist": "No crops registered yet. Add crops to view distribution by name.",
+  "empty_growth_stages": "No crop growth stage records found. Add your crop stages to see the distribution.",
+  "empty_crops_per_farm": "No farm crop records available. Add farms and crops to see crops per farm.",
+  "empty_crop_timeline": "No active planting or harvest timelines. Add crops with planting dates to track progress.",
+  "empty_disease_breakdown": "No plant health scans recorded yet. Diagnose crops to view health breakdown.",
+  "empty_top_diseases": "No crop diseases detected. Your diagnosed crops are healthy or no scans done yet.",
+  "empty_crop_disease_dist": "No crop disease distribution data. Scan crops to see disease patterns across varieties.",
+  "empty_disease_trends": "No disease trend history recorded yet. Historical trends appear as diagnoses are made over time.",
+  "empty_irrigation_activity": "No irrigation records found for this period. Run irrigation advisories to track moisture trends.",
+  "empty_crop_irrigation_summary": "No crop irrigation summaries available yet.",
   "days_since_planting_label": "days since planting",
   "notification_center_title": "Alerts & Notifications",
   "notification_card_desc": "View crop harvest reminders, irrigation alerts, weather warnings, and disease follow-ups.",
@@ -978,6 +988,16 @@ mr: {
   "healthy_label": "निरोगी",
   "diseased_label": "बाधित",
   "no_data_label": "निवडलेल्या निकषांसाठी कोणतीही नोंद आढळली नाही.",
+  "empty_crop_dist": "अद्याप कोणतीही पिके नोंदणीकृत नाहीत. नावानुसार वितरण पाहण्यासाठी पिके जोडा.",
+  "empty_growth_stages": "पीक वाढीच्या टप्प्याची नोंद आढळली नाही. वितरण पाहण्यासाठी पिकांचे टप्पे जोडा.",
+  "empty_crops_per_farm": "शेतातील पिकांची नोंद उपलब्ध नाही. शेतनिहाय पिके पाहण्यासाठी शेत आणि पिके जोडा.",
+  "empty_crop_timeline": "कोणतीही सक्रिय लागवड किंवा काढणी टाइमलाइन नाही. प्रगती ट्रॅक करण्यासाठी लागवड तारखेसह पिके जोडा.",
+  "empty_disease_breakdown": "अद्याप कोणत्याही वनस्पती आरोग्य तपासणीची नोंद नाही. आरोग्य विभाजन पाहण्यासाठी पिकांचे निदान करा.",
+  "empty_top_diseases": "कोणताही पीक रोग आढळला नाही. तुमची तपासलेली पिके निरोगी आहेत किंवा अद्याप स्कॅन केलेले नाही.",
+  "empty_crop_disease_dist": "पीक रोग वितरण डेटा उपलब्ध नाही. वाणांनुसार रोगाचे नमुने पाहण्यासाठी पिके स्कॅन करा.",
+  "empty_disease_trends": "अद्याप रोगाचा कोणताही ट्रेंड इतिहास नाही. कालांतराने निदान केल्यावर ट्रेंड दिसतील.",
+  "empty_irrigation_activity": "या कालावधीसाठी कोणतीही सिंचन नोंद आढळली नाही. ओलावा ट्रेंड ट्रॅक करण्यासाठी सिंचन सल्ला वापरा.",
+  "empty_crop_irrigation_summary": "अद्याप कोणताही पीक सिंचन सारांश उपलब्ध नाही.",
   "days_since_planting_label": "दिवस लागवडीनंतर",
   "notification_center_title": "सूचना आणि सतर्कता",
   "notification_card_desc": "पीक काढणी स्मरणपत्रे, सिंचन सतर्कता, हवामान इशारे आणि रोग प्रतिबंधक सल्ला पहा.",
@@ -1762,6 +1782,16 @@ hi: {
   "healthy_label": "स्वस्थ",
   "diseased_label": "रोगग्रस्त",
   "no_data_label": "चयनित मानदंडों के लिए कोई रिकॉर्ड नहीं मिला।",
+  "empty_crop_dist": "अभी तक कोई फसल पंजीकृत नहीं है। नाम अनुसार वितरण देखने के लिए फसलें जोड़ें।",
+  "empty_growth_stages": "फसल विकास चरण का कोई रिकॉर्ड नहीं मिला। वितरण देखने के लिए फसल के चरण जोड़ें।",
+  "empty_crops_per_farm": "खेत की फसलों का रिकॉर्ड उपलब्ध नहीं है। प्रति खेत फसलें देखने के लिए खेत और फसलें जोड़ें।",
+  "empty_crop_timeline": "कोई सक्रिय बुवाई या कटाई समयरेखा नहीं है। प्रगति ट्रैक करने के लिए बुवाई की तारीख सहित फसलें जोड़ें।",
+  "empty_disease_breakdown": "अभी तक किसी पौधे के स्वास्थ्य स्कैन का रिकॉर्ड नहीं है। स्वास्थ्य विश्लेषण देखने के लिए फसल निदान करें।",
+  "empty_top_diseases": "कोई फसल रोग नहीं मिला। आपकी जांची गई फसलें स्वस्थ हैं या अभी तक कोई स्कैन नहीं किया गया है।",
+  "empty_crop_disease_dist": "फसल रोग वितरण डेटा उपलब्ध नहीं है। विभिन्न किस्मों में रोग पैटर्न देखने के लिए फसलें स्कैन करें।",
+  "empty_disease_trends": "अभी तक कोई रोग प्रवृत्ति इतिहास नहीं है। समय के साथ निदान करने पर रुझान दिखाई देंगे।",
+  "empty_irrigation_activity": "इस अवधि के लिए कोई सिंचाई रिकॉर्ड नहीं मिला। नमी के रुझान को ट्रैक करने के लिए सिंचाई सलाह का उपयोग करें।",
+  "empty_crop_irrigation_summary": "अभी तक कोई फसल सिंचाई सारांश उपलब्ध नहीं है।",
   "days_since_planting_label": "दिन बुवाई के बाद",
   "notification_center_title": "अलर्ट और सूचनाएं",
   "notification_card_desc": "फसल कटाई रिमाइंडर, सिंचाई अलर्ट, मौसम चेतावनी और रोग रोकथाम सलाह देखें।",
@@ -2364,6 +2394,11 @@ function setCurrentLang(lang) {
   localStorage.setItem('lang', lang);
   document.documentElement.lang = lang;
 
+  const sel = document.getElementById('lang-select');
+  if (sel && sel.value !== lang) {
+    sel.value = lang;
+  }
+
   // Persist preference to database if farmer is logged in
   const token = localStorage.getItem('agriSmartToken') || localStorage.getItem('token');
   if (token) {
@@ -2379,6 +2414,9 @@ function setCurrentLang(lang) {
       // Non-blocking background sync
     });
   }
+
+  applyTranslations();
+  window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
 }
 
 function t(key) {
@@ -2480,9 +2518,6 @@ function applyTranslations(container = document) {
       sel.dataset.listenerAttached = 'true';
       sel.addEventListener('change', e => {
         setCurrentLang(e.target.value);
-        applyTranslations();
-        // Dispatch custom event so dynamic modules can re-render immediately
-        window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: e.target.value } }));
       });
     }
   }

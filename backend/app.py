@@ -121,6 +121,11 @@ def server_error_handler(error):
 
 @app.route("/")
 def home():
+    # If a browser or webview requests the root URL expecting HTML, serve index.html
+    # while preserving the standard JSON health check response for API callers / automated tests
+    accept = request.headers.get("Accept", "")
+    if "text/html" in accept and not request.path.startswith("/api"):
+        return send_from_directory(PROJECT_ROOT, "index.html")
     return jsonify({
         "message": "Smart Agriculture Assistant Backend is running!"
     })
