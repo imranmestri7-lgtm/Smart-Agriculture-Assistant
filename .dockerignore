@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# Python virtual environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# All environment and secret files
+**/.env*
+.env
+.env.*
+*.env
+.env.save
+
+# Private keys and certificates
+**/*.pem
+**/*.key
+
+# Docker Compose file (not needed inside application image)
+docker-compose.yml
+
+# Uploaded files
+backend/uploads/
+
+# Logs and temporary files
+*.log
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+
+# Node dependencies
+node_modules/
+
+# Test cache
+.coverage
+htmlcov/
