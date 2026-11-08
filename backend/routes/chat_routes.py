@@ -218,7 +218,7 @@ def chat_message():
         reply_text = analysis["reply"]
 
         # Persist conversation to chat_history
-        db_message = f"[image:{image_url}] {message}"
+        db_message = f"[image:{image_url}] [class:{analysis['predicted_class']}] {message}"
         history_saved = False
         connection = None
         cursor = None
@@ -400,6 +400,7 @@ def get_chat_history():
             img_match = re.search(r"\[image:(/api/chat/image/[^\]]+)\]", raw_msg)
             image_url = img_match.group(1) if img_match else None
             clean_message = re.sub(r"\[image:/api/chat/image/[^\]]+\]\s*", "", raw_msg) if image_url else raw_msg
+            clean_message = re.sub(r"\[class:[^\]]+\]\s*", "", clean_message).strip()
 
             item = {
                 "id": row["id"],
@@ -529,7 +530,8 @@ def get_chat_image(filename):
                 "SELECT id FROM chat_history WHERE user_id = %s AND message LIKE %s LIMIT 1",
                 (user_id, f"%{safe_name}%")
             )
-            if cursor.fetchone():
+            row = cursor.fetchone()
+            if isinstance(row, dict) and row.get("id"):
                 is_owner = True
         except Exception:
             pass

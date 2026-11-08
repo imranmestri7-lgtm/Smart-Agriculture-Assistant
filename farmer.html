@@ -1206,10 +1206,19 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                             class="chat-image-remove-btn"
                             id="btnRemoveChatImage"
                             title="Remove image"
+                            data-i18n-title="chat_remove_image_tooltip"
                             aria-label="Remove image"
                         >
                             ✕
                         </button>
+                    </div>
+
+                    <!-- SENDING / UPLOAD PROGRESS BAR -->
+                    <div class="chat-sending-progress-bar" id="chatSendingProgressBar" style="display: none;" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                        <div class="chat-progress-track">
+                            <div class="chat-progress-fill" id="chatProgressFill"></div>
+                        </div>
+                        <span class="chat-progress-text" id="chatProgressText" data-i18n="chat_sending_message">Sending message...</span>
                     </div>
 
                     <div class="chat-input-area">
@@ -1219,6 +1228,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                             class="add-button"
                             id="addButton"
                             title="Add attachment"
+                            data-i18n-title="chat_attach_tooltip"
                             aria-haspopup="true"
                             aria-expanded="false"
                         >

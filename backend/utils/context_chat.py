@@ -112,6 +112,61 @@ def _get_growth_stage_advice(crop_name, growth_status, language):
     return advice_en.get(status, advice_en["Growing"])
 
 
+def _extract_recent_disease_info(recent_chat, diagnoses=None):
+    """Extract most recently diagnosed plant disease and crop from conversation or diagnosis history.
+
+    Returns dict with keys: class_name, display_name, crop, is_healthy or None
+    """
+    if recent_chat:
+        for turn in reversed(recent_chat):
+            msg = turn.get("message") or ""
+            resp = turn.get("response") or ""
+
+            # 1. Tag in message: [class:Tomato___Early_blight]
+            class_match = re.search(r"\[class:([A-Za-z0-9_]+)\]", msg)
+            if class_match:
+                cls_name = class_match.group(1)
+                is_healthy = "healthy" in cls_name.lower()
+                crop = cls_name.split("___")[0].replace("_", " ") if "___" in cls_name else "Plant"
+                return {
+                    "class_name": cls_name,
+                    "display_name": cls_name.replace("___", " — ").replace("_", " "),
+                    "crop": crop,
+                    "is_healthy": is_healthy
+                }
+
+            # 2. Structured vision markers in response
+            if any(k in resp for k in ("Plant Image Analysis", "वनस्पती प्रतिमा विश्लेषण", "पौधे की तस्वीर का विश्लेषण", "Condition Detected:", "आढळलेली स्थिती:", "पहचानी गई स्थिति:")):
+                cond_match = re.search(r"(?:Condition Detected|आढळलेली स्थिती|पहचानी गई स्थिति):\s*([^\n\r*]+)", resp)
+                if cond_match:
+                    display = cond_match.group(1).strip()
+                    is_healthy = any(h in display.lower() for h in ("healthy", "निरोगी", "स्वस्थ"))
+                    crop_match = re.search(r"(?:Crop|पीक|फसल):\s*([^\n\r*]+)", resp)
+                    crop_name = crop_match.group(1).strip() if crop_match else "Plant"
+                    crop_name = crop_name.split("(")[0].strip()
+                    return {
+                        "class_name": display,
+                        "display_name": display,
+                        "crop": crop_name,
+                        "is_healthy": is_healthy
+                    }
+
+    # 3. Fallback to recent diagnosis from database
+    if diagnoses and len(diagnoses) > 0:
+        pred_cls = diagnoses[0].get("predicted_class")
+        if pred_cls and pred_cls != "Unknown":
+            is_healthy = "healthy" in pred_cls.lower()
+            crop = pred_cls.split("___")[0].replace("_", " ") if "___" in pred_cls else "Plant"
+            return {
+                "class_name": pred_cls,
+                "display_name": pred_cls.replace("___", " — ").replace("_", " "),
+                "crop": crop,
+                "is_healthy": is_healthy
+            }
+
+    return None
+
+
 def is_context_relevant_query(message: str) -> bool:
     """Return True if message requests personalized farmer context, history, or follow-up."""
     if not message or not isinstance(message, str):
@@ -137,13 +192,16 @@ def is_context_relevant_query(message: str) -> bool:
         "harvest reminder", "harvest reminders", "when is my crop expected to be harvested",
         "which crops are ready for harvest", "ready for harvest", "when will my crop be harvested",
         "harvest date", "expected harvest", "when will it be harvested", "when will it be",
-        "काढणी स्मरणपत्रे", "काढणी माहिती", "काढणी तारीख", "कापणी", "कटाई रिमाइंडर", "फसल कटाई",
+        "when should i harvest it", "when to harvest it", "when to harvest",
+        "काढणी स्मरणपत्रे", "काढणी माहिती", "काढणी तारीख", "कापणी", "काढणी कधी", "कटाई रिमाइंडर", "फसल कटाई", "कटाई कब",
 
         # Irrigation history / guidance from records
         "what irrigation recommendation did i receive", "irrigation recommendation did i receive",
         "what irrigation recommendation", "recent irrigation", "irrigation guidance",
         "how much water did", "my irrigation status", "does my crop need water",
+        "how much water does it need", "when to water it", "how much water", "when should i water it",
         "सिंचन मार्गदर्शन", "सिंचन शिफारस", "सिंचाई मार्गदर्शन", "सिंचाई सिफारिश",
+        "याला किती पाणी द्यावे", "पाणी कधी द्यावे", "इसे कितना पानी चाहिए", "पानी कब दें",
 
         # Disease diagnosis history & prevention
         "recent disease diagnosis", "recent diagnosis", "show my diagnosis", "my disease diagnosis",
@@ -165,6 +223,30 @@ def is_context_relevant_query(message: str) -> bool:
 
         # Follow-up continuity cues
         "when will it be", "how to care for it", "what care does it need", "what care does it",
+        "what fertilizer should i give", "what fertilizer does it need", "कोणते खत द्यावे", "कौन सी खाद दें",
+
+        # Disease follow-up continuity cues
+        "how do i treat this", "how to treat this", "treatment for this", "how to cure this",
+        "what should i spray", "which fungicide", "can i spray", "how to cure it", "how to treat it",
+        "how to cure", "how to treat", "treat this disease", "cure this disease", "spray for this",
+        "fungicide for this", "medicine for this", "what medicine", "what chemical", "what spray",
+        "how to prevent this", "how can i prevent this", "how to prevent it", "prevention for this",
+        "stop this disease", "stop it from spreading", "will it spread", "can it spread", "spread to other",
+        "what causes this", "what caused it", "why did this happen", "cause of this", "what is the cause",
+        "tell me more about this disease", "tell me more about this", "what should i do about this",
+        "what to do for this disease", "what should i do for this", "what to do now", "what should i do",
+
+        # Marathi disease follow-ups
+        "हा रोग कसा बरा करावा", "यावर काय उपाय करावा", "उपाय काय", "यावर कोणती फवारणी करावी",
+        "कोणते औषध फवारावे", "औषध काय", "फवारणी काय करावी", "हा रोग कशामुळे होतो",
+        "हा कसा पसरतो", "हा रोग कसा रोखावा", "यावर काय करावे", "या रोगावर उपाय",
+        "या रोगाची काळजी", "हा रोग बरा होईल का", "हा पसरू शकतो का",
+
+        # Hindi disease follow-ups
+        "इसका इलाज कैसे करें", "इस बीमारी का क्या उपाय है", "कौन सी दवा छिड़कें",
+        "क्या छिड़काव करें", "यह किस कारण से होता है", "यह कैसे फैलता है",
+        "इसको कैसे रोकें", "इस बीमारी से कैसे बचें", "मुझे क्या करना चाहिए",
+        "इस पर क्या उपाय करें", "क्या यह फैल सकती है", "इस बीमारी की दवा",
     ]
 
     for pat in context_patterns:
@@ -206,6 +288,213 @@ def handle_farmer_context(message, language="en", context=None):
             if inferred:
                 matched_crop = inferred
                 is_follow_up = True
+
+    # =========================================================================
+    # INTENT 0: RECENT DISEASE / LEAF DIAGNOSIS FOLLOW-UP
+    # =========================================================================
+    recent_disease = _extract_recent_disease_info(recent_chat, diagnoses)
+
+    disease_followup_cues = (
+        "this disease", "the disease", "this problem", "this condition",
+        "treat this", "how to treat", "treatment", "cure", "fungicide",
+        "spray for this", "which fungicide", "medicine for this", "how to cure",
+        "prevent this", "prevention for this", "stop it from spreading", "will it spread", "can it spread",
+        "cause of this", "what causes this", "what caused it", "why did this happen",
+        "what should i do about this disease", "what to do for this disease",
+        # Marathi
+        "हा रोग", "हा आजार", "या रोगा", "या रोगावर", "यावर फवारणी", "औषध काय",
+        "बरे करावे", "प्रतिबंध", "रोखावा", "पसरतो", "पसरू", "कशामुळे होतो", "यावर काय उपाय",
+        # Hindi
+        "यह बीमारी", "इस बीमारी", "इसका इलाज", "इस बीमारी का उपाय", "दवा छिड़कें",
+        "रोकथाम", "रोकें", "फैलता", "फैलेगा", "इस बीमारी का कारण"
+    )
+
+    potential_crops = ("cotton", "wheat", "rice", "sugarcane", "potato", "maize", "soybean", "onion", "banana", "chilli")
+    has_unregistered_crop_query = any(re.search(rf"\b{w}\b", text) for w in potential_crops) and "disease" not in text and "रोग" not in text and "बीमारी" not in text
+    has_registered_crop_mention = any((c.get("crop_name") or "").lower() in text for c in crops if c.get("crop_name"))
+
+    is_asking_disease = (
+        recent_disease is not None and
+        not has_registered_crop_mention and
+        not has_unregistered_crop_query and
+        any(cue in text for cue in disease_followup_cues)
+    )
+
+    if is_asking_disease:
+        from utils import disease_knowledge
+        from utils.image_chat import localize_crop
+        cls_name = recent_disease.get("class_name") or "Plant condition"
+        knowledge = disease_knowledge.get_disease_info(cls_name, language=language)
+        display_name = knowledge.get("display_name") or recent_disease.get("display_name") or "Plant condition"
+        raw_crop = knowledge.get("crop") or recent_disease.get("crop") or "Plant"
+        crop_name = localize_crop(raw_crop, language)
+        is_healthy = recent_disease.get("is_healthy", False) or knowledge.get("is_healthy", False)
+
+        if is_healthy:
+            if language == "mr":
+                reply = (
+                    f"आपल्या नुकत्याच तपासलेल्या छायाचित्रानुसार आपले **{crop_name}** पीक **निरोगी (Healthy)** आढळले आहे.\n\n"
+                    f"पिकाची निरोगी वाढ टिकवण्यासाठी:\n"
+                    f"• **सिंचन**: पानांवर पाणी न टाकता मुळांशी ठिबक सिंचनाने पाणी द्या.\n"
+                    f"• **पोषण**: वाढीच्या टप्प्यानुसार संतुलित सेंद्रिय खत किंवा कंपोस्ट वापरा.\n"
+                    f"• **तपासणी**: पानांच्या खाली कीड किंवा डाग आहेत का ते आठवड्यातून एकदा तपासा.\n"
+                    f"• **हवा खेळती ठेवणे**: अतिरिक्त फांद्यांची छाटणी करून झाडात पुरेशी हवा खेळती राहील याची काळजी घ्या."
+                )
+            elif language == "hi":
+                reply = (
+                    f"आपकी हालिया तस्वीर के अनुसार आपकी **{crop_name}** फसल **स्वस्थ (Healthy)** पाई गई है।\n\n"
+                    f"फसल को स्वस्थ बनाए रखने के लिए:\n"
+                    f"• **सिंचाई**: पत्तियों को गीला किए बिना ड्रिप द्वारा केवल जड़ों में पानी दें।\n"
+                    f"• **पोषण**: विकास चरण के अनुसार संतुलित जैविक खाद या कंपोस्ट का प्रयोग करें।\n"
+                    f"• **निरीक्षण**: सप्ताह में एक बार पत्तियों के नीचे कीट या धब्बों की जांच करें।\n"
+                    f"• **हवा और धूप**: खेत में खरपतवार नियंत्रण रखें ताकि पौधों को पर्याप्त धूप और हवा मिल सके।"
+                )
+            else:
+                reply = (
+                    f"Based on your recent leaf photo, your **{crop_name}** was evaluated as **Healthy**.\n\n"
+                    f"To keep your {crop_name} thriving and productive:\n"
+                    f"• **Irrigation**: Water at the base early in the morning using drip irrigation to keep leaves dry.\n"
+                    f"• **Nutrition**: Apply balanced compost or organic fertilizer matching the current vegetative stage.\n"
+                    f"• **Monitoring**: Regularly inspect lower foliage and stems for early signs of pests or discoloration.\n"
+                    f"• **Airflow**: Prune dense shoots to ensure good ventilation and prevent microclimates favorable to fungi."
+                )
+            return {"category": "disease", "reply": reply, "knowledge": knowledge, "is_custom_localized": True}
+
+        # Diseased condition: check sub-intents
+        symptoms_list = knowledge.get("symptoms", [])
+        causes_list = knowledge.get("possible_causes", [])
+        treatments_list = knowledge.get("safe_treatment") or knowledge.get("care_recommendations") or []
+        prevention_list = knowledge.get("prevention", [])
+
+        # Sub-intent A: Treatment / Spray / Medicine / Cure
+        is_treat_query = any(k in text for k in (
+            "treat", "cure", "spray", "fungicide", "medicine", "remedy",
+            "उपचार", "फवारणी", "औषध", "बरे", "बरा", "उपाय", "इलाज", "दवा", "छिड़काव"
+        ))
+
+        # Sub-intent B: Prevention / Stop Spread
+        is_prev_query = any(k in text for k in (
+            "prevent", "prevention", "stop", "spread", "avoid",
+            "प्रतिबंध", "रोखावा", "पसरतो", "पसरू", "रोकथाम", "रोकें", "फैल"
+        ))
+
+        # Sub-intent C: Causes / Why
+        is_cause_query = any(k in text for k in (
+            "cause", "why", "origin", "reason",
+            "कारण", "कशामुळे", "क्यों"
+        ))
+
+        if is_treat_query:
+            if language == "mr":
+                treat_str = "\n• ".join([str(t) for t in treatments_list[:3]]) if treatments_list else "शिफारस केलेल्या जैविक किंवा तांबे-युक्त उत्पादनांची फवारणी करा आणि कृषी तज्ज्ञांचा सल्ला घ्या."
+                reply = (
+                    f"आपल्या **{crop_name}** पिकावरील **{display_name}** रोगनिदानावर आधारित सुरक्षित उपचार उपाय:\n\n"
+                    f"• **स्वच्छता**: रोगट पाने त्वरित कात्रीने कापून शेताबाहेर नेऊन नष्ट करा. रोगट अवशेष शेतात ठेवू नका.\n"
+                    f"• **उपचार व फवारणी शिफारसी**:\n• {treat_str}\n"
+                    f"• **फवारणीची वेळ**: सकाळी लवकर किंवा संध्याकाळी कोरड्या हवामानात फवारणी करा. औषधाच्या लेबलवरील सूचना तंतोतंत पाळा.\n\n"
+                    f"*टीप: रासायनिक औषधांच्या वापरापूर्वी स्थानिक कृषी विज्ञान केंद्र (KVK) किंवा कृषी अधिकाऱ्यांचा सल्ला घ्या.*"
+                )
+            elif language == "hi":
+                treat_str = "\n• ".join([str(t) for t in treatments_list[:3]]) if treatments_list else "अनुशंसित जैविक या तांबा-युक्त कवकनाशी का प्रयोग करें और कृषि विशेषज्ञ से सलाह लें।"
+                reply = (
+                    f"आपकी **{crop_name}** फसल के **{display_name}** रोग निदान पर आधारित सुरक्षित उपचार उपाय:\n\n"
+                    f"• **स्वच्छता**: संक्रमित पत्तियों को तुरंत काटकर खेत से दूर नष्ट कर दें।\n"
+                    f"• **उपचार और छिड़काव सलाह**:\n• {treat_str}\n"
+                    f"• **छिड़काव का समय**: सुबह जल्दी या शाम को शांत मौसम में छिड़काव करें। उत्पाद लेबल के निर्देशों का पालन करें।\n\n"
+                    f"*नोट: गंभीर प्रकोप में नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।*"
+                )
+            else:
+                treat_str = "\n• ".join([str(t) for t in treatments_list[:3]]) if treatments_list else "Apply recommended protective bio-fungicides and consult a local agricultural extension officer."
+                reply = (
+                    f"Based on your recent diagnosis for **{display_name}** on **{crop_name}**, here are the recommended safe treatment steps:\n\n"
+                    f"• **Sanitation**: Immediately prune and safely dispose of infected leaves or stems. Do not leave diseased debris in the field.\n"
+                    f"• **Safe Treatment Guidance**:\n• {treat_str}\n"
+                    f"• **Application Advice**: Spray during calm, dry morning or late afternoon hours. Always observe product label instructions and pre-harvest intervals.\n\n"
+                    f"*Note: For severe infections or chemical prescriptions, consult your local Krishi Vigyan Kendra (KVK) or extension officer.*"
+                )
+            return {"category": "disease", "reply": reply, "knowledge": knowledge, "is_custom_localized": True}
+
+        if is_prev_query:
+            if language == "mr":
+                prev_str = "\n• ".join([str(p) for p in prevention_list[:4]]) if prevention_list else "पिकांची फेरपालट करा आणि पानांवर पाणी साचणे टाळा."
+                reply = (
+                    f"**{display_name}** हा रोग इतर झाडांवर पसरू नये म्हणून खबरदारीचे उपाय:\n\n"
+                    f"• {prev_str}\n"
+                    f"• **पाण्याचे व्यवस्थापन**: पाण्याचा निचरा योग्य ठेवा आणि मुळांशी ठिबक सिंचनाने पाणी द्या.\n"
+                    f"• **साधने निर्जंतुक करणे**: छाटणीची कात्री किंवा अवजारे एका झाडाहून दुसऱ्या झाडावर वापरताना स्वच्छ करा."
+                )
+            elif language == "hi":
+                prev_str = "\n• ".join([str(p) for p in prevention_list[:4]]) if prevention_list else "फसलों का चक्र अपनाएं और पत्तियों पर पानी जमा न होने दें।"
+                reply = (
+                    f"**{display_name}** को अन्य पौधों में फैलने से रोकने के लिए सावधानियां:\n\n"
+                    f"• {prev_str}\n"
+                    f"• **जल प्रबंधन**: केवल ड्रिप सिंचाई का प्रयोग करें ताकि पत्तियों पर पानी का छिड़काव न हो।\n"
+                    f"• **औजारों की सफाई**: छंटाई के औजारों को समय-समय पर साफ करें ताकि संक्रमण न फैले।"
+                )
+            else:
+                prev_str = "\n• ".join([str(p) for p in prevention_list[:4]]) if prevention_list else "Practice crop rotation and avoid overhead watering."
+                reply = (
+                    f"To prevent **{display_name}** and stop it from spreading to other plants:\n\n"
+                    f"• {prev_str}\n"
+                    f"• **Water Management**: Switch to drip irrigation at the root zone. Avoid overhead watering to prevent splashing fungal spores onto leaves.\n"
+                    f"• **Tool Disinfection**: Clean and sanitize pruning tools with 70% alcohol or bleach between plants.\n\n"
+                    f"*Healthy cultural practices protect both current yield and future planting cycles.*"
+                )
+            return {"category": "disease", "reply": reply, "knowledge": knowledge, "is_custom_localized": True}
+
+        if is_cause_query:
+            if language == "mr":
+                cause_str = "\n• ".join([str(c) for c in causes_list[:3]]) if causes_list else "ओलसर हवामानात बुरशीचे बीजाणू पिकांवर पसरल्यामुळे हा रोग होतो."
+                reply = (
+                    f"**{crop_name}** वरील **{display_name}** रोगाची मुख्य कारणे:\n\n"
+                    f"• {cause_str}\n\n"
+                    f"उबदार आणि ओलसर हवामान, पाऊस किंवा पानांवर पाणी साचल्यामुळे बुरशीची वाढ वेगाने होते."
+                )
+            elif language == "hi":
+                cause_str = "\n• ".join([str(c) for c in causes_list[:3]]) if causes_list else "नम मौसम में कवक के बीजाणु फैलने से यह रोग होता है।"
+                reply = (
+                    f"**{crop_name}** पर **{display_name}** रोग के मुख्य कारण:\n\n"
+                    f"• {cause_str}\n\n"
+                    f"गर्म और अत्यधिक नम मौसम तथा पत्तियों पर पानी जमा रहने से रोगजनक कवक तेजी से पनपते हैं।"
+                )
+            else:
+                cause_str = "\n• ".join([str(c) for c in causes_list[:3]]) if causes_list else "Fungal spores or bacteria surviving in crop residues under warm, humid conditions."
+                reply = (
+                    f"The primary causes and vectors for **{display_name}** on **{crop_name}** are:\n\n"
+                    f"• {cause_str}\n\n"
+                    f"Warm, humid conditions and extended leaf wetness (rain splash, overhead irrigation, or dense shade) create the ideal environment for infection."
+                )
+            return {"category": "disease", "reply": reply, "knowledge": knowledge, "is_custom_localized": True}
+
+        # Default general follow-up
+        if language == "mr":
+            treat_str = "\n• ".join([str(t) for t in treatments_list[:2]]) if treatments_list else "सुरक्षित जैविक उपाय वापरा."
+            prev_str = "\n• ".join([str(p) for p in prevention_list[:2]]) if prevention_list else "पिकांची स्वच्छता ठेवा."
+            reply = (
+                f"आपल्या **{crop_name}** पिकावरील **{display_name}** साठी आवश्यक मार्गदर्शन:\n\n"
+                f"• **उपचार**:\n• {treat_str}\n\n"
+                f"• **प्रतिबंधक उपाय**:\n• {prev_str}\n\n"
+                f"अधिक माहितीसाठी आपण फवारणी, प्रतिबंध किंवा कारणांविषयी स्वतंत्रपणे विचारू शकता."
+            )
+        elif language == "hi":
+            treat_str = "\n• ".join([str(t) for t in treatments_list[:2]]) if treatments_list else "सुरक्षित जैविक उपाय अपनाएं।"
+            prev_str = "\n• ".join([str(p) for p in prevention_list[:2]]) if prevention_list else "खेत की स्वच्छता बनाए रखें।"
+            reply = (
+                f"आपकी **{crop_name}** फसल के **{display_name}** के लिए आवश्यक मार्गदर्शन:\n\n"
+                f"• **उपचार**:\n• {treat_str}\n\n"
+                f"• **रोकथाम उपाय**:\n• {prev_str}\n\n"
+                f"अधिक जानकारी के लिए आप छिड़काव, रोकथाम या कारणों के बारे में अलग से पूछ सकते हैं।"
+            )
+        else:
+            treat_str = "\n• ".join([str(t) for t in treatments_list[:2]]) if treatments_list else "Apply safe bio-controls."
+            prev_str = "\n• ".join([str(p) for p in prevention_list[:2]]) if prevention_list else "Maintain field sanitation."
+            reply = (
+                f"Summary action guide for **{display_name}** on **{crop_name}**:\n\n"
+                f"• **Immediate Treatment Steps**:\n• {treat_str}\n\n"
+                f"• **Prevention & Care**:\n• {prev_str}\n\n"
+                f"Feel free to ask for specific spraying guidance, causes, or organic prevention tips!"
+            )
+        return {"category": "disease", "reply": reply, "knowledge": knowledge, "is_custom_localized": True}
 
     # =========================================================================
     # INTENT 1: MY CROP STATUS / ALL CROPS INQUIRY
