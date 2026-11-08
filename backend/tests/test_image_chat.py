@@ -257,6 +257,153 @@ class TestImageChatEndpoints(unittest.TestCase):
         self.assertEqual(item["image_url"], "/api/chat/image/chat_leaf_901_test.jpg")
         self.assertEqual(item["clean_message"], "What is this disease?")
 
+    @patch("routes.chat_routes.get_db_connection")
+    def test_disease_followup_treatment_english(self, mock_db):
+        """Farmer asking how to treat the diagnosed plant gets tailored disease advice from context."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        # Mock recent chat turn with Tomato Early Blight
+        mock_cursor.fetchall.side_effect = [
+            [],  # farms
+            [],  # crops
+            [],  # diagnoses
+            [],  # irrigations
+            [    # recent chat
+                {
+                    "message": "[image:/api/chat/image/chat_leaf_901_1.jpg] [class:Tomato___Early_blight] check this",
+                    "response": "📸 **Plant Image Analysis**\n\nCondition Detected: Tomato Early Blight\n• Crop: Tomato",
+                    "created_at": None
+                }
+            ]
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+        mock_db.return_value = mock_conn
+
+        res = self.client.post(
+            "/api/chat/message",
+            headers={"Authorization": f"Bearer {self.token_user1}"},
+            json={"message": "How do I treat this disease?", "language": "en"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["category"], "disease")
+        self.assertIn("Tomato Early Blight", data["reply"])
+        self.assertIn("treatment", data["reply"].lower())
+
+    @patch("routes.chat_routes.get_db_connection")
+    def test_disease_followup_prevention_english(self, mock_db):
+        """Farmer asking how to prevent it gets specific prevention guidance."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.side_effect = [
+            [], [], [], [],
+            [
+                {
+                    "message": "[image:/api/chat/image/chat_leaf_901_1.jpg] [class:Tomato___Early_blight] check this",
+                    "response": "Condition Detected: Tomato Early Blight",
+                    "created_at": None
+                }
+            ]
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+        mock_db.return_value = mock_conn
+
+        res = self.client.post(
+            "/api/chat/message",
+            headers={"Authorization": f"Bearer {self.token_user1}"},
+            json={"message": "How can I prevent this?", "language": "en"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["category"], "disease")
+        self.assertIn("Tomato Early Blight", data["reply"])
+        self.assertIn("rotation", data["reply"].lower())
+
+    @patch("routes.chat_routes.get_db_connection")
+    def test_disease_followup_marathi(self, mock_db):
+        """Farmer asking in Marathi gets localized Marathi follow-up guidance."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.side_effect = [
+            [], [], [], [],
+            [
+                {
+                    "message": "[image:/api/chat/image/chat_leaf_901_1.jpg] [class:Tomato___Early_blight] check",
+                    "response": "Condition Detected: Tomato Early Blight",
+                    "created_at": None
+                }
+            ]
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+        mock_db.return_value = mock_conn
+
+        res = self.client.post(
+            "/api/chat/message",
+            headers={"Authorization": f"Bearer {self.token_user1}"},
+            json={"message": "हा रोग कसा बरा करावा?", "language": "mr"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["language"], "mr")
+        self.assertIn("उपचार", data["reply"])
+
+    @patch("routes.chat_routes.get_db_connection")
+    def test_disease_followup_hindi(self, mock_db):
+        """Farmer asking in Hindi gets localized Hindi follow-up guidance."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.side_effect = [
+            [], [], [], [],
+            [
+                {
+                    "message": "[image:/api/chat/image/chat_leaf_901_1.jpg] [class:Tomato___Early_blight] check",
+                    "response": "Condition Detected: Tomato Early Blight",
+                    "created_at": None
+                }
+            ]
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+        mock_db.return_value = mock_conn
+
+        res = self.client.post(
+            "/api/chat/message",
+            headers={"Authorization": f"Bearer {self.token_user1}"},
+            json={"message": "इसका इलाज कैसे करें?", "language": "hi"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["language"], "hi")
+        self.assertIn("उपचार", data["reply"])
+
+    @patch("routes.chat_routes.get_db_connection")
+    def test_disease_followup_healthy_plant(self, mock_db):
+        """When leaf was healthy, asking care steps gives healthy plant maintenance."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.side_effect = [
+            [], [], [], [],
+            [
+                {
+                    "message": "[image:/api/chat/image/chat_leaf_901_1.jpg] [class:Tomato___healthy] check",
+                    "response": "Condition Detected: Tomato Healthy",
+                    "created_at": None
+                }
+            ]
+        ]
+        mock_conn.cursor.return_value = mock_cursor
+        mock_db.return_value = mock_conn
+
+        res = self.client.post(
+            "/api/chat/message",
+            headers={"Authorization": f"Bearer {self.token_user1}"},
+            json={"message": "How do I care for this condition?", "language": "en"}
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertIn("Healthy", data["reply"])
+        self.assertIn("Irrigation", data["reply"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -237,6 +237,65 @@ function formatChatTime(dateInput) {
 
 
 // =====================================================
+// CHAT MESSAGE MARKDOWN FORMATTER
+// =====================================================
+
+function formatChatMessage(text) {
+    if (!text || typeof text !== "string") {
+        return "";
+    }
+
+    // 1. Sanitize HTML entities
+    let escaped = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    // 2. Bold: **text** -> <strong>text</strong>
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    // 3. Italic: *text* -> <em>$1</em>
+    escaped = escaped.replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, "$1<em>$2</em>$3");
+
+    // 4. Split into paragraphs
+    const paragraphs = escaped.split(/\n\s*\n/);
+    const htmlParts = [];
+
+    paragraphs.forEach(function (para) {
+        para = para.trim();
+        if (!para) return;
+
+        const lines = para.split(/\n/);
+        const listItems = [];
+        const normalLines = [];
+
+        lines.forEach(function (line) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("• ") || trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+                listItems.push(trimmed.replace(/^[•\-\*]\s*/, ""));
+            } else {
+                if (listItems.length > 0) {
+                    htmlParts.push("<ul class=\"chat-bullet-list\"><li>" + listItems.join("</li><li>") + "</li></ul>");
+                    listItems.length = 0;
+                }
+                normalLines.push(line);
+            }
+        });
+
+        if (listItems.length > 0) {
+            htmlParts.push("<ul class=\"chat-bullet-list\"><li>" + listItems.join("</li><li>") + "</li></ul>");
+        }
+
+        if (normalLines.length > 0) {
+            htmlParts.push("<p>" + normalLines.join("<br>") + "</p>");
+        }
+    });
+
+    return htmlParts.join("");
+}
+
+
+// =====================================================
 // LOAD CHAT HISTORY
 // =====================================================
 
@@ -285,6 +344,7 @@ function loadChatHistory() {
                         displayMsg = item.message.replace(/\[image:\/api\/chat\/image\/[^\]]+\]\s*/, "");
                     }
                 }
+                displayMsg = displayMsg.replace(/\[class:[^\]]+\]\s*/g, "");
 
                 if (itemImgUrl) {
                     const authenticatedImgUrl = itemImgUrl + (itemImgUrl.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(token);
@@ -313,11 +373,10 @@ function loadChatHistory() {
                     <div class="message-avatar">🌱</div>
                     <div class="message-content">
                         <div class="message-name">AgriSmart Assistant</div>
-                        <p></p>
+                        <div class="message-body">${formatChatMessage(item.response || "")}</div>
                         <span class="message-time">${formatChatTime(item.created_at)}</span>
                     </div>
                 `;
-                botMsg.querySelector("p").textContent = item.response;
                 chatArea.appendChild(botMsg);
             });
 
@@ -572,18 +631,55 @@ function sendMessage() {
     // Scroll
     scrollToBottom();
 
-    // Show thinking indicator
-    showThinking();
+    // Show sending & upload progress indicators
+    const chatSendingProgressBar = document.getElementById("chatSendingProgressBar");
+    const chatProgressText = document.getElementById("chatProgressText");
+    const addButton = document.getElementById("addButton");
 
-    const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
-    if (!token) {
-        removeThinking();
-        addAssistantMessage("Your login session is missing. Please log in again to use the farming assistant.");
-        return;
+    let progressLabel = "";
+    if (imageToSend) {
+        progressLabel = window.i18n ? window.i18n.t("chat_analyzing_image") : "Analyzing plant image...";
+    } else {
+        progressLabel = window.i18n ? window.i18n.t("chat_sending_message") : "Sending message...";
     }
+
+    if (chatSendingProgressBar) {
+        if (chatProgressText) {
+            chatProgressText.textContent = progressLabel;
+        }
+        chatSendingProgressBar.style.display = "flex";
+    }
+
+    showThinking(progressLabel);
 
     if (sendButton) {
         sendButton.disabled = true;
+        sendButton.dataset.prevText = sendButton.textContent;
+        sendButton.textContent = "⏳";
+    }
+    if (addButton) {
+        addButton.disabled = true;
+    }
+
+    function stopSendingIndicators() {
+        removeThinking();
+        if (chatSendingProgressBar) {
+            chatSendingProgressBar.style.display = "none";
+        }
+        if (sendButton) {
+            sendButton.disabled = false;
+            sendButton.textContent = sendButton.dataset.prevText || "➤";
+        }
+        if (addButton) {
+            addButton.disabled = false;
+        }
+    }
+
+    const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
+    if (!token) {
+        stopSendingIndicators();
+        addAssistantMessage("Your login session is missing. Please log in again to use the farming assistant.");
+        return;
     }
 
     let requestPromise;
@@ -630,17 +726,11 @@ function sendMessage() {
             return data;
         })
         .then(function (data) {
-            removeThinking();
-            if (sendButton) {
-                sendButton.disabled = false;
-            }
+            stopSendingIndicators();
             addAssistantMessage(data);
         })
         .catch(function (error) {
-            removeThinking();
-            if (sendButton) {
-                sendButton.disabled = false;
-            }
+            stopSendingIndicators();
             addAssistantMessage(
                 error.message ||
                 "Unable to connect to AgriSmart. Check that the Flask backend is running."
@@ -679,8 +769,9 @@ function addAssistantMessage(response) {
     name.className = "message-name";
     name.textContent = "AgriSmart Assistant";
 
-    const reply = document.createElement("p");
-    reply.textContent = data.reply || "I couldn't prepare a response.";
+    const reply = document.createElement("div");
+    reply.className = "message-body";
+    reply.innerHTML = formatChatMessage(data.reply || "I couldn't prepare a response.");
 
     content.appendChild(name);
     content.appendChild(reply);
@@ -797,62 +888,38 @@ function addAssistantMessage(response) {
 // THINKING ANIMATION
 // =====================================================
 
-function showThinking() {
-
+function showThinking(customText) {
     if (!chatArea) {
         return;
     }
 
-
-    if (
-        document.getElementById("thinkingMessage")
-    ) {
-
+    const existing = document.getElementById("thinkingMessage");
+    if (existing) {
+        if (customText) {
+            const txt = existing.querySelector(".thinking-text");
+            if (txt) txt.textContent = customText;
+        }
         return;
-
     }
 
+    const defaultLabel = window.i18n ? window.i18n.t("thinking_status", "Thinking") : "Thinking";
+    const label = customText || defaultLabel;
 
-    const thinkingMessage =
-        document.createElement("div");
-
-
-    thinkingMessage.className =
-        "message assistant-message";
-
-
-    thinkingMessage.id =
-        "thinkingMessage";
-
-
+    const thinkingMessage = document.createElement("div");
+    thinkingMessage.className = "message assistant-message";
+    thinkingMessage.id = "thinkingMessage";
     thinkingMessage.innerHTML = `
-
-        <div class="message-avatar">
-            🌱
-        </div>
-
+        <div class="message-avatar">🌱</div>
         <div class="thinking-bubble">
-
-            <span class="thinking-text">
-                Thinking
-            </span>
-
+            <span class="thinking-text">${label}</span>
             <span class="dot"></span>
-
             <span class="dot"></span>
-
             <span class="dot"></span>
-
         </div>
-
     `;
 
-
     chatArea.appendChild(thinkingMessage);
-
-
     scrollToBottom();
-
 }
 
 
@@ -1258,6 +1325,7 @@ if (uploadLeaf) {
         event.stopPropagation();
         if (addMenu) addMenu.classList.remove("show");
         if (chatFileInput) {
+            chatFileInput.value = "";
             chatFileInput.click();
         }
     });

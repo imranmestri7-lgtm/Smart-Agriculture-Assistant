@@ -223,6 +223,7 @@ def is_context_relevant_query(message: str) -> bool:
 
         # Follow-up continuity cues
         "when will it be", "how to care for it", "what care does it need", "what care does it",
+        "how do i care for this", "how to care for this", "care for this", "care for this condition", "care for this plant",
         "what fertilizer should i give", "what fertilizer does it need", "कोणते खत द्यावे", "कौन सी खाद दें",
 
         # Disease follow-up continuity cues
