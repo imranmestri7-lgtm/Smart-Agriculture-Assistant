@@ -296,9 +296,20 @@ def predict_disease():
                 "confidence": round(float(probabilities[index]) * 100, 2)
             })
 
+        lang = request.headers.get("X-Language") or request.args.get("lang") or "en"
         knowledge = disease_knowledge.get_disease_info(
-            predicted_class, confidence=confidence
+            predicted_class, confidence=confidence, language=lang
         )
+
+        crop_name = (knowledge and knowledge.get("crop"))
+        if not crop_name:
+            crop_name = predicted_class.split("___")[0].replace("_", " ").title() if "___" in predicted_class else "Plant"
+
+        display_name = (knowledge and knowledge.get("display_name"))
+        if not display_name:
+            display_name = predicted_class.split("___")[1].replace("_", " ").title() if "___" in predicted_class else predicted_class.replace("_", " ").title()
+
+        is_healthy = bool(knowledge and knowledge.get("is_healthy")) if knowledge else ("healthy" in predicted_class.lower())
 
         # Save history only when the request has a valid signed token.
         # Guest predictions continue to work without being saved.
@@ -398,6 +409,9 @@ def predict_disease():
             "message": "Image prediction completed.",
             "prediction": {
                 "class_name": predicted_class,
+                "crop_name": crop_name,
+                "disease_name": display_name,
+                "is_healthy": is_healthy,
                 "confidence": round(confidence, 2)
             },
             "top_predictions": top_predictions,
@@ -417,6 +431,34 @@ def predict_disease():
             "status": "error",
             "message": "An error occurred while predicting the uploaded image."
         }), 500
+
+
+@disease_bp.route("/info/<path:class_name>", methods=["GET"])
+def get_disease_class_info(class_name):
+    """
+    Retrieve knowledge base details for a class name in the requested language.
+    Endpoint: GET /api/disease/info/<class_name>
+    """
+    if not class_name:
+        return jsonify({"status": "error", "message": "Class name is required."}), 400
+
+    lang = request.headers.get("X-Language") or request.args.get("lang") or "en"
+    confidence = request.args.get("confidence")
+    conf_float = None
+    if confidence is not None:
+        try:
+            conf_float = float(confidence)
+        except ValueError:
+            pass
+
+    info = disease_knowledge.get_disease_info(
+        class_name, confidence=conf_float, language=lang
+    )
+
+    return jsonify({
+        "status": "success",
+        "knowledge": info
+    }), 200
 
 
 # =========================================================

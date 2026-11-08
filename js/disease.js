@@ -29,6 +29,25 @@ let cameraStream = null;
 let previewObjectUrl = null;
 let lastPredictionData = null;
 
+// Translation and string helpers
+function t(key, fallback) {
+    if (window.i18n && typeof window.i18n.t === "function") {
+        const val = window.i18n.t(key);
+        if (val && val !== key) return val;
+    }
+    return fallback || key;
+}
+
+function escapeHtml(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // =====================================================
 // CREATE RESULT SECTION
 // =====================================================
@@ -38,83 +57,132 @@ resultSection.id = "predictionResult";
 
 resultSection.style.cssText = `
     display: none;
-    max-width: 900px;
+    max-width: 920px;
     margin: 30px auto;
     padding: 28px;
     background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 5px 22px rgba(0, 0, 0, 0.10);
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2ece3;
 `;
 
 resultSection.innerHTML = `
-    <h2 style="margin-bottom: 20px; color: #245c32;" data-i18n="disease_result_heading">
-        🌿 Disease Prediction Result
-    </h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px; border-bottom:1px solid #f1f5f9; padding-bottom:16px;">
+        <h2 style="margin:0; color:#15803d; font-size:24px; font-weight:700; display:flex; align-items:center; gap:8px;">
+            <span>🌿</span> <span data-i18n="disease_result_heading">Disease Prediction Result</span>
+        </h2>
+        <span id="predictionHealthBadge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"></span>
+    </div>
 
-    <div style="
-        display: flex;
-        flex-wrap: wrap;
-        gap: 24px;
-        align-items: flex-start;
-    ">
-        <div style="flex: 1; min-width: 220px;">
-            <img
-                id="resultImage"
-                alt="Analyzed plant image"
-                data-i18n-alt="analyzed_plant_image_alt"
-                style="
-                    width: 100%;
-                    max-width: 320px;
-                    border-radius: 12px;
-                    object-fit: contain;
-                "
-            >
+    <div style="display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start; margin-bottom:24px;">
+        <div style="flex:1; min-width:240px; max-width:320px;">
+            <div style="position:relative; border-radius:14px; overflow:hidden; border:2px solid #e2e8f0; background:#f8fafc; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;">
+                <img
+                    id="resultImage"
+                    alt="Analyzed plant leaf image"
+                    data-i18n-alt="analyzed_plant_image_alt"
+                    style="width:100%; height:100%; object-fit:cover; display:block;"
+                >
+            </div>
+            <p style="text-align:center; font-size:12px; color:#64748b; margin-top:8px;" data-i18n="analyzed_leaf_caption">
+                📸 Uploaded plant leaf for AI analysis
+            </p>
         </div>
 
-        <div style="flex: 2; min-width: 250px;">
-            <p style="color: #666; margin-bottom: 8px;" data-i18n="predicted_class_label">
-                Predicted class
-            </p>
-
-            <h3
-                id="diseaseName"
-                style="
-                    color: #245c32;
-                    font-size: 23px;
-                    margin-bottom: 18px;
-                    overflow-wrap: anywhere;
-                "
-            >--</h3>
-
-            <p style="margin-bottom: 8px;">
-                <span data-i18n="model_confidence_label">Model confidence:</span>
-                <strong id="confidence">--</strong>
-            </p>
-
-            <div style="
-                height: 12px;
-                background: #e5e7eb;
-                border-radius: 10px;
-                overflow: hidden;
-                margin-bottom: 22px;
-            ">
-                <div
-                    id="confidenceBar"
-                    style="
-                        width: 0%;
-                        height: 100%;
-                        background: #2e7d32;
-                        transition: width 0.5s ease;
-                    "
-                ></div>
+        <div style="flex:2; min-width:280px;">
+            <div style="margin-bottom:12px;">
+                <span style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;" data-i18n="predicted_crop_label">
+                    Predicted Crop
+                </span>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:3px;">
+                    <span style="font-size:18px;">🌱</span>
+                    <h4 id="predictedCropName" style="margin:0; font-size:20px; font-weight:700; color:#1e293b;">--</h4>
+                </div>
             </div>
 
-            <h4 style="margin-bottom: 12px;" data-i18n="other_possible_predictions_heading">
-                Other possible predictions
-            </h4>
+            <div style="margin-bottom:18px;">
+                <span style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;" data-i18n="predicted_disease_label">
+                    Detected Condition / Disease
+                </span>
+                <h3
+                    id="diseaseName"
+                    style="margin:4px 0 0 0; color:#15803d; font-size:24px; font-weight:800; line-height:1.3; overflow-wrap:anywhere;"
+                >--</h3>
+            </div>
 
-            <div id="topPredictions"></div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 18px; margin-bottom:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:13px; font-weight:600; color:#334155;" data-i18n="model_confidence_label">Model Confidence:</span>
+                    <strong id="confidence" style="font-size:16px; color:#15803d;">--%</strong>
+                </div>
+                <div style="height:10px; background:#e2e8f0; border-radius:8px; overflow:hidden;">
+                    <div
+                        id="confidenceBar"
+                        style="width:0%; height:100%; background:#16a34a; transition:width 0.6s cubic-bezier(0.16, 1, 0.3, 1);"
+                    ></div>
+                </div>
+            </div>
+
+            <div>
+                <h4 style="margin:0 0 10px 0; font-size:13px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.04em;" data-i18n="other_possible_predictions_heading">
+                    Other Candidate Predictions
+                </h4>
+                <div id="topPredictions" style="background:#ffffff; border:1px solid #edf2f7; border-radius:10px; padding:4px 12px;"></div>
+            </div>
         </div>
+    </div>
+
+    <!-- Description Paragraph -->
+    <div id="diseaseDescriptionWrap" style="display:none; margin-bottom:22px; padding:14px 18px; background:#f0fdf4; border-left:4px solid #16a34a; border-radius:8px;">
+        <p id="diseaseDescription" style="margin:0; font-size:14px; line-height:1.6; color:#1e3a29;"></p>
+    </div>
+
+    <!-- Detailed Guidance Sections Grid (Symptoms, Causes, Treatment, Prevention) -->
+    <div id="diseaseGuidanceContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px; margin-bottom:24px;">
+        <!-- Symptoms -->
+        <div class="guidance-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#0f766e;">
+                <span style="font-size:20px;">🔍</span>
+                <h4 style="margin:0; font-size:16px; font-weight:700;" data-i18n="disease_symptoms_heading">Symptoms</h4>
+            </div>
+            <ul id="symptomsList" style="margin:0; padding-left:20px; font-size:13.5px; line-height:1.6; color:#334155;"></ul>
+            <p id="symptomsFallback" style="display:none; margin:0; font-size:13px; color:#64748b; font-style:italic;" data-i18n="no_symptoms_available"></p>
+        </div>
+
+        <!-- Causes -->
+        <div class="guidance-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#b45309;">
+                <span style="font-size:20px;">⚠️</span>
+                <h4 style="margin:0; font-size:16px; font-weight:700;" data-i18n="disease_causes_heading">Possible Causes</h4>
+            </div>
+            <ul id="causesList" style="margin:0; padding-left:20px; font-size:13.5px; line-height:1.6; color:#334155;"></ul>
+            <p id="causesFallback" style="display:none; margin:0; font-size:13px; color:#64748b; font-style:italic;" data-i18n="no_causes_available"></p>
+        </div>
+
+        <!-- Safe Treatment -->
+        <div class="guidance-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#b91c1c;">
+                <span style="font-size:20px;">💊</span>
+                <h4 style="margin:0; font-size:16px; font-weight:700;" data-i18n="disease_treatment_heading">Safe Treatment</h4>
+            </div>
+            <ul id="treatmentList" style="margin:0; padding-left:20px; font-size:13.5px; line-height:1.6; color:#334155;"></ul>
+            <p id="treatmentFallback" style="display:none; margin:0; font-size:13px; color:#64748b; font-style:italic;" data-i18n="no_treatment_available"></p>
+        </div>
+
+        <!-- Prevention & Care -->
+        <div class="guidance-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#15803d;">
+                <span style="font-size:20px;">🛡️</span>
+                <h4 style="margin:0; font-size:16px; font-weight:700;" data-i18n="disease_prevention_heading">Prevention & Care</h4>
+            </div>
+            <ul id="preventionList" style="margin:0; padding-left:20px; font-size:13.5px; line-height:1.6; color:#334155;"></ul>
+            <p id="preventionFallback" style="display:none; margin:0; font-size:13px; color:#64748b; font-style:italic;" data-i18n="no_prevention_available"></p>
+        </div>
+    </div>
+
+    <!-- Guidance Unavailable Box -->
+    <div id="guidanceUnavailableBox" style="display:none; margin-bottom:20px; padding:14px 18px; background:#fef2f2; border:1px solid #fee2e2; border-radius:10px; color:#991b1b; font-size:13.5px;">
+        <span data-i18n="guidance_unavailable_note">Detailed guidance is currently unavailable for this condition. Please consult a local agricultural extension officer.</span>
     </div>
 
     <div
@@ -143,6 +211,13 @@ resultSection.innerHTML = `
         id="farmerFollowUp"
         style="
             display: none;
+            margin-top: 22px;
+            padding: 20px;
+            border: 1px solid #dce8dc;
+            border-radius: 12px;
+            background: #fafdfa;
+        "
+    >
             margin-top: 22px;
             padding: 20px;
             border: 1px solid #dce8dc;
@@ -366,20 +441,25 @@ function displaySelectedImage(file) {
 function handleImage(file) {
     clearMessage();
 
-    if (!file.type.startsWith("image/")) {
-        showMessage("Please select a valid image file.");
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    const fileType = (file.type || "").toLowerCase();
+    const fileName = (file.name || "").toLowerCase();
+    const hasValidExt = fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png") || fileName.endsWith(".webp");
+
+    if ((fileType && !allowedTypes.includes(fileType)) || (!fileType && !hasValidExt)) {
+        showMessage(t("msg_invalid_image_format", "Invalid image format. Supported formats: JPG, JPEG, PNG, WEBP."));
         return;
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-        showMessage("Image size must be less than 5 MB.");
+        showMessage(t("msg_image_too_large", "Image size must not exceed 5 MB."));
         return;
     }
 
     selectedFile = file;
     displaySelectedImage(file);
-
-    // Keep the existing crop selection optional.
 }
 
 // =====================================================
