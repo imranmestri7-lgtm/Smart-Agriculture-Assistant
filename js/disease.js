@@ -678,59 +678,230 @@ function displayTopPredictions(predictions) {
 }
 
 // =====================================================
-// SHOW PREDICTION AND LOW-CONFIDENCE QUESTIONS
+// SHOW PREDICTION AND DETAILED GUIDANCE
 // =====================================================
 
-function showResult(data) {
-    lastPredictionData = data;
+function populateListOrFallback(listId, fallbackId, items) {
+    const listEl = document.getElementById(listId);
+    const fallbackEl = document.getElementById(fallbackId);
+    if (!listEl) return;
+
+    listEl.replaceChildren();
+
+    if (Array.isArray(items) && items.length > 0) {
+        items.forEach(function (text) {
+            const li = document.createElement("li");
+            li.textContent = text;
+            listEl.appendChild(li);
+        });
+        listEl.style.display = "block";
+        if (fallbackEl) fallbackEl.style.display = "none";
+    } else {
+        listEl.style.display = "none";
+        if (fallbackEl) fallbackEl.style.display = "block";
+    }
+}
+
+function renderPredictionResult(data) {
+    if (!data || !data.prediction) return;
 
     const prediction = data.prediction;
+    const knowledge = data.knowledge || {};
     const confidence = Number(prediction.confidence);
 
     if (!Number.isFinite(confidence)) {
         throw new Error("The model returned an invalid confidence value.");
     }
 
-    document.getElementById("resultImage").src = previewImage.src;
-
-    document.getElementById("diseaseName").textContent =
-        formatClassName(prediction.class_name);
-
-    document.getElementById("confidence").textContent =
-        `${confidence.toFixed(2)}%`;
-
-    document.getElementById("confidenceBar").style.width =
-        `${Math.min(100, Math.max(0, confidence))}%`;
-
-    const warning = document.getElementById("lowConfidenceWarning");
-    const followUp = document.getElementById("farmerFollowUp");
-    const answersResult = document.getElementById("farmerAnswersResult");
-    const questionsForm = document.getElementById("farmerQuestionsForm");
-
-    const isLowConfidence = confidence < LOW_CONFIDENCE_LIMIT;
-
-warning.style.display = isLowConfidence ? "block" : "none";
-followUp.style.display = "block";
-    answersResult.style.display = "none";
-    answersResult.replaceChildren();
-
-    if (questionsForm) {
-        questionsForm.reset();
+    // Leaf image
+    const resultImg = document.getElementById("resultImage");
+    if (resultImg && previewImage && previewImage.src) {
+        resultImg.src = previewImage.src;
     }
 
-    document.getElementById("predictionDisclaimer").textContent =
-        data.disclaimer ||
-        "This is a model prediction, not a confirmed diagnosis. Verify the symptoms before choosing a treatment.";
+    // Predicted Crop Name
+    const cropNameEl = document.getElementById("predictedCropName");
+    if (cropNameEl) {
+        let displayCrop = prediction.crop_name || knowledge.crop;
+        if (!displayCrop && prediction.class_name && prediction.class_name.includes("___")) {
+            displayCrop = prediction.class_name.split("___")[0].replace(/_/g, " ");
+        }
+        cropNameEl.textContent = displayCrop || t("unknown_crop", "Plant Crop");
+    }
 
+    // Predicted Disease / Condition & Health Badge
+    const diseaseNameEl = document.getElementById("diseaseName");
+    const healthBadge = document.getElementById("predictionHealthBadge");
+    const isHealthy = Boolean(
+        prediction.is_healthy ||
+        knowledge.is_healthy ||
+        (prediction.class_name && prediction.class_name.toLowerCase().includes("healthy"))
+    );
+
+    let displayDisease = prediction.disease_name || knowledge.display_name;
+    if (!displayDisease) {
+        displayDisease = formatClassName(prediction.class_name);
+    }
+
+    if (diseaseNameEl) {
+        diseaseNameEl.textContent = displayDisease;
+    }
+
+    if (healthBadge) {
+        if (isHealthy) {
+            healthBadge.style.background = "#dcfce7";
+            healthBadge.style.color = "#15803d";
+            healthBadge.innerHTML = `✓ ${escapeHtml(t("healthy_badge_label", "Healthy Foliage"))}`;
+        } else {
+            healthBadge.style.background = "#fee2e2";
+            healthBadge.style.color = "#991b1b";
+            healthBadge.innerHTML = `⚠️ ${escapeHtml(t("diseased_badge_label", "Condition Detected"))}`;
+        }
+    }
+
+    // Confidence Number & Bar
+    const confEl = document.getElementById("confidence");
+    const confBar = document.getElementById("confidenceBar");
+    if (confEl) {
+        confEl.textContent = `${confidence.toFixed(2)}%`;
+        if (confidence >= 75) {
+            confEl.style.color = "#15803d";
+        } else if (confidence >= 50) {
+            confEl.style.color = "#b45309";
+        } else {
+            confEl.style.color = "#b91c1c";
+        }
+    }
+    if (confBar) {
+        confBar.style.width = `${Math.min(100, Math.max(0, confidence))}%`;
+        if (confidence >= 75) {
+            confBar.style.background = "#16a34a";
+        } else if (confidence >= 50) {
+            confBar.style.background = "#f59e0b";
+        } else {
+            confBar.style.background = "#e11d48";
+        }
+    }
+
+    // Top alternative predictions
     displayTopPredictions(data.top_predictions);
 
+    // Description
+    const descWrap = document.getElementById("diseaseDescriptionWrap");
+    const descEl = document.getElementById("diseaseDescription");
+    if (descWrap && descEl) {
+        if (knowledge.description) {
+            descEl.textContent = knowledge.description;
+            descWrap.style.display = "block";
+        } else {
+            descWrap.style.display = "none";
+        }
+    }
+
+    // Detailed Guidance Sections (Symptoms, Causes, Treatment, Prevention)
+    const guidanceContainer = document.getElementById("diseaseGuidanceContainer");
+    const unavailableBox = document.getElementById("guidanceUnavailableBox");
+
+    const hasAnyKnowledge = Boolean(
+        knowledge && (
+            (knowledge.symptoms && knowledge.symptoms.length > 0) ||
+            (knowledge.possible_causes && knowledge.possible_causes.length > 0) ||
+            (knowledge.safe_treatment && knowledge.safe_treatment.length > 0) ||
+            (knowledge.prevention && knowledge.prevention.length > 0) ||
+            (knowledge.care_recommendations && knowledge.care_recommendations.length > 0)
+        )
+    );
+
+    if (hasAnyKnowledge) {
+        if (guidanceContainer) guidanceContainer.style.display = "grid";
+        if (unavailableBox) unavailableBox.style.display = "none";
+
+        // Symptoms
+        populateListOrFallback("symptomsList", "symptomsFallback", knowledge.symptoms);
+
+        // Causes
+        populateListOrFallback("causesList", "causesFallback", knowledge.possible_causes);
+
+        // Safe Treatment
+        populateListOrFallback("treatmentList", "treatmentFallback", knowledge.safe_treatment);
+
+        // Prevention & Care (merge prevention and care_recommendations)
+        const preventionCombined = [
+            ...(Array.isArray(knowledge.prevention) ? knowledge.prevention : []),
+            ...(Array.isArray(knowledge.care_recommendations) ? knowledge.care_recommendations : [])
+        ];
+        populateListOrFallback("preventionList", "preventionFallback", preventionCombined);
+    } else {
+        if (guidanceContainer) guidanceContainer.style.display = "none";
+        if (unavailableBox) unavailableBox.style.display = "block";
+    }
+
+    // Low confidence warning
+    const warning = document.getElementById("lowConfidenceWarning");
+    const isLowConfidence = confidence < LOW_CONFIDENCE_LIMIT;
+    if (warning) {
+        warning.style.display = isLowConfidence ? "block" : "none";
+    }
+
+    // Optional follow-up questionnaire
+    const followUp = document.getElementById("farmerFollowUp");
+    if (followUp) {
+        followUp.style.display = "block";
+    }
+
+    // Disclaimer
+    const disclaimerEl = document.getElementById("predictionDisclaimer");
+    if (disclaimerEl) {
+        disclaimerEl.textContent = data.disclaimer || knowledge.disclaimer ||
+            t("prediction_disclaimer_default", "This result is a model prediction, not a confirmed diagnosis. Verify symptoms before choosing a treatment.");
+    }
+
     resultSection.style.display = "block";
+    if (window.i18n && typeof window.i18n.applyTranslations === "function") {
+        window.i18n.applyTranslations(resultSection);
+    }
 
     resultSection.scrollIntoView({
         behavior: "smooth",
         block: "start"
     });
 }
+
+function showResult(data) {
+    lastPredictionData = data;
+    renderPredictionResult(data);
+}
+
+// Re-render prediction results when language changes
+window.addEventListener("languageChanged", async function () {
+    if (lastPredictionData && lastPredictionData.prediction) {
+        const lang = (window.i18n && typeof window.i18n.getLang === "function")
+            ? window.i18n.getLang()
+            : (localStorage.getItem("lang") || "en");
+
+        const className = lastPredictionData.prediction.class_name;
+        if (className) {
+            try {
+                const conf = lastPredictionData.prediction.confidence || 0;
+                const resp = await fetch(`/api/disease/info/${encodeURIComponent(className)}?confidence=${conf}`, {
+                    headers: { "X-Language": lang }
+                });
+                if (resp.ok) {
+                    const infoData = await resp.json();
+                    if (infoData.status === "success" && infoData.knowledge) {
+                        lastPredictionData.knowledge = infoData.knowledge;
+                        if (infoData.knowledge.display_name) {
+                            lastPredictionData.prediction.disease_name = infoData.knowledge.display_name;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not reload translated disease info:", err);
+            }
+        }
+        renderPredictionResult(lastPredictionData);
+    }
+});
 
 // =====================================================
 // FARMER FOLLOW-UP FORM
@@ -883,9 +1054,7 @@ if (analyzeButton) {
         clearMessage();
 
         if (!selectedFile) {
-            showMessage(
-                "Please upload a plant image or capture one using the camera."
-            );
+            showMessage(t("msg_no_image_selected", "Please upload a plant leaf image or capture one using the camera."));
             return;
         }
 
@@ -894,9 +1063,8 @@ if (analyzeButton) {
         // Preserve original text and disable button
         analyzeButton.disabled = true;
         analyzeButton.dataset.originalText = analyzeButton.textContent;
-        // Set visible analyzing label
-        analyzeButton.textContent = "⏳ Analyzing image...";
-        // Insert visible loading spinner for accessibility
+        analyzeButton.textContent = "⏳ " + t("btn_analyzing", "Analyzing image...");
+
         const spinner = document.createElement('span');
         spinner.className = 'loading-spinner';
         spinner.setAttribute('role', 'status');
@@ -908,10 +1076,15 @@ if (analyzeButton) {
             const formData = new FormData();
             formData.append("image", selectedFile);
 
-            const token = localStorage.getItem("agriSmartToken");
-            const headers = token
-                ? { "Authorization": `Bearer ${token}` }
-                : {};
+            const token = localStorage.getItem("agriSmartToken") || localStorage.getItem("token");
+            const lang = (window.i18n && typeof window.i18n.getLang === "function")
+                ? window.i18n.getLang()
+                : (localStorage.getItem("lang") || "en");
+
+            const headers = {
+                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+                "X-Language": lang
+            };
 
             const response = await fetch(API_URL, {
                 method: "POST",
@@ -924,11 +1097,11 @@ if (analyzeButton) {
             try {
                 data = await response.json();
             } catch {
-                throw new Error("The backend returned an invalid response.");
+                throw new Error(t("msg_invalid_backend_response", "The backend returned an invalid response."));
             }
 
             if (!response.ok) {
-                throw new Error(data.message || "Disease prediction failed.");
+                throw new Error(data.message || t("msg_prediction_failed", "Disease prediction failed."));
             }
 
             if (
@@ -936,9 +1109,7 @@ if (analyzeButton) {
                 !data.prediction ||
                 !data.prediction.class_name
             ) {
-                throw new Error(
-                    "The backend did not return a valid prediction."
-                );
+                throw new Error(t("msg_prediction_failed", "The backend did not return a valid prediction."));
             }
 
             showResult(data);
@@ -948,17 +1119,15 @@ if (analyzeButton) {
         } catch (error) {
             console.error("Disease prediction error:", error);
 
-            const errorMessage = error.message || "An unexpected error occurred.";
-
-            showMessage(
-                errorMessage.includes("Failed to fetch")
-                    ? `Cannot connect to the Flask backend at ${API_URL}.`
-                    : errorMessage
-            );
+            const errorMessage = error.message || "";
+            if (errorMessage.includes("Failed to fetch") || errorMessage.includes("Cannot connect")) {
+                showMessage(t("msg_backend_unavailable", `Cannot connect to the Flask prediction API. Please ensure the backend server is running.`));
+            } else {
+                showMessage(errorMessage || t("msg_prediction_failed", "Disease prediction failed."));
+            }
         } finally {
-            // Remove spinner and restore button text
-            const spinner = analyzeButton.querySelector('.loading-spinner');
-            if (spinner) { spinner.remove(); }
+            const spinnerEl = analyzeButton.querySelector('.loading-spinner');
+            if (spinnerEl) { spinnerEl.remove(); }
             analyzeButton.disabled = false;
             analyzeButton.textContent = originalButtonText;
         }
@@ -1026,13 +1195,6 @@ if (scanAgainButton) {
 // =====================================================
 
 const HISTORY_API_URL = "/api/disease/history";
-
-function t(key, fallback) {
-    if (window.i18n && typeof window.i18n.t === "function") {
-        return window.i18n.t(key);
-    }
-    return fallback || key;
-}
 
 // Global modal close handler
 function closeDiagnosisModal() {
