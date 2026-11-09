@@ -239,3 +239,63 @@ self.addEventListener('message', (event) => {
         self.skipWaiting();
     }
 });
+
+/**
+ * 4. PWA Push Notifications & Notification Click (Feature Upgrade 4)
+ */
+self.addEventListener('push', (event) => {
+    let payload = {
+        title: 'AgriSmart Alert',
+        body: 'New agricultural alert for your farm.',
+        icon: '/images/icons/icon-192x192.png',
+        badge: '/images/icons/icon-72x72.png',
+        data: { url: '/farmer.html#notificationSection' },
+        tag: 'agrismart-alert'
+    };
+
+    if (event.data) {
+        try {
+            const dataJson = event.data.json();
+            payload = Object.assign(payload, dataJson);
+        } catch (e) {
+            payload.body = event.data.text() || payload.body;
+        }
+    }
+
+    const options = {
+        body: payload.body,
+        icon: payload.icon || '/images/icons/icon-192x192.png',
+        badge: payload.badge || '/images/icons/icon-72x72.png',
+        vibrate: [100, 50, 100],
+        data: payload.data || { url: '/farmer.html#notificationSection' },
+        tag: payload.tag || 'agrismart-alert',
+        renotify: true
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(payload.title, options)
+    );
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const targetUrl = (event.notification.data && event.notification.data.url)
+        ? event.notification.data.url
+        : '/farmer.html#notificationSection';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if ('focus' in client) {
+                    client.navigate(targetUrl);
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
+});
+

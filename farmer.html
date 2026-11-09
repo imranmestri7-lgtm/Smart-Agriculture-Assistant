@@ -717,6 +717,7 @@
             <div class="notif-filter-tabs">
                 <button type="button" class="notif-tab active" data-category="all" id="notifFilterAll" data-i18n="notif_filter_all">All Alerts</button>
                 <button type="button" class="notif-tab" data-unread="true" id="notifFilterUnread" data-i18n="notif_filter_unread">Unread</button>
+                <button type="button" class="notif-tab" data-read="true" id="notifFilterRead" data-i18n="notif_filter_read">Read</button>
                 <button type="button" class="notif-tab" data-category="crop" id="notifFilterCrop" data-i18n="notif_filter_crop">🌾 Crops</button>
                 <button type="button" class="notif-tab" data-category="irrigation" id="notifFilterIrrigation" data-i18n="notif_filter_irrigation">💧 Irrigation</button>
                 <button type="button" class="notif-tab" data-category="weather" id="notifFilterWeather" data-i18n="notif_filter_weather">🌦️ Weather</button>
@@ -1507,10 +1508,22 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                 <small><span data-i18n="prefs_disease_desc">Diagnosis follow-ups, field sanitation, and inspection advice.</span></small>
                             </span>
                         </label>
+                        <label class="pref-item-card" style="border: 1px solid var(--accent-light, #c8e6c9); background: var(--bg-surface-elevated, #f9fbf9);">
+                            <input type="checkbox" id="prefPushEnabled">
+                            <span class="pref-item-info">
+                                <strong>🔔 <span data-i18n="prefs_push_label">Web Push Notifications (Service Worker)</span></strong>
+                                <small><span data-i18n="prefs_push_desc">Receive instant farm advisories and urgent alerts directly on your device.</span></small>
+                            </span>
+                        </label>
                     </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
-                        <button type="submit" class="btn-primary" data-i18n="btn_save">Save Preferences</button>
+                    <div class="modal-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <button type="button" class="btn-secondary" id="btnTestPush" style="display:inline-flex; align-items:center; gap:6px; font-size:var(--font-sm);" data-i18n="btn_test_push">📲 Test Notification</button>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                            <button type="submit" class="btn-primary" data-i18n="btn_save">Save Preferences</button>
+                        </div>
                     </div>
                 </form>
             </div>

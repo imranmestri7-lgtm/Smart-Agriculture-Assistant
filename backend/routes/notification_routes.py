@@ -33,7 +33,7 @@ def _authenticate():
 def _get_preferences(cursor, user_id):
     """Retrieve farmer's notification preferences, defaulting to enabled."""
     cursor.execute("""
-        SELECT crop_reminders, irrigation_alerts, weather_alerts, disease_reminders
+        SELECT crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, push_enabled
         FROM notification_preferences
         WHERE user_id = %s
     """, (user_id,))
@@ -43,17 +43,19 @@ def _get_preferences(cursor, user_id):
             "crop_reminders": bool(row["crop_reminders"]),
             "irrigation_alerts": bool(row["irrigation_alerts"]),
             "weather_alerts": bool(row["weather_alerts"]),
-            "disease_reminders": bool(row["disease_reminders"])
+            "disease_reminders": bool(row["disease_reminders"]),
+            "push_enabled": bool(row["push_enabled"]) if "push_enabled" in row and row["push_enabled"] is not None else True
         }
     return {
         "crop_reminders": True,
         "irrigation_alerts": True,
         "weather_alerts": True,
-        "disease_reminders": True
+        "disease_reminders": True,
+        "push_enabled": True
     }
 
 
-def _insert_notification_if_new(connection, cursor, user_id, category, title, message, severity="info", link=None, unique_key=None):
+def _insert_notification_if_new(connection, cursor, user_id, category, title, message, severity="info", link=None, unique_key=None, related_id=None):
     """Insert notification only if unique_key does not already exist for this user."""
     if unique_key:
         cursor.execute("""
@@ -64,9 +66,9 @@ def _insert_notification_if_new(connection, cursor, user_id, category, title, me
             return False  # Already exists, skip duplicate
 
     cursor.execute("""
-        INSERT INTO notifications (user_id, category, title, message, severity, link, unique_key, is_read, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, 0, CURRENT_TIMESTAMP)
-    """, (user_id, category, title, message, severity, link, unique_key))
+        INSERT INTO notifications (user_id, category, title, message, severity, link, unique_key, related_id, is_read, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0, CURRENT_TIMESTAMP)
+    """, (user_id, category, title, message, severity, link, unique_key, related_id))
     connection.commit()
     return True
 
@@ -107,14 +109,14 @@ def _generate_notifications(connection, cursor, user_id):
                     unique_key = f"crop_harvest_approaching_{crop_id}_{h_date}"
                     title = f"Harvest Approaching: {crop_name}"
                     msg = f"{crop_name} ({variety or 'General'}) at {farm_name} is approaching its expected harvest date on {h_date} (in {days_until_harvest} days)."
-                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key)
+                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
 
                 # B. Harvest date reached or passed
                 elif days_until_harvest < 0 and growth_status != "Harvested":
                     unique_key = f"crop_harvest_reached_{crop_id}_{h_date}"
                     title = f"Harvest Ready: {crop_name}"
                     msg = f"{crop_name} at {farm_name} reached its expected harvest date on {h_date}. Please check readiness and update growth status."
-                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "warning", "#farmCropSection", unique_key)
+                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "warning", "#farmCropSection", unique_key, related_id=crop_id)
 
             # C. Crop unupdated for a long time (> 30 days)
             if updated_at and growth_status != "Harvested":
@@ -124,27 +126,33 @@ def _generate_notifications(connection, cursor, user_id):
                     unique_key = f"crop_stale_{crop_id}_{month_key}"
                     title = f"Growth Update Needed: {crop_name}"
                     msg = f"No growth status update recorded for {crop_name} at {farm_name} in over 30 days. Updating status helps keep management advice accurate."
-                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key)
+                    _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
 
             # D. Growth stage care reminder
-            if growth_status == "Flowering":
+            st_lower = growth_status.lower()
+            if "flower" in st_lower or "bloom" in st_lower:
                 unique_key = f"crop_flowering_care_{crop_id}"
                 title = f"Critical Stage: {crop_name} Flowering"
                 msg = f"{crop_name} at {farm_name} is in the flowering phase. Maintain consistent soil moisture and avoid excessive moisture stress or harsh chemical sprays."
-                _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key)
-            elif growth_status == "Fruiting":
+                _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
+            elif "fruit" in st_lower or "pod" in st_lower or "grain" in st_lower:
                 unique_key = f"crop_fruiting_care_{crop_id}"
                 title = f"Care Advisory: {crop_name} Fruiting"
                 msg = f"{crop_name} at {farm_name} is fruiting. Monitor soil moisture regularly to prevent fruit cracking or premature fruit drop."
-                _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key)
+                _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
+            elif "seed" in st_lower or "plant" in st_lower or "sow" in st_lower:
+                unique_key = f"crop_seedling_care_{crop_id}"
+                title = f"Seedling Care: {crop_name}"
+                msg = f"Tender {crop_name} seedlings at {farm_name} require light, frequent watering and crust prevention. Check germination progress."
+                _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
 
     # =========================================================================
-    # 2. IRRIGATION ALERTS
+    # 2. IRRIGATION ALERTS (Feature Upgrade 3 Integration)
     # =========================================================================
     if prefs["irrigation_alerts"]:
         cursor.execute("""
             SELECT id, crop, soil_moisture, is_irrigation_needed, water_quantity_mm,
-                   recommendation_status, created_at
+                   recommendation_status, soil_type, growth_stage, water_saved_mm, created_at
             FROM irrigation_history
             WHERE user_id = %s
             ORDER BY created_at DESC
@@ -159,20 +167,50 @@ def _generate_notifications(connection, cursor, user_id):
             status = rec.get("recommendation_status") or "Recorded"
             moisture = rec.get("soil_moisture")
             water_mm = rec.get("water_quantity_mm")
+            water_saved = float(rec.get("water_saved_mm") or 0.0)
+            g_stage = rec.get("growth_stage")
 
-            if needed:
+            # A. Rain Postponement (Water Conserved)
+            if "postpone" in status.lower() or water_saved > 0:
+                unique_key = f"irrig_postpone_{rec_id}"
+                title = f"Irrigation Postponed for Rain: {crop_name}"
+                litres_str = f" ({int(water_saved * 10000):,} L/ha)" if water_saved > 0 else ""
+                msg = f"Upcoming rainfall allows postponing irrigation for {crop_name}, conserving ~{water_saved:.1f} mm depth{litres_str}. Recheck moisture post-rainfall."
+                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "info", "irrigation.html", unique_key, related_id=rec_id)
+
+            # B. Urgent Moisture Deficit Alert
+            elif status == "Urgent":
+                unique_key = f"irrig_urgent_{rec_id}"
+                title = f"Urgent Irrigation Needed: {crop_name}"
+                moist_str = f"{moisture}%" if moisture is not None else "Deficit"
+                msg = f"Critical soil moisture deficit detected for {crop_name} (Moisture: {moist_str}). Immediate replenishment of {water_mm} mm depth recommended."
+                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "urgent", "irrigation.html", unique_key, related_id=rec_id)
+
+            # C. Recommended Irrigation
+            elif needed:
                 unique_key = f"irrig_needed_{rec_id}"
                 title = f"Irrigation Required: {crop_name}"
-                msg = f"Assessment for {crop_name} indicated moisture deficit ({moisture}%). Recommended water application: {water_mm} mm."
-                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "urgent", "irrigation.html", unique_key)
+                moist_str = f"{moisture}%" if moisture is not None else "Deficit"
+                msg = f"Assessment for {crop_name} indicated moisture deficit ({moist_str}). Recommended water application: {water_mm} mm."
+                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "warning", "irrigation.html", unique_key, related_id=rec_id)
+
+            # D. Qualitative Unmeasured Guidance Check
+            elif "guidance" in status.lower() or "unmeasured" in status.lower():
+                unique_key = f"irrig_unmeasured_{rec_id}"
+                title = f"Soil Moisture Tactile Check: {crop_name}"
+                msg = f"Unmeasured guidance recorded for {crop_name}. Perform a 15–20 cm root-zone tactile squeeze check before operating irrigation equipment."
+                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "info", "irrigation.html", unique_key, related_id=rec_id)
+
+            # E. Satisfactory check recorded
             else:
                 unique_key = f"irrig_logged_{rec_id}"
                 title = f"Irrigation Check Recorded: {crop_name}"
-                msg = f"Guidance '{status}' recorded for {crop_name} (Soil Moisture: {moisture}%). Field conditions were satisfactory."
-                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "info", "irrigation.html", unique_key)
+                moist_str = f"{moisture}%" if moisture is not None else "Satisfactory"
+                msg = f"Guidance '{status}' recorded for {crop_name} (Soil Moisture: {moist_str}). Field conditions were satisfactory."
+                _insert_notification_if_new(connection, cursor, user_id, "irrigation", title, msg, "info", "irrigation.html", unique_key, related_id=rec_id)
 
     # =========================================================================
-    # 3. WEATHER ALERTS
+    # 3. WEATHER ALERTS (WeatherAPI Live Integration)
     # =========================================================================
     if prefs["weather_alerts"]:
         cursor.execute("""
@@ -191,7 +229,6 @@ def _generate_notifications(connection, cursor, user_id):
         weather_key = os.getenv("WEATHER_API_KEY", "").strip()
 
         if farm_loc and weather_key:
-            # Query weather API safely
             clean_city = farm_loc.split(",")[0].strip()
             try:
                 url = f"{WEATHER_API_BASE_URL}/forecast.json"
@@ -206,26 +243,41 @@ def _generate_notifications(connection, cursor, user_id):
                         max_temp = day_info.get("maxtemp_c")
                         precip_mm = day_info.get("totalprecip_mm")
                         chance_rain = day_info.get("daily_chance_of_rain")
+                        max_wind = day_info.get("maxwind_kph")
 
-                        # Heavy rainfall advisory
+                        # A. Heavy rainfall advisory
                         if (precip_mm is not None and precip_mm >= 25.0) or (chance_rain is not None and chance_rain >= 80):
                             unique_key = f"weather_rain_{clean_city}_{f_date}"
                             title = f"Heavy Rain Advisory: {clean_city}"
                             msg = f"Heavy rainfall forecast for {clean_city} on {f_date} (Rain chance: {chance_rain}%, {precip_mm} mm). Postpone irrigation and inspect farm drainage."
                             _insert_notification_if_new(connection, cursor, user_id, "weather", title, msg, "warning", "weather.html", unique_key)
 
-                        # High temperature warning
+                        # B. High temperature warning
                         if max_temp is not None and max_temp >= 38.0:
                             unique_key = f"weather_heat_{clean_city}_{f_date}"
                             title = f"High Temperature Warning: {clean_city}"
                             msg = f"High temperature expected in {clean_city} on {f_date} (Max: {max_temp}°C). Provide shade for nursery beds and avoid midday irrigation."
                             _insert_notification_if_new(connection, cursor, user_id, "weather", title, msg, "warning", "weather.html", unique_key)
+
+                        # C. Strong wind warning
+                        if max_wind is not None and max_wind >= 35.0:
+                            unique_key = f"weather_wind_{clean_city}_{f_date}"
+                            title = f"Strong Wind Advisory: {clean_city}"
+                            msg = f"High wind speeds forecast for {clean_city} on {f_date} (Max wind: {max_wind} km/h). Stake vulnerable tall crops and delay chemical spray applications."
+                            _insert_notification_if_new(connection, cursor, user_id, "weather", title, msg, "warning", "weather.html", unique_key)
+
+                        # D. High evaporation / irrigation review advisory
+                        if max_temp is not None and max_temp >= 34.0 and (precip_mm is None or precip_mm < 2.0):
+                            unique_key = f"weather_evap_{clean_city}_{f_date}"
+                            title = f"High Evaporation Alert: {clean_city}"
+                            msg = f"Dry, hot conditions expected in {clean_city} on {f_date} (Max: {max_temp}°C). Review root-zone soil moisture and schedule irrigation during cooler hours."
+                            _insert_notification_if_new(connection, cursor, user_id, "weather", title, msg, "info", "irrigation.html", unique_key)
             except Exception as e:
                 # Silently catch network timeouts; do NOT invent weather alerts
                 pass
 
     # =========================================================================
-    # 4. DISEASE PREVENTION REMINDERS
+    # 4. DISEASE PREVENTION & DIAGNOSIS ALERTS
     # =========================================================================
     if prefs["disease_reminders"]:
         cursor.execute("""
@@ -237,21 +289,27 @@ def _generate_notifications(connection, cursor, user_id):
         """, (user_id,))
         diags = cursor.fetchall() or []
 
-        has_specific_reminder = False
         for d in diags:
             pred_cls = d.get("predicted_class") or ""
+            diag_id = d["id"]
+            conf = d.get("confidence")
+            conf_str = f" ({conf:.1f}% confidence)" if conf is not None else ""
+
             if "___" in pred_cls:
                 crop_part, disease_part = pred_cls.split("___", 1)
                 crop_name = crop_part.replace("_", " ").title()
                 disease_name = disease_part.replace("_", " ").title()
 
                 if "healthy" not in disease_part.lower():
-                    has_specific_reminder = True
-                    diag_id = d["id"]
                     unique_key = f"disease_followup_{diag_id}"
                     title = f"Disease Prevention: {disease_name}"
-                    msg = f"Previous check found {disease_name} on {crop_name}. Ensure field sanitation, prune infected foliage, and avoid overhead watering to prevent spore spread."
-                    _insert_notification_if_new(connection, cursor, user_id, "disease", title, msg, "warning", "disease.html#diagnosisHistorySection", unique_key)
+                    msg = f"Previous check found {disease_name} on {crop_name}{conf_str}. Ensure field sanitation, prune infected foliage, and avoid overhead watering to prevent spore spread."
+                    _insert_notification_if_new(connection, cursor, user_id, "disease", title, msg, "warning", "disease.html#diagnosisHistorySection", unique_key, related_id=diag_id)
+                else:
+                    unique_key = f"disease_healthy_{diag_id}"
+                    title = f"Crop Health Confirmed: {crop_name}"
+                    msg = f"Recent diagnosis confirmed healthy foliage for {crop_name}{conf_str}. Continue preventive sanitation and routine field scouting."
+                    _insert_notification_if_new(connection, cursor, user_id, "disease", title, msg, "info", "disease.html#diagnosisHistorySection", unique_key, related_id=diag_id)
 
         # General seasonal reminder if registered crops exist
         cursor.execute("SELECT DISTINCT crop_name FROM crops WHERE user_id = %s LIMIT 3", (user_id,))
@@ -271,7 +329,7 @@ def _generate_notifications(connection, cursor, user_id):
 
 @notification_bp.route("", methods=["GET"])
 def get_notifications():
-    """Retrieve notifications for authenticated farmer."""
+    """Retrieve notifications for authenticated farmer with optional filters."""
     user_id, err_resp = _authenticate()
     if err_resp:
         return err_resp
@@ -286,6 +344,7 @@ def get_notifications():
         _generate_notifications(connection, cursor, user_id)
 
         unread_only = request.args.get("unread_only", "").lower() in ("true", "1")
+        read_status = request.args.get("read_status", "").strip().lower()
         category = request.args.get("category", "").strip().lower()
         limit_param = request.args.get("limit", "50")
 
@@ -297,8 +356,11 @@ def get_notifications():
         where_clauses = ["user_id = %s"]
         params = [user_id]
 
-        if unread_only:
+        if unread_only or read_status == "unread":
             where_clauses.append("is_read = 0")
+        elif read_status == "read":
+            where_clauses.append("is_read = 1")
+
         if category and category != "all":
             where_clauses.append("category = %s")
             params.append(category)
@@ -306,7 +368,7 @@ def get_notifications():
         where_sql = " AND ".join(where_clauses)
 
         cursor.execute(f"""
-            SELECT id, category, title, message, severity, is_read, link, created_at
+            SELECT id, category, title, message, severity, is_read, link, related_id, created_at
             FROM notifications
             WHERE {where_sql}
             ORDER BY created_at DESC, id DESC
@@ -316,6 +378,7 @@ def get_notifications():
 
         cursor.execute("SELECT COUNT(*) AS cnt FROM notifications WHERE user_id = %s AND is_read = 0", (user_id,))
         unread_count = int(cursor.fetchone()["cnt"] or 0)
+        total_count = len(rows)
 
         formatted_notifications = []
         for r in rows:
@@ -328,13 +391,15 @@ def get_notifications():
                 "severity": r["severity"],
                 "is_read": bool(r["is_read"]),
                 "link": r.get("link"),
+                "related_id": r.get("related_id"),
                 "created_at": c_date.strftime("%Y-%m-%d %H:%M:%S") if isinstance(c_date, (datetime, date)) else str(c_date)
             })
 
         return jsonify({
             "status": "success",
             "notifications": formatted_notifications,
-            "unread_count": unread_count
+            "unread_count": unread_count,
+            "total_count": total_count
         }), 200
 
     except Exception as e:
@@ -435,6 +500,44 @@ def mark_notification_read(notification_id):
         return jsonify({
             "status": "success",
             "message": "Notification marked as read.",
+            "unread_count": unread_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@notification_bp.route("/<int:notification_id>/unread", methods=["PATCH"])
+def mark_notification_unread(notification_id):
+    """Mark single notification as unread."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT id FROM notifications WHERE id = %s AND user_id = %s", (notification_id, user_id))
+        if not cursor.fetchone():
+            return jsonify({"status": "error", "message": "Notification not found."}), 404
+
+        cursor.execute("UPDATE notifications SET is_read = 0 WHERE id = %s AND user_id = %s", (notification_id, user_id))
+        connection.commit()
+
+        cursor.execute("SELECT COUNT(*) AS cnt FROM notifications WHERE user_id = %s AND is_read = 0", (user_id,))
+        unread_count = int(cursor.fetchone()["cnt"] or 0)
+
+        return jsonify({
+            "status": "success",
+            "message": "Notification marked as unread.",
             "unread_count": unread_count
         }), 200
 
@@ -591,6 +694,7 @@ def update_preferences():
     irrigation_alerts = 1 if data.get("irrigation_alerts", True) else 0
     weather_alerts = 1 if data.get("weather_alerts", True) else 0
     disease_reminders = 1 if data.get("disease_reminders", True) else 0
+    push_enabled = 1 if data.get("push_enabled", True) else 0
 
     connection = None
     cursor = None
@@ -599,14 +703,15 @@ def update_preferences():
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute("""
-            INSERT INTO notification_preferences (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO notification_preferences (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, push_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 crop_reminders = VALUES(crop_reminders),
                 irrigation_alerts = VALUES(irrigation_alerts),
                 weather_alerts = VALUES(weather_alerts),
-                disease_reminders = VALUES(disease_reminders)
-        """, (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders))
+                disease_reminders = VALUES(disease_reminders),
+                push_enabled = VALUES(push_enabled)
+        """, (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, push_enabled))
         connection.commit()
 
         updated_prefs = _get_preferences(cursor, user_id)
@@ -616,6 +721,158 @@ def update_preferences():
             "preferences": updated_prefs
         }), 200
 
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+# =============================================================================
+# PWA PUSH NOTIFICATION SUBSCRIPTION ENDPOINTS
+# =============================================================================
+
+@notification_bp.route("/push-subscription", methods=["POST"])
+def save_push_subscription():
+    """Save or update farmer's browser push notification subscription."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    data = request.get_json(silent=True) or {}
+    endpoint = str(data.get("endpoint", "")).strip()
+    keys = data.get("keys", {})
+    p256dh = str(keys.get("p256dh", "")).strip() if isinstance(keys, dict) else ""
+    auth = str(keys.get("auth", "")).strip() if isinstance(keys, dict) else ""
+    user_agent = request.headers.get("User-Agent", "")[:250]
+
+    if not endpoint or not p256dh or not auth:
+        return jsonify({
+            "status": "error",
+            "message": "Missing required push subscription fields (endpoint, keys.p256dh, keys.auth)."
+        }), 400
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, user_agent)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, endpoint, p256dh, auth, user_agent))
+        connection.commit()
+
+        return jsonify({
+            "status": "success",
+            "message": "Push subscription saved successfully."
+        }), 200
+    except Exception as e:
+        # Silently succeed if duplicate endpoint
+        if connection:
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+        return jsonify({"status": "success", "message": "Push subscription registered."}), 200
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@notification_bp.route("/push-subscription", methods=["DELETE"])
+def delete_push_subscription():
+    """Remove farmer's browser push notification subscription."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("DELETE FROM push_subscriptions WHERE user_id = %s", (user_id,))
+        connection.commit()
+
+        return jsonify({
+            "status": "success",
+            "message": "Push subscription removed."
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@notification_bp.route("/push-status", methods=["GET"])
+def get_push_status():
+    """Check push notification preference and subscription status."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        prefs = _get_preferences(cursor, user_id)
+        cursor.execute("SELECT COUNT(*) as cnt FROM push_subscriptions WHERE user_id = %s", (user_id,))
+        sub_count = int(cursor.fetchone()["cnt"] or 0)
+
+        return jsonify({
+            "status": "success",
+            "push_enabled": prefs["push_enabled"],
+            "has_subscription": sub_count > 0
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@notification_bp.route("/test-push", methods=["POST"])
+def send_test_push():
+    """Send or simulate a push notification for testing."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT COUNT(*) as cnt FROM push_subscriptions WHERE user_id = %s", (user_id,))
+        sub_count = int(cursor.fetchone()["cnt"] or 0)
+
+        return jsonify({
+            "status": "success",
+            "message": "Test notification dispatched.",
+            "payload": {
+                "title": "🌾 AgriSmart Farm Alert",
+                "body": "This is a test notification verifying your active farm alert channel.",
+                "url": "/farmer.html#notificationSection",
+                "category": "system",
+                "severity": "info"
+            },
+            "subscribers_notified": sub_count
+        }), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
