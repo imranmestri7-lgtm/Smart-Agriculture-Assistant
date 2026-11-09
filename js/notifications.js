@@ -1,13 +1,13 @@
 /**
  * js/notifications.js
- * Smart Agriculture Assistant - Phase 8 Smart Notifications & Alerts Controller
+ * Smart Agriculture Assistant - Feature Upgrade 4: Smart Notifications & Alerts Controller
  */
 
 (function () {
     "use strict";
 
     let currentCategory = "all";
-    let isUnreadFilter = false;
+    let readStatus = "all"; // "all" | "unread" | "read"
     let cachedNotifications = [];
 
     function getAuthToken() {
@@ -97,9 +97,13 @@
         if (!listContainer) return;
 
         const queryParams = new URLSearchParams();
-        if (isUnreadFilter) {
-            queryParams.append("unread_only", "true");
-        } else if (currentCategory && currentCategory !== "all") {
+        if (readStatus && readStatus !== "all") {
+            queryParams.append("read_status", readStatus);
+            if (readStatus === "unread") {
+                queryParams.append("unread_only", "true");
+            }
+        }
+        if (currentCategory && currentCategory !== "all") {
             queryParams.append("category", currentCategory);
         }
 
@@ -131,9 +135,12 @@
         if (!listContainer) return;
 
         if (!notifications || notifications.length === 0) {
-            const emptyMsg = isUnreadFilter
-                ? t("no_unread_notifications_msg", "You have no unread notifications.")
-                : t("no_notifications_msg", "No alerts at this time. All farming activities are up to date!");
+            let emptyMsg = t("no_notifications_msg", "No alerts at this time. All farming activities are up to date!");
+            if (readStatus === "unread") {
+                emptyMsg = t("no_unread_notifications_msg", "You have no unread notifications.");
+            } else if (readStatus === "read") {
+                emptyMsg = t("no_read_notifications_msg", "You have no read notifications.");
+            }
 
             listContainer.innerHTML = `
                 <div class="notif-empty-state">
@@ -150,6 +157,7 @@
             const unreadClass = n.is_read ? "" : "unread";
             const icon = getCategoryIcon(n.category);
             const markReadTitle = t("mark_as_read", "Mark as Read");
+            const markUnreadTitle = t("mark_as_unread", "Mark as Unread");
             const deleteTitle = t("delete_notification", "Delete");
 
             let actionLinkHtml = "";
@@ -163,9 +171,9 @@
                 actionLinkHtml = `<a href="${escapeHtml(n.link)}" class="notif-link-btn">${escapeHtml(linkLabel)}</a>`;
             }
 
-            const readBtnHtml = !n.is_read
+            const actionBtnHtml = !n.is_read
                 ? `<button type="button" class="btn-notif-circle btn-read-notif" data-id="${n.id}" title="${markReadTitle}">✓</button>`
-                : "";
+                : `<button type="button" class="btn-notif-circle btn-unread-notif" data-id="${n.id}" title="${markUnreadTitle}">↺</button>`;
 
             html += `
                 <div class="notif-card ${severityClass} ${unreadClass}" id="notifCard-${n.id}">
@@ -184,7 +192,7 @@
                         </div>
                     </div>
                     <div class="notif-actions-col">
-                        ${readBtnHtml}
+                        ${actionBtnHtml}
                         <button type="button" class="btn-notif-circle btn-delete-notif" data-id="${n.id}" title="${deleteTitle}">🗑️</button>
                     </div>
                 </div>
@@ -207,6 +215,14 @@
             btn.addEventListener("click", async (e) => {
                 const notifId = e.currentTarget.getAttribute("data-id");
                 await markSingleRead(notifId);
+            });
+        });
+
+        // Mark as Unread
+        document.querySelectorAll(".btn-unread-notif").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const notifId = e.currentTarget.getAttribute("data-id");
+                await markSingleUnread(notifId);
             });
         });
 
@@ -240,11 +256,21 @@
                 if (card) {
                     card.classList.remove("unread");
                     const readBtn = card.querySelector(".btn-read-notif");
-                    if (readBtn) readBtn.remove();
+                    if (readBtn) {
+                        const markUnreadTitle = t("mark_as_unread", "Mark as Unread");
+                        const newBtn = document.createElement("button");
+                        newBtn.type = "button";
+                        newBtn.className = "btn-notif-circle btn-unread-notif";
+                        newBtn.setAttribute("data-id", id);
+                        newBtn.title = markUnreadTitle;
+                        newBtn.textContent = "↺";
+                        newBtn.addEventListener("click", () => markSingleUnread(id));
+                        readBtn.replaceWith(newBtn);
+                    }
                 }
 
                 // If in unread filter, remove card
-                if (isUnreadFilter && card) {
+                if (readStatus === "unread" && card) {
                     card.remove();
                     const listContainer = document.getElementById("notificationsList");
                     if (listContainer && listContainer.children.length === 0) {
@@ -254,6 +280,54 @@
             }
         } catch (err) {
             console.error("Failed to mark notification read:", err);
+        }
+    }
+
+    /**
+     * Mark single notification as unread
+     */
+    async function markSingleUnread(id) {
+        const token = getAuthToken();
+        if (!token || !id) return;
+
+        try {
+            const resp = await fetch(`/api/notifications/${id}/unread`, {
+                method: "PATCH",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                updateBadges(data.unread_count);
+
+                const card = document.getElementById(`notifCard-${id}`);
+                if (card) {
+                    card.classList.add("unread");
+                    const unreadBtn = card.querySelector(".btn-unread-notif");
+                    if (unreadBtn) {
+                        const markReadTitle = t("mark_as_read", "Mark as Read");
+                        const newBtn = document.createElement("button");
+                        newBtn.type = "button";
+                        newBtn.className = "btn-notif-circle btn-read-notif";
+                        newBtn.setAttribute("data-id", id);
+                        newBtn.title = markReadTitle;
+                        newBtn.textContent = "✓";
+                        newBtn.addEventListener("click", () => markSingleRead(id));
+                        unreadBtn.replaceWith(newBtn);
+                    }
+                }
+
+                // If in read filter, remove card
+                if (readStatus === "read" && card) {
+                    card.remove();
+                    const listContainer = document.getElementById("notificationsList");
+                    if (listContainer && listContainer.children.length === 0) {
+                        renderNotifications([]);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Failed to mark notification unread:", err);
         }
     }
 
@@ -337,6 +411,103 @@
     }
 
     /**
+     * Push notification subscription & permissions
+     */
+    async function requestPushPermissionAndSubscribe() {
+        if (!("Notification" in window)) {
+            console.warn("This browser does not support notifications.");
+            return false;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                alert(t("push_permission_denied", "Notification permission was denied in your browser settings."));
+                return false;
+            }
+
+            const token = getAuthToken();
+            if (!token) return true;
+
+            // Register push subscription if ServiceWorker ready
+            if ("serviceWorker" in navigator) {
+                const reg = await navigator.serviceWorker.ready;
+                let sub = null;
+                if (reg.pushManager) {
+                    sub = await reg.pushManager.getSubscription();
+                }
+
+                const subPayload = {
+                    endpoint: sub ? sub.endpoint : "https://browser.push.local/" + btoa(navigator.userAgent).slice(0, 16),
+                    p256dh: (sub && sub.toJSON && sub.toJSON().keys) ? sub.toJSON().keys.p256dh : "p256dh-local-device-token",
+                    auth: (sub && sub.toJSON && sub.toJSON().keys) ? sub.toJSON().keys.auth : "auth-local-device-token",
+                    user_agent: navigator.userAgent
+                };
+
+                await fetch("/api/notifications/push-subscription", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(subPayload)
+                });
+            }
+
+            return true;
+        } catch (err) {
+            console.error("Error subscribing to push notifications:", err);
+            return false;
+        }
+    }
+
+    async function triggerTestPushNotification() {
+        const token = getAuthToken();
+        if (!token) return;
+
+        // Ensure permission first
+        const hasPermission = await requestPushPermissionAndSubscribe();
+        if (!hasPermission) return;
+
+        try {
+            const resp = await fetch("/api/notifications/test-push", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                const payload = data.push_payload || {
+                    title: "🌱 AgriSmart Alert",
+                    body: "Smart Farm Notification test received successfully!",
+                    icon: "/assets/images/icons/icon-192x192.png",
+                    url: "/farmer.html#notificationSection"
+                };
+
+                if ("serviceWorker" in navigator) {
+                    const reg = await navigator.serviceWorker.ready;
+                    if (reg && reg.showNotification) {
+                        await reg.showNotification(payload.title, {
+                            body: payload.body,
+                            icon: payload.icon || "/assets/images/icons/icon-192x192.png",
+                            badge: "/assets/images/icons/icon-72x72.png",
+                            data: { url: payload.url || "/farmer.html#notificationSection" },
+                            vibrate: [100, 50, 100],
+                            tag: "agrismart-test"
+                        });
+                    }
+                } else if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification(payload.title, { body: payload.body, icon: payload.icon });
+                }
+
+                alert(t("push_test_success", "Test notification triggered successfully!"));
+            }
+        } catch (err) {
+            console.error("Test notification failed:", err);
+        }
+    }
+
+    /**
      * Notification Preferences
      */
     async function openPreferencesModal() {
@@ -359,11 +530,13 @@
                 const irrigCheck = document.getElementById("prefIrrigationAlerts");
                 const weathCheck = document.getElementById("prefWeatherAlerts");
                 const disCheck = document.getElementById("prefDiseaseReminders");
+                const pushCheck = document.getElementById("prefPushEnabled");
 
                 if (cropCheck) cropCheck.checked = !!p.crop_reminders;
                 if (irrigCheck) irrigCheck.checked = !!p.irrigation_alerts;
                 if (weathCheck) weathCheck.checked = !!p.weather_alerts;
                 if (disCheck) disCheck.checked = !!p.disease_reminders;
+                if (pushCheck) pushCheck.checked = !!p.push_enabled;
             }
 
             modal.style.display = "flex";
@@ -377,11 +550,14 @@
         const token = getAuthToken();
         if (!token) return;
 
+        const pushEnabled = document.getElementById("prefPushEnabled")?.checked ?? false;
+
         const payload = {
             crop_reminders: document.getElementById("prefCropReminders")?.checked ?? true,
             irrigation_alerts: document.getElementById("prefIrrigationAlerts")?.checked ?? true,
             weather_alerts: document.getElementById("prefWeatherAlerts")?.checked ?? true,
-            disease_reminders: document.getElementById("prefDiseaseReminders")?.checked ?? true
+            disease_reminders: document.getElementById("prefDiseaseReminders")?.checked ?? true,
+            push_enabled: pushEnabled
         };
 
         try {
@@ -391,7 +567,6 @@
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                json: true,
                 body: JSON.stringify(payload)
             });
 
@@ -417,12 +592,16 @@
 
                 const cat = e.currentTarget.getAttribute("data-category");
                 const unread = e.currentTarget.getAttribute("data-unread");
+                const read = e.currentTarget.getAttribute("data-read");
 
                 if (unread === "true") {
-                    isUnreadFilter = true;
+                    readStatus = "unread";
+                    currentCategory = "all";
+                } else if (read === "true") {
+                    readStatus = "read";
                     currentCategory = "all";
                 } else {
-                    isUnreadFilter = false;
+                    readStatus = "all";
                     currentCategory = cat || "all";
                 }
 
@@ -472,6 +651,25 @@
             prefsForm.addEventListener("submit", savePreferences);
         }
 
+        // Push Checkbox user prompt
+        const pushCheck = document.getElementById("prefPushEnabled");
+        if (pushCheck) {
+            pushCheck.addEventListener("change", async (e) => {
+                if (e.target.checked) {
+                    const granted = await requestPushPermissionAndSubscribe();
+                    if (!granted) {
+                        e.target.checked = false;
+                    }
+                }
+            });
+        }
+
+        // Test Push Button
+        const testPushBtn = document.getElementById("btnTestPush");
+        if (testPushBtn) {
+            testPushBtn.addEventListener("click", triggerTestPushNotification);
+        }
+
         // Close modal buttons
         const prefsModal = document.getElementById("notificationPrefsModal");
         if (prefsModal) {
@@ -503,6 +701,8 @@
         loadNotifications,
         loadUnreadCount,
         markAllRead,
+        markSingleRead,
+        markSingleUnread,
         clearAllNotifications
     };
 

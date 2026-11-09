@@ -743,10 +743,10 @@ def save_push_subscription():
 
     data = request.get_json(silent=True) or {}
     endpoint = str(data.get("endpoint", "")).strip()
-    keys = data.get("keys", {})
-    p256dh = str(keys.get("p256dh", "")).strip() if isinstance(keys, dict) else ""
-    auth = str(keys.get("auth", "")).strip() if isinstance(keys, dict) else ""
-    user_agent = request.headers.get("User-Agent", "")[:250]
+    keys = data.get("keys", {}) if isinstance(data.get("keys"), dict) else {}
+    p256dh = str(keys.get("p256dh") or data.get("p256dh") or "").strip()
+    auth = str(keys.get("auth") or data.get("auth") or "").strip()
+    user_agent = request.headers.get("User-Agent", data.get("user_agent", ""))[:250]
 
     if not endpoint or not p256dh or not auth:
         return jsonify({
@@ -763,6 +763,10 @@ def save_push_subscription():
         cursor.execute("""
             INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, user_agent)
             VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                p256dh = VALUES(p256dh),
+                auth = VALUES(auth),
+                user_agent = VALUES(user_agent)
         """, (user_id, endpoint, p256dh, auth, user_agent))
         connection.commit()
 
@@ -834,7 +838,9 @@ def get_push_status():
         return jsonify({
             "status": "success",
             "push_enabled": prefs["push_enabled"],
-            "has_subscription": sub_count > 0
+            "has_subscription": sub_count > 0,
+            "push_supported": True,
+            "active_subscriptions_count": sub_count
         }), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -861,16 +867,18 @@ def send_test_push():
         cursor.execute("SELECT COUNT(*) as cnt FROM push_subscriptions WHERE user_id = %s", (user_id,))
         sub_count = int(cursor.fetchone()["cnt"] or 0)
 
+        test_payload = {
+            "title": "🌾 AgriSmart Farm Alert",
+            "body": "This is a test notification verifying your active farm alert channel.",
+            "url": "/farmer.html#notificationSection",
+            "category": "system",
+            "severity": "info"
+        }
         return jsonify({
             "status": "success",
             "message": "Test notification dispatched.",
-            "payload": {
-                "title": "🌾 AgriSmart Farm Alert",
-                "body": "This is a test notification verifying your active farm alert channel.",
-                "url": "/farmer.html#notificationSection",
-                "category": "system",
-                "severity": "info"
-            },
+            "payload": test_payload,
+            "push_payload": test_payload,
             "subscribers_notified": sub_count
         }), 200
     except Exception as e:
