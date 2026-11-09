@@ -105,11 +105,20 @@
 
                 <form id="irrigationForm">
 
+                    <!-- Quick Load Registered Crop (if farmer is logged in) -->
+                    <div class="form-group" id="registeredCropWrapper" style="display:none; margin-bottom:18px; background:#f0fdf4; border:1px solid #bbf7d0; padding:14px 18px; border-radius:14px;">
+                        <label for="registeredCropSelect" style="font-weight:700; color:#166534; font-size:13px; display:block; margin-bottom:6px;" data-i18n="registered_crops_label">
+                            🌾 Load from My Registered Crops
+                        </label>
+                        <select id="registeredCropSelect" style="background:#ffffff; border:1px solid #86efac; border-radius:10px; padding:10px 14px; width:100%; font-size:14px; color:#14532d; font-weight:600;">
+                            <option value="" data-i18n="opt_select_registered_crop">Select a registered crop to auto-fill</option>
+                        </select>
+                    </div>
+
                     <div class="form-grid">
 
                         <!-- Crop -->
                         <div class="form-group">
-
                             <label for="crop" data-i18n="select_crop_label">
                                 🌾 Select Crop
                             </label>
@@ -124,15 +133,48 @@
                                 <option value="Soybean" data-i18n="opt_crop_soybean">Soybean</option>
                                 <option value="Tomato" data-i18n="opt_crop_tomato">Tomato</option>
                                 <option value="Potato" data-i18n="opt_crop_potato">Potato</option>
+                                <option value="Onion" data-i18n="opt_crop_onion">Onion</option>
+                                <option value="Groundnut" data-i18n="opt_crop_groundnut">Groundnut / Peanut</option>
+                                <option value="Chili" data-i18n="opt_crop_chili">Chili / Pepper</option>
+                                <option value="Banana" data-i18n="opt_crop_banana">Banana</option>
+                                <option value="Gram" data-i18n="opt_crop_gram">Gram / Chickpea</option>
                             </select>
-
                         </div>
 
+                        <!-- Soil Type -->
+                        <div class="form-group">
+                            <label for="soilType" data-i18n="soil_type_label">
+                                🌱 Soil Type
+                            </label>
+
+                            <select id="soilType">
+                                <option value="loamy" data-i18n="opt_soil_loamy">Loamy (Optimal / Balanced)</option>
+                                <option value="sandy" data-i18n="opt_soil_sandy">Sandy (Rapid drainage)</option>
+                                <option value="clay" data-i18n="opt_soil_clay">Clay (High water retention)</option>
+                                <option value="black" data-i18n="opt_soil_black">Black Cotton / Regur</option>
+                                <option value="red" data-i18n="opt_soil_red">Red / Laterite</option>
+                                <option value="silt" data-i18n="opt_soil_silt">Silt Soil</option>
+                            </select>
+                        </div>
+
+                        <!-- Crop Growth Stage -->
+                        <div class="form-group">
+                            <label for="growthStage" data-i18n="growth_stage_label">
+                                🌿 Crop Growth Stage
+                            </label>
+
+                            <select id="growthStage">
+                                <option value="vegetative" data-i18n="opt_stage_vegetative">Vegetative / Canopy Growth</option>
+                                <option value="seedling" data-i18n="opt_stage_seedling">Newly Planted / Seedling</option>
+                                <option value="flowering" data-i18n="opt_stage_flowering">Flowering / Bloom (Critical)</option>
+                                <option value="fruiting" data-i18n="opt_stage_fruiting">Fruiting / Pod / Grain Filling</option>
+                                <option value="near_harvest" data-i18n="opt_stage_harvest">Near Harvest / Maturation</option>
+                            </select>
+                        </div>
 
                         <!-- Soil Moisture -->
                         <div class="form-group">
-
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:4px;">
                                 <label for="soilMoisture" data-i18n="soil_moisture_label" style="margin-bottom:0;">
                                     💧 Soil Moisture (%)
                                 </label>
@@ -152,12 +194,68 @@
                             >
                             <div id="iotMoistureNotice" style="display:none; font-size:12px; color:#059669; margin-top:4px; font-weight:600;"></div>
 
+                            <!-- Qualitative / No Sensor Option -->
+                            <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="toggleNoSensor" style="width:16px; height:16px; cursor:pointer;">
+                                <label for="toggleNoSensor" style="font-size:12px; color:#475569; font-weight:600; cursor:pointer; margin-bottom:0;" data-i18n="no_moisture_sensor_toggle">
+                                    I don't have a moisture sensor (get qualitative stage guidance)
+                                </label>
+                            </div>
+                            <div id="noSensorNotice" style="display:none; font-size:11px; color:#0284c7; background:#e0f2fe; padding:6px 10px; border-radius:8px; margin-top:6px; font-weight:600;" data-i18n="qualitative_moisture_notice">
+                                ℹ️ Qualitative stage & soil guidance will be calculated without guessing or fabricating numbers.
+                            </div>
                         </div>
 
+                        <!-- Location & Live Weather Auto-Fetch -->
+                        <div class="form-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:4px;">
+                                <label for="location" data-i18n="location_label" style="margin-bottom:0;">
+                                    📍 Location
+                                </label>
+                                <button type="button" id="btnFetchLiveWeather" style="font-size:11px; padding:3px 8px; border-radius:12px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; cursor:pointer; font-weight:600;" data-i18n="fetch_live_weather_btn">
+                                    ⛅ Fetch Live Weather &amp; 48h Rain
+                                </button>
+                            </div>
+
+                            <input
+                                type="text"
+                                id="location"
+                                placeholder="e.g. Pune, Nashik, Kolhapur"
+                                list="locationSuggestions"
+                            >
+                            <datalist id="locationSuggestions">
+                                <option value="Pune">
+                                <option value="Nashik">
+                                <option value="Kolhapur">
+                                <option value="Nagpur">
+                                <option value="Solapur">
+                                <option value="Aurangabad">
+                                <option value="Satara">
+                                <option value="Ahmednagar">
+                                <option value="Sangli">
+                                <option value="Amravati">
+                            </datalist>
+                            <div id="weatherFetchNotice" style="display:none; font-size:12px; color:#2563eb; margin-top:4px; font-weight:600;"></div>
+                        </div>
+
+                        <!-- Expected Rain in 24-48h -->
+                        <div class="form-group">
+                            <label for="forecastRain" data-i18n="forecast_rain_label">
+                                🌧️ Expected Rain next 24–48h (mm)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="forecastRain"
+                                min="0"
+                                step="0.1"
+                                placeholder="e.g. 0.0"
+                                value="0.0"
+                            >
+                        </div>
 
                         <!-- Temperature -->
                         <div class="form-group">
-
                             <label for="temperature" data-i18n="temperature_label">
                                 🌡️ Temperature (°C)
                             </label>
@@ -171,13 +269,10 @@
                                 placeholder="e.g. 28"
                                 required
                             >
-
                         </div>
-
 
                         <!-- Humidity -->
                         <div class="form-group">
-
                             <label for="humidity" data-i18n="humidity_label">
                                 ☁️ Humidity (%)
                             </label>
@@ -191,13 +286,10 @@
                                 placeholder="e.g. 65"
                                 required
                             >
-
                         </div>
 
-
-                        <!-- Rainfall -->
+                        <!-- Recent Rainfall -->
                         <div class="form-group">
-
                             <label for="rainfall" data-i18n="rainfall_label">
                                 🌧️ Recent Rainfall (mm)
                             </label>
@@ -207,35 +299,10 @@
                                 id="rainfall"
                                 min="0"
                                 step="0.1"
-                                placeholder="e.g. 10"
+                                placeholder="e.g. 0"
+                                value="0"
                                 required
                             >
-
-                        </div>
-
-
-                        <!-- Location -->
-                        <div class="form-group">
-
-                            <label for="location" data-i18n="location_label">
-                                📍 Location
-                            </label>
-
-                            <select id="location">
-
-                                <option value="" data-i18n="select_location_placeholder">
-                                    Select location
-                                </option>
-
-                                <option value="Maharashtra" data-i18n="opt_loc_maharashtra">Maharashtra</option>
-                                <option value="Karnataka" data-i18n="opt_loc_karnataka">Karnataka</option>
-                                <option value="Goa" data-i18n="opt_loc_goa">Goa</option>
-                                <option value="Gujarat" data-i18n="opt_loc_gujarat">Gujarat</option>
-                                <option value="Madhya Pradesh" data-i18n="opt_loc_mp">Madhya Pradesh</option>
-                                <option value="Other" data-i18n="opt_loc_other">Other</option>
-
-                            </select>
-
                         </div>
 
                     </div>
@@ -290,6 +357,64 @@
 
             <!-- Dynamic Recommendation Box (injected by js/irrigation.js) -->
             <div id="dynamicResultCard" style="display:none;"></div>
+
+        </section>
+
+
+        <!-- Irrigation History & Water Savings Section -->
+        <section class="irrigation-section" id="irrigationHistorySection" style="margin-top:20px;">
+
+            <div class="irrigation-card">
+
+                <div class="section-heading">
+
+                    <span class="section-number">02</span>
+
+                    <div>
+                        <h2 data-i18n="irrigation_history_title">Recent Irrigation Guidance History</h2>
+
+                        <p data-i18n="irrigation_activity_title">
+                            Track your water recommendations, rainfall deferrals, and moisture trends.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Stats Strip -->
+                <div id="irrigationStatsStrip" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:24px;">
+
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:16px; text-align:center;">
+                        <div style="font-size:26px; font-weight:800; color:#15803d;" id="statTotalChecks">0</div>
+                        <div style="font-size:12px; font-weight:700; color:#166534; text-transform:uppercase; margin-top:4px;" data-i18n="stat_total_checks">Total Checks</div>
+                    </div>
+
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:16px; text-align:center;">
+                        <div style="font-size:26px; font-weight:800; color:#2563eb;" id="statWaterSaved">0 L</div>
+                        <div style="font-size:12px; font-weight:700; color:#1d4ed8; text-transform:uppercase; margin-top:4px;" data-i18n="stat_water_saved">Water Saved</div>
+                    </div>
+
+                    <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:14px; padding:16px; text-align:center;">
+                        <div style="font-size:26px; font-weight:800; color:#b45309;" id="statNeeded">0</div>
+                        <div style="font-size:12px; font-weight:700; color:#92400e; text-transform:uppercase; margin-top:4px;" data-i18n="stat_irrigation_needed">Irrigation Needed</div>
+                    </div>
+
+                    <div style="background:#f3e8ff; border:1px solid #e9d5ff; border-radius:14px; padding:16px; text-align:center;">
+                        <div style="font-size:26px; font-weight:800; color:#7e22ce;" id="statPostponed">0</div>
+                        <div style="font-size:12px; font-weight:700; color:#6b21a8; text-transform:uppercase; margin-top:4px;" data-i18n="stat_postponed_rain">Postponed for Rain</div>
+                    </div>
+
+                </div>
+
+                <!-- History Container -->
+                <div id="irrigationHistoryContainer">
+                    <div id="historyLoading" style="text-align:center; padding:20px; color:#64748b; font-size:14px;">Loading history...</div>
+                    <div id="historyEmpty" style="display:none; text-align:center; padding:28px; background:#f8fafc; border-radius:16px; border:1px dashed #cbd5e1; color:#64748b; font-size:14px;" data-i18n="no_irrigation_history">
+                        No irrigation records yet. Run your first check above!
+                    </div>
+                    <div id="historyList" style="display:flex; flex-direction:column; gap:12px;"></div>
+                </div>
+
+            </div>
 
         </section>
 

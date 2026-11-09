@@ -1,4 +1,4 @@
-"""Stub config module providing a dummy DB connection for tests."""
+"""Config module providing real DB connection when available, with dummy fallback for isolated unit tests."""
 
 class _DummyCursor:
     def __init__(self):
@@ -24,5 +24,8 @@ class _DummyConnection:
         pass
 
 def get_db_connection():
-    # Return a dummy connection object; tests only check that the function exists.
-    return _DummyConnection()
+    try:
+        from backend.config import get_db_connection as real_get_db
+        return real_get_db()
+    except Exception:
+        return _DummyConnection()

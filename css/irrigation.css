@@ -523,3 +523,25 @@ input[type="radio"]:checked + .option-card,
 .benefit-card:hover .benefit-icon {
     transform: scale(1.15) rotate(4deg);
 }
+
+/* Responsive adjustments for smart irrigation upgrade */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .form-action {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+
+    .form-action button {
+        width: 100%;
+    }
+
+    .irrigation-card {
+        padding: var(--space-5);
+    }
+}
+
