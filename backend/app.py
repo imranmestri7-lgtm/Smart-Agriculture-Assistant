@@ -33,6 +33,7 @@ from routes.farm_crop_routes import farm_bp, crop_mgmt_bp
 from routes.analytics_routes import analytics_bp
 from routes.notification_routes import notification_bp
 from routes.iot_routes import iot_bp
+from routes.financial_routes import financial_bp
 
 app = Flask(__name__)
 
@@ -60,6 +61,7 @@ app.register_blueprint(crop_mgmt_bp)
 app.register_blueprint(analytics_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(iot_bp)
+app.register_blueprint(financial_bp)
 
 
 # =========================================================================

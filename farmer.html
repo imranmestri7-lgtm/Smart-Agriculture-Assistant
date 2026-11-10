@@ -359,6 +359,39 @@
                 </a>
 
 
+                <!-- SMART FARM FINANCE & PROFIT MANAGEMENT (FEATURE UPGRADE 5) -->
+
+                <a href="#financialSection" class="dashboard-card" id="financeDashboardCard">
+
+                    <div class="dashboard-card-icon finance-card-icon" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
+                        💰
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="finance_card_title">
+                                Farm Finance &amp; Profit
+                            </h3>
+
+                            <span class="notification-card-badge" id="cardProfitBadge" style="display:none; background:#10b981; color:#fff;">₹0</span>
+
+                        </div>
+
+                        <p data-i18n="finance_card_desc">
+                            Track real farm expenses, record harvest sales, and monitor crop-wise net profit or loss.
+                        </p>
+
+                        <span class="card-link" data-i18n="finance_card_link">
+                            Manage Finance →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
                 <!-- FARMER ASSISTANT -->
 
                 <a href="#assistant" class="dashboard-card">
@@ -993,6 +1026,212 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
   "timestamp": "2026-10-31T09:50:00Z"
 }</pre>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SMART FARM EXPENSE & PROFIT MANAGEMENT (FEATURE UPGRADE 5)
+        ================================================== -->
+
+        <section class="financial-section" id="financialSection">
+
+            <div class="section-heading">
+                <span>FINANCIAL INTELLIGENCE</span>
+                <h2 data-i18n="finance_section_heading">Farm Expense &amp; Profit Management</h2>
+                <p data-i18n="finance_section_sub" style="color:var(--text-secondary); font-size:var(--font-sm); max-width:700px; margin-top:4px;">
+                    Track real operational expenses, record verified harvest sales, and monitor crop-wise net profit or loss.
+                </p>
+            </div>
+
+            <!-- HEADER ACTIONS -->
+            <div class="finance-header-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn-primary" id="btnOpenAddExpenseModal" style="display:inline-flex; align-items:center; gap:6px;">
+                        <span>➕</span> <span data-i18n="btn_add_expense">Add Expense</span>
+                    </button>
+                    <button type="button" class="btn-primary" id="btnOpenAddHarvestModal" style="background:#059669; border-color:#059669; display:inline-flex; align-items:center; gap:6px;">
+                        <span>🌾</span> <span data-i18n="btn_add_harvest">Record Harvest &amp; Sales</span>
+                    </button>
+                </div>
+                <div>
+                    <button type="button" class="btn-secondary" id="btnRefreshFinance" style="display:inline-flex; align-items:center; gap:6px;">
+                        <span>🔄</span> <span data-i18n="btn_refresh">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1. KPI METRIC SUMMARY CARDS -->
+            <div class="finance-kpi-grid">
+                <!-- Total Expenses -->
+                <div class="finance-kpi-card" style="border-left: 4px solid #ef4444;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(239, 68, 68, 0.12); color: #dc2626;">
+                        💸
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_total_expenses">Total Expenses</span>
+                        <h3 class="kpi-value" id="kpiTotalExpenses">₹0</h3>
+                        <small class="kpi-sub" id="kpiExpenseCount">0 recorded entries</small>
+                    </div>
+                </div>
+
+                <!-- Total Revenue -->
+                <div class="finance-kpi-card" style="border-left: 4px solid #10b981;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
+                        🌾
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_total_revenue">Total Revenue</span>
+                        <h3 class="kpi-value" id="kpiTotalRevenue">₹0</h3>
+                        <small class="kpi-sub" id="kpiHarvestCount">From actual sales</small>
+                    </div>
+                </div>
+
+                <!-- Net Profit / Loss -->
+                <div class="finance-kpi-card" id="kpiNetProfitCard" style="border-left: 4px solid #3b82f6;">
+                    <div class="kpi-icon-wrapper" id="kpiProfitIconWrapper" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">
+                        📈
+                    </div>
+                    <div class="kpi-data">
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span class="kpi-label" data-i18n="kpi_net_profit_loss">Net Profit / Loss</span>
+                            <span class="profit-status-badge" id="kpiProfitBadge" style="font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600; background:#e2e8f0; color:#475569;">Balanced</span>
+                        </div>
+                        <h3 class="kpi-value" id="kpiNetProfit">₹0</h3>
+                        <small class="kpi-sub" id="kpiProfitSub">Revenue − Recorded Costs</small>
+                    </div>
+                </div>
+
+                <!-- Profit Margin -->
+                <div class="finance-kpi-card" style="border-left: 4px solid #8b5cf6;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(139, 92, 246, 0.12); color: #7c3aed;">
+                        📊
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_profit_margin">Profit Margin</span>
+                        <h3 class="kpi-value" id="kpiProfitMargin">0.0%</h3>
+                        <small class="kpi-sub" data-i18n="kpi_margin_sub">Net profit / total revenue</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. VISUAL ANALYTICS GRID -->
+            <div class="finance-analytics-grid">
+                <!-- A. Category Cost Breakdown -->
+                <div class="finance-box">
+                    <div class="finance-box-header">
+                        <h4>📊 <span data-i18n="category_breakdown_title">Expense Breakdown by Category</span></h4>
+                    </div>
+                    <div id="categoryBreakdownContainer" class="finance-box-content">
+                        <!-- Rendered by js/finance.js -->
+                    </div>
+                </div>
+
+                <!-- B. Crop-wise Profitability -->
+                <div class="finance-box">
+                    <div class="finance-box-header">
+                        <h4>🌾 <span data-i18n="crop_profitability_title">Crop-wise Profitability</span></h4>
+                    </div>
+                    <div id="cropProfitabilityContainer" class="finance-box-content">
+                        <!-- Rendered by js/finance.js -->
+                    </div>
+                </div>
+
+                <!-- C. Monthly Trends Chart -->
+                <div class="finance-box">
+                    <div class="finance-box-header">
+                        <h4>📅 <span data-i18n="monthly_trends_title">Monthly Expense &amp; Income Trends</span></h4>
+                    </div>
+                    <div id="monthlyTrendsContainer" class="finance-box-content">
+                        <!-- Rendered by js/finance.js -->
+                    </div>
+                </div>
+
+                <!-- D. Season-wise Financial Summary -->
+                <div class="finance-box">
+                    <div class="finance-box-header">
+                        <h4>🌦️ <span data-i18n="seasonal_summary_title">Season-wise Financial Summary</span></h4>
+                    </div>
+                    <div id="seasonalSummaryContainer" class="finance-box-content">
+                        <!-- Rendered by js/finance.js -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. INTERACTIVE RECORDS TABS & TABLES -->
+            <div class="finance-records-card">
+                <div class="finance-records-header">
+                    <div class="finance-records-tabs">
+                        <button type="button" class="finance-tab-btn active" id="tabExpensesBtn" data-tab="expenses" data-i18n="tab_recent_expenses">
+                            💸 Farm Expenses
+                        </button>
+                        <button type="button" class="finance-tab-btn" id="tabHarvestsBtn" data-tab="harvests" data-i18n="tab_recent_harvests">
+                            🌾 Harvest &amp; Sales Records
+                        </button>
+                    </div>
+                    <!-- Inline Filters -->
+                    <div class="finance-records-filters" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <select id="financeFilterCrop" class="finance-select-filter" aria-label="Filter by Crop">
+                            <option value="all" data-i18n="opt_all_crops">All Crops</option>
+                        </select>
+                        <select id="financeFilterCategory" class="finance-select-filter" aria-label="Filter by Category">
+                            <option value="all" data-i18n="opt_all_categories">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- EXPENSES TAB CONTENT -->
+                <div id="expensesTabPane" class="finance-tab-pane active">
+                    <div class="table-responsive">
+                        <table class="finance-data-table" id="expensesTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_date">Date</th>
+                                    <th data-i18n="th_category">Category</th>
+                                    <th data-i18n="th_crop_field">Crop / Farm</th>
+                                    <th data-i18n="th_description">Description</th>
+                                    <th data-i18n="th_quantity">Qty</th>
+                                    <th data-i18n="th_amount">Amount (₹)</th>
+                                    <th data-i18n="th_actions" style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesTableBody">
+                                <!-- Populated dynamically by js/finance.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="expensesEmptyState" class="finance-empty-state" style="display:none;">
+                        <span class="empty-icon">💸</span>
+                        <p data-i18n="empty_expenses_msg">No expenses recorded yet. Click "Add Expense" to start tracking farm operational costs.</p>
+                    </div>
+                </div>
+
+                <!-- HARVESTS TAB CONTENT -->
+                <div id="harvestsTabPane" class="finance-tab-pane" style="display:none;">
+                    <div class="table-responsive">
+                        <table class="finance-data-table" id="harvestsTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_date">Harvest Date</th>
+                                    <th data-i18n="th_crop">Crop</th>
+                                    <th data-i18n="th_harvest_qty">Harvested Quantity</th>
+                                    <th data-i18n="th_price_per_unit">Price / Unit (₹)</th>
+                                    <th data-i18n="th_revenue">Total Revenue (₹)</th>
+                                    <th data-i18n="th_buyer_market">Buyer / Market</th>
+                                    <th data-i18n="th_actions" style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="harvestsTableBody">
+                                <!-- Populated dynamically by js/finance.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="harvestsEmptyState" class="finance-empty-state" style="display:none;">
+                        <span class="empty-icon">🌾</span>
+                        <p data-i18n="empty_harvests_msg">No harvest sales recorded yet. Click "Record Harvest &amp; Sales" to log verified crop income.</p>
                     </div>
                 </div>
             </div>
@@ -1657,6 +1896,172 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
             </div>
         </div>
 
+
+        <!-- =================================================
+             MODALS: SMART FARM FINANCE & PROFIT (FEATURE UPGRADE 5)
+        ================================================== -->
+
+        <!-- 1. RECORD / EDIT EXPENSE MODAL -->
+        <div class="farm-modal-backdrop" id="expenseModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="expenseModalTitle" data-i18n="modal_add_expense_title">Record Farm Expense</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="expenseForm" class="modal-form">
+                    <input type="hidden" id="expenseId" value="">
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="expenseCategorySelect" data-i18n="lbl_category">Category <span class="required">*</span></label>
+                            <select id="expenseCategorySelect" class="form-control" required>
+                                <option value="" data-i18n="opt_choose_category">-- Choose Category --</option>
+                                <option value="Seeds" data-i18n="cat_seeds">🌱 Seeds</option>
+                                <option value="Fertilizers" data-i18n="cat_fertilizers">🧪 Fertilizers</option>
+                                <option value="Pesticides" data-i18n="cat_pesticides">🛡️ Pesticides</option>
+                                <option value="Labour" data-i18n="cat_labour">👥 Labour</option>
+                                <option value="Irrigation and electricity" data-i18n="cat_irrigation">💧 Irrigation &amp; Electricity</option>
+                                <option value="Machinery and equipment" data-i18n="cat_machinery">🚜 Machinery &amp; Equipment</option>
+                                <option value="Transportation" data-i18n="cat_transportation">🚛 Transportation</option>
+                                <option value="Other expenses" data-i18n="cat_other">📦 Other Expenses</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="expenseAmountInput" data-i18n="lbl_amount">Amount in INR (₹) <span class="required">*</span></label>
+                            <input type="number" id="expenseAmountInput" class="form-control" step="0.01" min="0.01" placeholder="e.g. 2500" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="expenseDateInput" data-i18n="lbl_expense_date">Expense Date <span class="required">*</span></label>
+                            <input type="date" id="expenseDateInput" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="expenseCropSelect" data-i18n="lbl_assigned_crop">Assigned Crop (Optional)</label>
+                            <select id="expenseCropSelect" class="form-control">
+                                <option value="" data-i18n="opt_general_overhead">-- General Farm Overhead --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="expenseFarmSelect" data-i18n="lbl_assigned_farm">Assigned Farm (Optional)</label>
+                            <select id="expenseFarmSelect" class="form-control">
+                                <option value="" data-i18n="opt_choose_farm">-- Choose Farm --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="expenseQuantityInput" data-i18n="lbl_quantity_unit">Quantity &amp; Unit (Optional)</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="number" id="expenseQuantityInput" class="form-control" step="0.01" placeholder="Qty">
+                                <input type="text" id="expenseUnitInput" class="form-control" placeholder="kg/bags/hrs" style="max-width:110px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseDescriptionInput" data-i18n="lbl_description">Description / Item Name</label>
+                        <input type="text" id="expenseDescriptionInput" class="form-control" placeholder="e.g. 2 bags of Urea, 1 day tractor rent">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseNotesInput" data-i18n="lbl_notes">Notes (Optional)</label>
+                        <textarea id="expenseNotesInput" class="form-control" rows="2" placeholder="Receipt details, supplier name, etc."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveExpense" data-i18n="btn_save_expense">Save Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. RECORD / EDIT HARVEST & SALES MODAL -->
+        <div class="farm-modal-backdrop" id="harvestModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="harvestModalTitle" data-i18n="modal_add_harvest_title">Record Harvest &amp; Sales</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="harvestForm" class="modal-form">
+                    <input type="hidden" id="harvestId" value="">
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="harvestCropSelect" data-i18n="lbl_crop_name">Crop <span class="required">*</span></label>
+                            <select id="harvestCropSelect" class="form-control">
+                                <option value="" data-i18n="opt_choose_crop">-- Choose Registered Crop --</option>
+                            </select>
+                            <input type="text" id="harvestCropNameInput" class="form-control" placeholder="Or enter crop name" style="margin-top:6px; display:none;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="harvestFarmSelect" data-i18n="lbl_assigned_farm">Farm (Optional)</label>
+                            <select id="harvestFarmSelect" class="form-control">
+                                <option value="" data-i18n="opt_choose_farm">-- Choose Farm --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="harvestDateInput" data-i18n="lbl_harvest_date">Harvest / Sale Date <span class="required">*</span></label>
+                            <input type="date" id="harvestDateInput" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="harvestBuyerNameInput" data-i18n="lbl_buyer_market">Buyer / Market (Optional)</label>
+                            <input type="text" id="harvestBuyerNameInput" class="form-control" placeholder="e.g. APMC Mandi, Wholesale Buyer">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="harvestQuantityInput" data-i18n="lbl_harvested_quantity">Harvest Quantity <span class="required">*</span></label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="number" id="harvestQuantityInput" class="form-control" step="0.01" min="0.01" placeholder="e.g. 40" required>
+                                <select id="harvestUnitInput" class="form-control" style="max-width:120px;" required>
+                                    <option value="quintals">Quintals</option>
+                                    <option value="kg">kg</option>
+                                    <option value="tons">Tons</option>
+                                    <option value="bags">Bags</option>
+                                    <option value="crates">Crates</option>
+                                    <option value="boxes">Boxes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="harvestPricePerUnitInput" data-i18n="lbl_price_per_unit">Price per Unit (₹) <span class="required">*</span></label>
+                            <input type="number" id="harvestPricePerUnitInput" class="form-control" step="0.01" min="0" placeholder="e.g. 2250" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="harvestTotalRevenueInput" data-i18n="lbl_total_revenue">Total Revenue in INR (₹) <span class="required">*</span></label>
+                        <input type="number" id="harvestTotalRevenueInput" class="form-control" step="0.01" min="0" placeholder="Auto-calculated (Qty × Price)" style="font-weight:700; color:#059669;" required>
+                        <small style="color:var(--text-secondary); font-size:12px;" data-i18n="tip_auto_revenue">Automatically calculated from Quantity × Price, or adjust if total differs.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="harvestNotesInput" data-i18n="lbl_notes">Notes (Optional)</label>
+                        <textarea id="harvestNotesInput" class="form-control" rows="2" placeholder="Quality grade, moisture %, payment terms, etc."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveHarvest" style="background:#059669; border-color:#059669;" data-i18n="btn_save_harvest">Save Harvest &amp; Revenue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 
@@ -1666,6 +2071,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
     <script src="js/analytics.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/iot_monitoring.js"></script>
+    <script src="js/finance.js"></script>
     <script src="js/mobile-nav.js"></script>
     <script src="js/scroll-reveal.js"></script>
 
