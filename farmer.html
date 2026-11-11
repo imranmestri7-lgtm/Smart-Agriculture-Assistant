@@ -1532,6 +1532,191 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
 
 
         <!-- =================================================
+             SMART FARM INVENTORY & STOCK MANAGEMENT (FEATURE UPGRADE 7)
+        ================================================== -->
+        <section class="inventory-section" id="inventorySection">
+
+            <div class="section-heading">
+                <span>FARM INVENTORY &amp; SUPPLIES</span>
+                <h2 data-i18n="inventory_section_heading">Smart Farm Inventory &amp; Stock Management</h2>
+                <p data-i18n="inventory_section_desc">
+                    Manage farm supplies, prevent stockouts, monitor expiration dates, and keep an accurate audit trail of stock usage.
+                </p>
+            </div>
+
+            <!-- 1. ACTION CONTROLS & FAST ACTIONS -->
+            <div class="inventory-actions-bar">
+                <div class="inventory-actions-left">
+                    <button type="button" class="btn-primary" id="btnOpenInventoryModal">
+                        <span>➕</span> <span data-i18n="btn_add_inventory_item">Add Inventory Item</span>
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnOpenMovementModal">
+                        <span>⇄</span> <span data-i18n="btn_record_stock_movement">Record Stock Movement</span>
+                    </button>
+                </div>
+                <div class="inventory-actions-right">
+                    <button type="button" class="btn-secondary btn-icon-refresh" id="btnRefreshInventory" title="Refresh Inventory" data-i18n-title="btn_refresh_inventory">
+                        🔄 <span data-i18n="btn_refresh">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. REORDER & LOW STOCK ALERTS BANNER -->
+            <div class="inventory-alerts-bar" id="inventoryAlertsBar" style="display:none;">
+                <div class="inventory-alerts-content">
+                    <span class="inventory-alerts-icon">⚠️</span>
+                    <div class="inventory-alerts-text">
+                        <strong data-i18n="inventory_alerts_title">Critical Stock Attention Needed:</strong>
+                        <span id="inventoryAlertsMessage"></span>
+                    </div>
+                </div>
+                <button type="button" class="btn-sm btn-filter-low" id="btnFilterCriticalStock" data-i18n="btn_view_critical">View Items</button>
+            </div>
+
+            <!-- 3. KPI SUMMARY CARDS -->
+            <div class="inventory-kpi-grid">
+                <div class="inventory-kpi-card kpi-total-items">
+                    <div class="kpi-icon">📦</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" data-i18n="kpi_total_inventory_items">Total Items</span>
+                        <h3 class="kpi-value" id="kpiTotalInventoryItems">0</h3>
+                        <small class="kpi-subtext" data-i18n="kpi_in_stock_supplies">Agricultural supplies</small>
+                    </div>
+                </div>
+
+                <div class="inventory-kpi-card kpi-low-stock">
+                    <div class="kpi-icon">⚠️</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" data-i18n="kpi_low_stock_items">Low Stock</span>
+                        <h3 class="kpi-value" id="kpiLowStockCount">0</h3>
+                        <small class="kpi-subtext" data-i18n="kpi_below_threshold">At or below reorder level</small>
+                    </div>
+                </div>
+
+                <div class="inventory-kpi-card kpi-expiring">
+                    <div class="kpi-icon">⏳</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" data-i18n="kpi_expiring_soon">Expiring / Expired</span>
+                        <h3 class="kpi-value" id="kpiExpiringCount">0</h3>
+                        <small class="kpi-subtext" data-i18n="kpi_within_30_days">Within 30 days or passed</small>
+                    </div>
+                </div>
+
+                <div class="inventory-kpi-card kpi-valuation">
+                    <div class="kpi-icon">💰</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label" data-i18n="kpi_total_stock_value">Total Valuation</span>
+                        <h3 class="kpi-value" id="kpiStockValuation">₹0</h3>
+                        <small class="kpi-subtext" data-i18n="kpi_calculated_valuation">Inventory asset value</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. TOOLBAR: FILTERS & SEARCH -->
+            <div class="inventory-toolbar-card">
+                <div class="inventory-filters-row">
+                    <div class="filter-group">
+                        <label for="inventoryCategoryFilter" data-i18n="lbl_filter_category">Category</label>
+                        <select id="inventoryCategoryFilter" class="form-control">
+                            <option value="all" data-i18n="opt_all_categories">All Categories</option>
+                            <option value="Seeds" data-i18n="cat_seeds">Seeds</option>
+                            <option value="Fertilizers" data-i18n="cat_fertilizers">Fertilizers</option>
+                            <option value="Pesticides" data-i18n="cat_pesticides">Pesticides</option>
+                            <option value="Herbicides" data-i18n="cat_herbicides">Herbicides</option>
+                            <option value="Farming equipment" data-i18n="cat_farming_equipment">Farming equipment</option>
+                            <option value="Irrigation supplies" data-i18n="cat_irrigation_supplies">Irrigation supplies</option>
+                            <option value="Tools and machinery" data-i18n="cat_tools_machinery">Tools and machinery</option>
+                            <option value="Other agricultural supplies" data-i18n="cat_other_supplies">Other agricultural supplies</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="inventoryStatusFilter" data-i18n="lbl_filter_status">Stock Status</label>
+                        <select id="inventoryStatusFilter" class="form-control">
+                            <option value="all" data-i18n="opt_all_statuses">All Statuses</option>
+                            <option value="in_stock" data-i18n="status_in_stock">In Stock</option>
+                            <option value="low_stock" data-i18n="status_low_stock">Low Stock</option>
+                            <option value="out_of_stock" data-i18n="status_out_of_stock">Out of Stock</option>
+                            <option value="expiring" data-i18n="status_expiring_soon">Expiring Soon</option>
+                            <option value="expired" data-i18n="status_expired">Expired</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="inventoryFarmFilter" data-i18n="lbl_filter_farm">Farm / Location</label>
+                        <select id="inventoryFarmFilter" class="form-control">
+                            <option value="all" data-i18n="opt_all_farms">All Farms</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group search-group">
+                        <label for="inventorySearchInput" data-i18n="lbl_search_inventory">Search</label>
+                        <input type="text" id="inventorySearchInput" class="form-control" placeholder="Search item, supplier, notes..." data-i18n-placeholder="placeholder_search_inventory">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. INVENTORY ITEMS TABLE -->
+            <div class="inventory-table-card">
+                <div class="table-responsive">
+                    <table class="inventory-table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th data-i18n="th_inv_item">Item Name</th>
+                                <th data-i18n="th_inv_category">Category</th>
+                                <th data-i18n="th_inv_quantity">Stock Level</th>
+                                <th data-i18n="th_inv_pricing">Unit Price / Value</th>
+                                <th data-i18n="th_inv_threshold">Min Reorder</th>
+                                <th data-i18n="th_inv_expiry">Expiry Date</th>
+                                <th data-i18n="th_inv_location">Farm / Storage</th>
+                                <th data-i18n="th_inv_status">Status</th>
+                                <th data-i18n="th_actions" style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <!-- Populated dynamically by js/inventory.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="inventoryEmptyState" class="inventory-empty-state" style="display:none;">
+                    <span class="empty-icon">📦</span>
+                    <p data-i18n="empty_inventory_msg">No inventory items found. Click "Add Inventory Item" to register your seeds, fertilizers, pesticides, or supplies.</p>
+                </div>
+            </div>
+
+            <!-- 6. RECENT MOVEMENTS SECTION -->
+            <div class="inventory-movements-card" id="inventoryRecentMovementsCard">
+                <div class="card-header-row">
+                    <h4 data-i18n="recent_movements_heading">Recent Stock Movements</h4>
+                    <span class="sub-label" data-i18n="recent_movements_sub">Audit trail of usage, purchases &amp; adjustments</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="inventory-table movements-table" id="recentMovementsTable">
+                        <thead>
+                            <tr>
+                                <th data-i18n="th_mov_date">Date &amp; Time</th>
+                                <th data-i18n="th_mov_item">Item</th>
+                                <th data-i18n="th_mov_type">Movement Type</th>
+                                <th data-i18n="th_mov_qty">Quantity</th>
+                                <th data-i18n="th_mov_target">Associated Crop / Farm</th>
+                                <th data-i18n="th_mov_reason">Reason &amp; Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentMovementsTableBody">
+                            <!-- Populated dynamically by js/inventory.js -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="recentMovementsEmptyState" class="inventory-empty-state" style="display:none; padding: 24px;">
+                    <p data-i18n="empty_movements_msg" style="color:var(--text-secondary); margin:0;">No stock movements recorded yet. Log usage, additions, or adjustments to see audit history.</p>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
              FARMER ASSISTANT
         ================================================== -->
 
@@ -2557,6 +2742,235 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
             </div>
         </div>
 
+        <!-- =================================================
+             SMART INVENTORY MODALS (FEATURE UPGRADE 7)
+        ================================================== -->
+
+        <!-- 1. ADD / EDIT INVENTORY ITEM MODAL -->
+        <div class="farm-modal-backdrop" id="inventoryModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="inventoryModalTitle" data-i18n="modal_add_inventory_title">Add Inventory Item</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="inventoryForm" class="modal-form">
+                    <input type="hidden" id="inventoryId" value="">
+
+                    <div class="form-row">
+                        <div class="form-group form-col-8">
+                            <label for="invItemName" data-i18n="lbl_inv_item_name">Item Name <span class="required">*</span></label>
+                            <input type="text" id="invItemName" class="form-control" placeholder="e.g. Urea Bio-Fertilizer, Hybrid Maize Seeds" data-i18n-placeholder="placeholder_inv_name" required maxlength="150">
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="invCategory" data-i18n="lbl_inv_category">Category <span class="required">*</span></label>
+                            <select id="invCategory" class="form-control" required>
+                                <option value="Seeds" data-i18n="cat_seeds">Seeds</option>
+                                <option value="Fertilizers" data-i18n="cat_fertilizers">Fertilizers</option>
+                                <option value="Pesticides" data-i18n="cat_pesticides">Pesticides</option>
+                                <option value="Herbicides" data-i18n="cat_herbicides">Herbicides</option>
+                                <option value="Farming equipment" data-i18n="cat_farming_equipment">Farming equipment</option>
+                                <option value="Irrigation supplies" data-i18n="cat_irrigation_supplies">Irrigation supplies</option>
+                                <option value="Tools and machinery" data-i18n="cat_tools_machinery">Tools and machinery</option>
+                                <option value="Other agricultural supplies" data-i18n="cat_other_supplies">Other agricultural supplies</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="invQuantity" data-i18n="lbl_inv_quantity">Quantity in Stock <span class="required">*</span></label>
+                            <input type="number" id="invQuantity" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="invUnit" data-i18n="lbl_inv_unit">Unit of Measure <span class="required">*</span></label>
+                            <select id="invUnit" class="form-control" required>
+                                <option value="kg">kg (Kilograms)</option>
+                                <option value="g">g (Grams)</option>
+                                <option value="litre">litre (Litres)</option>
+                                <option value="ml">ml (Millilitres)</option>
+                                <option value="packets">packets</option>
+                                <option value="bags">bags</option>
+                                <option value="pieces">pieces</option>
+                                <option value="bottles">bottles</option>
+                                <option value="quintal">quintal (100 kg)</option>
+                                <option value="boxes">boxes</option>
+                                <option value="units">units</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="invPurchasePrice" data-i18n="lbl_inv_purchase_price">Unit Purchase Price (₹) <span class="required">*</span></label>
+                            <input type="number" id="invPurchasePrice" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="invPurchaseDate" data-i18n="lbl_inv_purchase_date">Purchase / Stock Date <span class="required">*</span></label>
+                            <input type="date" id="invPurchaseDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="invMinThreshold" data-i18n="lbl_inv_min_threshold">Min Reorder Threshold <span class="required">*</span></label>
+                            <input type="number" id="invMinThreshold" class="form-control" step="0.01" min="0" placeholder="5.00" required>
+                            <small class="form-hint" data-i18n="hint_min_threshold">Alerts trigger when stock falls below this level.</small>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="invExpiryDate" data-i18n="lbl_inv_expiry_date">Expiry Date (Optional)</label>
+                            <input type="date" id="invExpiryDate" class="form-control">
+                            <small class="form-hint" data-i18n="hint_expiry_date">For chemicals, seeds, or perishable supplies.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="invFarmId" data-i18n="lbl_inv_farm">Associated Farm (Optional)</label>
+                            <select id="invFarmId" class="form-control">
+                                <option value="" data-i18n="opt_general_inventory">General / All Farms</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="invStorageLocation" data-i18n="lbl_inv_storage">Storage Location (Optional)</label>
+                            <input type="text" id="invStorageLocation" class="form-control" placeholder="e.g. Shed 1, North Barn Shelf B" data-i18n-placeholder="placeholder_storage_location" maxlength="150">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="invSupplierName" data-i18n="lbl_inv_supplier">Supplier / Dealer Name (Optional)</label>
+                        <input type="text" id="invSupplierName" class="form-control" placeholder="e.g. Kisan Krishi Seva Kendra, IFFCO Dealer" data-i18n-placeholder="placeholder_supplier_name" maxlength="150">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="invNotes" data-i18n="lbl_inv_notes">Notes / Specifications (Optional)</label>
+                        <textarea id="invNotes" class="form-control" rows="2" placeholder="e.g. Batch #2026, keep in dry and shaded area" data-i18n-placeholder="placeholder_inv_notes"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveInventory" data-i18n="btn_save_item">Save Inventory Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. STOCK MOVEMENT MODAL (Usage, Purchase, Adjustment, Damaged, Transfer) -->
+        <div class="farm-modal-backdrop" id="stockMovementModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="movementModalTitle" data-i18n="modal_movement_title">Record Stock Movement</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="stockMovementForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="movInventorySelect" data-i18n="lbl_mov_item">Select Inventory Item <span class="required">*</span></label>
+                        <select id="movInventorySelect" class="form-control" required>
+                            <option value="" data-i18n="opt_choose_item">-- Select item --</option>
+                        </select>
+                        <small id="movCurrentStockInfo" class="form-hint" style="font-weight:600; color:var(--text-primary);"></small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="movType" data-i18n="lbl_mov_type">Movement Type <span class="required">*</span></label>
+                            <select id="movType" class="form-control" required>
+                                <option value="Usage / Consumption" data-i18n="mov_usage">Usage / Consumption</option>
+                                <option value="Purchase / Addition" data-i18n="mov_purchase">Purchase / Addition</option>
+                                <option value="Adjustment" data-i18n="mov_adjustment">Adjustment (Stock Count)</option>
+                                <option value="Damaged or Expired" data-i18n="mov_damaged">Damaged or Expired</option>
+                                <option value="Transfer" data-i18n="mov_transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="movQuantity" data-i18n="lbl_mov_quantity">Quantity <span class="required">*</span> (<span id="movUnitBadge">units</span>)</label>
+                            <input type="number" id="movQuantity" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <!-- Adjustment Mode container (shown only when Adjustment is selected) -->
+                    <div id="movAdjustModeBox" class="form-group" style="display:none; background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0;">
+                        <label style="font-size:12px; font-weight:600; color:var(--text-secondary);" data-i18n="lbl_adjustment_mode">Adjustment Counting Mode:</label>
+                        <div style="display:flex; gap:16px; margin-top:4px;">
+                            <label style="font-size:13px; cursor:pointer;">
+                                <input type="radio" name="movAdjustMode" value="absolute" checked>
+                                <span data-i18n="opt_actual_physical_count">Actual physical count on shelf</span>
+                            </label>
+                            <label style="font-size:13px; cursor:pointer;">
+                                <input type="radio" name="movAdjustMode" value="relative">
+                                <span data-i18n="opt_delta_difference">Delta difference (+/-)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="movDate" data-i18n="lbl_mov_date">Date of Movement <span class="required">*</span></label>
+                            <input type="date" id="movDate" class="form-control" required>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="movCropSelect" data-i18n="lbl_mov_crop">Associated Crop (Optional)</label>
+                            <select id="movCropSelect" class="form-control">
+                                <option value="" data-i18n="opt_no_crop">-- No specific crop --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="movReason" data-i18n="lbl_mov_reason">Reason / Field Purpose <span class="required">*</span></label>
+                        <input type="text" id="movReason" class="form-control" placeholder="e.g. Sprayed field plot A, Sowing 2 acres, Delivered fresh stock" data-i18n-placeholder="placeholder_mov_reason" required maxlength="200">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="movNotes" data-i18n="lbl_mov_notes">Additional Notes (Optional)</label>
+                        <textarea id="movNotes" class="form-control" rows="2" placeholder="e.g. Applied via knapsack sprayer, operator: Ramesh" data-i18n-placeholder="placeholder_mov_notes"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveMovement" data-i18n="btn_record_movement_submit">Record Movement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. ITEM MOVEMENT HISTORY AUDIT MODAL -->
+        <div class="farm-modal-backdrop" id="itemHistoryModal">
+            <div class="farm-modal-dialog" style="max-width:680px;">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="itemHistoryModalTitle" style="margin:0;">Stock Movement Audit Trail</h3>
+                        <small id="itemHistorySubtitle" style="color:var(--text-secondary); font-size:12px;"></small>
+                    </div>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" style="padding:16px 20px;">
+                    <div id="itemHistoryOverviewPills" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;"></div>
+                    <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+                        <table class="inventory-table movements-table" id="itemMovementsTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_mov_date">Date</th>
+                                    <th data-i18n="th_mov_type">Type</th>
+                                    <th data-i18n="th_mov_qty">Quantity</th>
+                                    <th data-i18n="th_mov_target">Crop / Farm</th>
+                                    <th data-i18n="th_mov_reason">Reason &amp; Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemMovementsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="itemMovementsEmpty" class="inventory-empty-state" style="display:none; padding:16px;">
+                        <p style="color:var(--text-secondary); margin:0;" data-i18n="empty_item_movements">No movement history recorded for this item yet.</p>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding:12px 20px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+                    <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_close">Close</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
 
@@ -2568,6 +2982,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
     <script src="js/iot_monitoring.js"></script>
     <script src="js/finance.js"></script>
     <script src="js/activity.js"></script>
+    <script src="js/inventory.js"></script>
     <script src="js/mobile-nav.js"></script>
     <script src="js/scroll-reveal.js"></script>
 

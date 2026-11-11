@@ -4623,3 +4623,367 @@
         padding: 1px 4px;
     }
 }
+
+/* =========================================================================
+   FEATURE UPGRADE 7: SMART FARM INVENTORY & STOCK MANAGEMENT
+   ========================================================================= */
+
+.inventory-section {
+    margin-top: 48px;
+    margin-bottom: 48px;
+}
+
+.inventory-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.inventory-actions-left,
+.inventory-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Low Stock & Expiry Alert Banner */
+.inventory-alerts-bar {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-lg, 12px);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.08);
+}
+
+.inventory-alerts-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inventory-alerts-icon {
+    font-size: 24px;
+}
+
+.inventory-alerts-text {
+    font-size: 14px;
+    color: #92400e;
+    line-height: 1.4;
+}
+
+.btn-filter-low {
+    background: #d97706;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-filter-low:hover {
+    background: #b45309;
+}
+
+/* KPI Cards Grid */
+.inventory-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.inventory-kpi-card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-lg, 12px);
+    padding: 18px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.inventory-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.inventory-kpi-card .kpi-icon {
+    font-size: 26px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-total-items .kpi-icon { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+.kpi-low-stock .kpi-icon { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+.kpi-expiring .kpi-icon { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+.kpi-valuation .kpi-icon { background: rgba(16, 185, 129, 0.12); color: #059669; }
+
+.inventory-kpi-card .kpi-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.inventory-kpi-card .kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.inventory-kpi-card .kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+    margin: 0 0 2px 0;
+    line-height: 1.2;
+}
+
+.inventory-kpi-card .kpi-subtext {
+    font-size: 11px;
+    color: var(--text-tertiary, #94a3b8);
+}
+
+/* Toolbar Card */
+.inventory-toolbar-card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-lg, 12px);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.inventory-filters-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.inventory-filters-row .filter-group {
+    flex: 1;
+    min-width: 170px;
+}
+
+.inventory-filters-row .search-group {
+    flex: 1.5;
+    min-width: 220px;
+}
+
+.inventory-filters-row label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary, #475569);
+    margin-bottom: 6px;
+}
+
+/* Table Cards */
+.inventory-table-card,
+.inventory-movements-card {
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-lg, 12px);
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+}
+
+.card-header-row h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+}
+
+.card-header-row .sub-label {
+    font-size: 12px;
+    color: var(--text-secondary, #64748b);
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.inventory-table th {
+    background: #f8fafc;
+    color: var(--text-secondary, #475569);
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.inventory-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-primary, #1e293b);
+    vertical-align: middle;
+}
+
+.inventory-table tr:hover td {
+    background: #fbfcfe;
+}
+
+/* Status Badges */
+.stock-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stock-status-in-stock {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.stock-status-low-stock {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.stock-status-out-of-stock {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.stock-status-expiring {
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fed7aa;
+}
+
+.stock-status-expired {
+    background: #fdf2f8;
+    color: #831843;
+    border: 1px solid #fbcfe8;
+}
+
+/* Movement Type Badges */
+.mov-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.mov-type-usage { background: #fee2e2; color: #991b1b; }
+.mov-type-purchase { background: #dcfce7; color: #166534; }
+.mov-type-adjustment { background: #e0e7ff; color: #3730a3; }
+.mov-type-damaged { background: #fef3c7; color: #92400e; }
+.mov-type-transfer { background: #f1f5f9; color: #334155; }
+
+/* Stock Progress Bar */
+.stock-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.stock-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+.stock-bar-fill.normal { background: #10b981; }
+.stock-bar-fill.low { background: #f59e0b; }
+.stock-bar-fill.out { background: #ef4444; }
+
+/* Empty State */
+.inventory-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary, #64748b);
+}
+
+.inventory-empty-state .empty-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 10px;
+    opacity: 0.6;
+}
+
+/* Responsive Grid for Inventory */
+@media (max-width: 1024px) {
+    .inventory-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-filters-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inventory-filters-row .filter-group,
+    .inventory-filters-row .search-group {
+        min-width: 100%;
+    }
+
+    .inventory-actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inventory-actions-left,
+    .inventory-actions-right {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .inventory-actions-left button,
+    .inventory-actions-right button {
+        flex: 1;
+    }
+}
