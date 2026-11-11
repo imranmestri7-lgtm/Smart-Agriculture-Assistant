@@ -392,6 +392,39 @@
                 </a>
 
 
+                <!-- SMART FARM ACTIVITY CALENDAR & TASK PLANNER (FEATURE UPGRADE 6) -->
+
+                <a href="#activitySection" class="dashboard-card" id="activityDashboardCard">
+
+                    <div class="dashboard-card-icon activity-card-icon" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5;">
+                        🗓️
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="activity_card_title">
+                                Farm Calendar &amp; Tasks
+                            </h3>
+
+                            <span class="notification-card-badge" id="cardActivityBadge" style="display:none; background:#4f46e5; color:#fff;">0</span>
+
+                        </div>
+
+                        <p data-i18n="activity_card_desc">
+                            Schedule farm operations, track crop lifecycle tasks, view interactive monthly calendar, and receive timely activity alerts.
+                        </p>
+
+                        <span class="card-link" data-i18n="activity_card_link">
+                            View Calendar →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
                 <!-- FARMER ASSISTANT -->
 
                 <a href="#assistant" class="dashboard-card">
@@ -1240,6 +1273,232 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
 
 
         <!-- =================================================
+             SMART FARM ACTIVITY CALENDAR & TASK PLANNER (FEATURE UPGRADE 6)
+        ================================================== -->
+
+        <section class="activity-section" id="activitySection">
+
+            <div class="section-heading">
+                <span>TASK INTELLIGENCE &amp; SCHEDULING</span>
+                <h2 data-i18n="activity_section_heading">Farm Activity Calendar &amp; Task Planner</h2>
+                <p data-i18n="activity_section_sub" style="color:var(--text-secondary); font-size:var(--font-sm); max-width:700px; margin-top:4px;">
+                    Schedule farm operations, track crop lifecycle tasks, view interactive monthly calendar, and receive timely activity alerts.
+                </p>
+            </div>
+
+            <!-- ACTION BAR -->
+            <div class="activity-header-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn-primary" id="btnOpenAddActivityModal" style="display:inline-flex; align-items:center; gap:6px;">
+                        <span>➕</span> <span data-i18n="btn_add_activity">Schedule Activity</span>
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnRefreshActivities" style="display:inline-flex; align-items:center; gap:6px;">
+                        <span>🔄</span> <span data-i18n="btn_refresh">Refresh</span>
+                    </button>
+                </div>
+                <!-- View Mode Tabs -->
+                <div class="view-mode-tabs" style="display:flex; gap:6px; background:#f1f5f9; padding:4px; border-radius:10px;">
+                    <button type="button" class="view-tab-btn active" id="tabCalendarViewBtn" data-view="calendar" data-i18n="view_calendar_tab">
+                        📅 Calendar View
+                    </button>
+                    <button type="button" class="view-tab-btn" id="tabListViewBtn" data-view="list" data-i18n="view_list_tab">
+                        📋 Task List View
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1. KPI SUMMARY CARDS -->
+            <div class="activity-kpi-grid">
+                <!-- Today's Tasks -->
+                <div class="activity-kpi-card" style="border-left: 4px solid #3b82f6;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">
+                        📅
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_today_tasks">Today's Tasks</span>
+                        <h3 class="kpi-value" id="kpiTodayActivities">0</h3>
+                        <small class="kpi-sub" data-i18n="kpi_today_sub">Scheduled for today</small>
+                    </div>
+                </div>
+
+                <!-- Upcoming (Next 7 Days) -->
+                <div class="activity-kpi-card" style="border-left: 4px solid #6366f1;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5;">
+                        ⏳
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_upcoming_tasks">Upcoming</span>
+                        <h3 class="kpi-value" id="kpiUpcomingActivities">0</h3>
+                        <small class="kpi-sub" data-i18n="kpi_upcoming_sub">Next 7 days</small>
+                    </div>
+                </div>
+
+                <!-- Overdue Tasks -->
+                <div class="activity-kpi-card" style="border-left: 4px solid #ef4444;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(239, 68, 68, 0.12); color: #dc2626;">
+                        ⚠️
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_overdue_tasks">Overdue</span>
+                        <h3 class="kpi-value" id="kpiOverdueActivities">0</h3>
+                        <small class="kpi-sub" data-i18n="kpi_overdue_sub">Pending past deadline</small>
+                    </div>
+                </div>
+
+                <!-- Completed Tasks -->
+                <div class="activity-kpi-card" style="border-left: 4px solid #10b981;">
+                    <div class="kpi-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
+                        ✅
+                    </div>
+                    <div class="kpi-data">
+                        <span class="kpi-label" data-i18n="kpi_completed_tasks">Completed</span>
+                        <h3 class="kpi-value" id="kpiCompletedActivities">0</h3>
+                        <small class="kpi-sub" data-i18n="kpi_completed_sub">Finished activities</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CROP-AWARE ACTIVITY SUGGESTIONS (AI-ASSISTED RECOMMENDATIONS) -->
+            <div class="activity-suggestions-wrapper" id="activitySuggestionsWrapper">
+                <div class="suggestions-header" id="suggestionsHeaderToggle" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:18px;">💡</span>
+                        <h4 style="margin:0; font-size:15px; font-weight:600;" data-i18n="suggestions_title">Crop-Aware Activity Suggestions</h4>
+                        <span class="badge-suggestions-count" id="suggestionsCountBadge">0</span>
+                    </div>
+                    <button type="button" class="btn-toggle-suggestions" id="btnToggleSuggestions" aria-label="Toggle suggestions">▼</button>
+                </div>
+                <div class="suggestions-container" id="activitySuggestionsContainer">
+                    <!-- Populated dynamically by js/activity.js -->
+                </div>
+            </div>
+
+            <!-- 3. FILTER CONTROLS BAR -->
+            <div class="activity-filters-card">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <div class="filter-group-inline">
+                        <label for="activityFilterCategory" data-i18n="lbl_filter_category" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Category:</label>
+                        <select id="activityFilterCategory" class="activity-select-filter">
+                            <option value="all" data-i18n="opt_all_categories">All Categories</option>
+                            <option value="Land preparation" data-i18n="cat_land_prep">🚜 Land Preparation</option>
+                            <option value="Sowing and planting" data-i18n="cat_sowing">🌱 Sowing &amp; Planting</option>
+                            <option value="Irrigation" data-i18n="cat_irrigation">💧 Irrigation</option>
+                            <option value="Fertilizer application" data-i18n="cat_fertilizer">🧪 Fertilizer Application</option>
+                            <option value="Pesticide application" data-i18n="cat_pesticide">🛡️ Pesticide Application</option>
+                            <option value="Weed management" data-i18n="cat_weed">🌿 Weed Management</option>
+                            <option value="Crop inspection" data-i18n="cat_crop_inspect">🔍 Crop Inspection</option>
+                            <option value="Disease monitoring" data-i18n="cat_disease_monitor">🍃 Disease Monitoring</option>
+                            <option value="Harvesting" data-i18n="cat_harvesting">🌾 Harvesting</option>
+                            <option value="Other activities" data-i18n="cat_other_act">📦 Other Activities</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-inline">
+                        <label for="activityFilterStatus" data-i18n="lbl_filter_status" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Status:</label>
+                        <select id="activityFilterStatus" class="activity-select-filter">
+                            <option value="all" data-i18n="opt_all_statuses">All Statuses</option>
+                            <option value="Pending" data-i18n="status_pending">Pending</option>
+                            <option value="In Progress" data-i18n="status_in_progress">In Progress</option>
+                            <option value="Completed" data-i18n="status_completed">Completed</option>
+                            <option value="Postponed" data-i18n="status_postponed">Postponed</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-inline">
+                        <label for="activityFilterCrop" data-i18n="lbl_filter_crop" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Crop:</label>
+                        <select id="activityFilterCrop" class="activity-select-filter">
+                            <option value="all" data-i18n="opt_all_crops">All Crops</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-inline">
+                        <label for="activityFilterPriority" data-i18n="lbl_filter_priority" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Priority:</label>
+                        <select id="activityFilterPriority" class="activity-select-filter">
+                            <option value="all" data-i18n="opt_all_priorities">All Priorities</option>
+                            <option value="High" data-i18n="priority_high">🔴 High</option>
+                            <option value="Medium" data-i18n="priority_medium">🟡 Medium</option>
+                            <option value="Low" data-i18n="priority_low">🟢 Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. CALENDAR VIEW CONTAINER -->
+            <div id="activityCalendarContainer" class="activity-view-container active">
+                <div class="calendar-card">
+                    <!-- Month Navigation Header -->
+                    <div class="calendar-nav-bar">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button type="button" class="btn-cal-nav" id="btnPrevMonth" title="Previous Month">◀</button>
+                            <h3 id="calMonthYearDisplay" style="margin:0; min-width:180px; text-align:center; font-size:18px; font-weight:700;">November 2026</h3>
+                            <button type="button" class="btn-cal-nav" id="btnNextMonth" title="Next Month">▶</button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn-secondary" id="btnTodayMonth" style="padding:6px 14px; font-size:13px;" data-i18n="btn_today">Today</button>
+                        </div>
+                    </div>
+
+                    <!-- Weekdays Header (Sun-Sat) -->
+                    <div class="calendar-weekdays-grid">
+                        <div class="cal-weekday" data-i18n="cal_sun">Sun</div>
+                        <div class="cal-weekday" data-i18n="cal_mon">Mon</div>
+                        <div class="cal-weekday" data-i18n="cal_tue">Tue</div>
+                        <div class="cal-weekday" data-i18n="cal_wed">Wed</div>
+                        <div class="cal-weekday" data-i18n="cal_thu">Thu</div>
+                        <div class="cal-weekday" data-i18n="cal_fri">Fri</div>
+                        <div class="cal-weekday" data-i18n="cal_sat">Sat</div>
+                    </div>
+
+                    <!-- Days Grid -->
+                    <div class="calendar-days-grid" id="activityCalendarGrid">
+                        <!-- Populated by js/activity.js -->
+                    </div>
+                </div>
+
+                <!-- Selected Day Agenda Drawer -->
+                <div class="selected-day-agenda-box" id="selectedDayAgendaBox">
+                    <div class="agenda-header">
+                        <h4 id="selectedDayTitle">📅 <span data-i18n="agenda_title">Day Schedule</span></h4>
+                        <span id="selectedDayDateDisplay" style="font-size:13px; color:var(--text-secondary); font-weight:600;"></span>
+                    </div>
+                    <div id="selectedDayActivitiesList" class="agenda-activities-list">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. TASK LIST VIEW CONTAINER -->
+            <div id="activityListContainer" class="activity-view-container" style="display:none;">
+                <div class="activity-records-card">
+                    <div class="table-responsive">
+                        <table class="activity-data-table" id="activityTable">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_act_date">Date &amp; Time</th>
+                                    <th data-i18n="th_act_title">Activity</th>
+                                    <th data-i18n="th_act_category">Category</th>
+                                    <th data-i18n="th_act_crop">Crop / Farm</th>
+                                    <th data-i18n="th_act_priority">Priority</th>
+                                    <th data-i18n="th_act_status">Status</th>
+                                    <th data-i18n="th_actions" style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityTableBody">
+                                <!-- Populated dynamically by js/activity.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="activityEmptyState" class="activity-empty-state" style="display:none;">
+                        <span class="empty-icon">🗓️</span>
+                        <p data-i18n="empty_activities_msg">No farm activities found. Click "Schedule Activity" to plan your farm tasks.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
              FARMER ASSISTANT
         ================================================== -->
 
@@ -2062,6 +2321,209 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
             </div>
         </div>
 
+        <!-- =================================================
+             MODALS: SMART FARM ACTIVITY CALENDAR (FEATURE UPGRADE 6)
+        ================================================== -->
+
+        <!-- 1. SCHEDULE / EDIT ACTIVITY MODAL -->
+        <div class="farm-modal-backdrop" id="activityModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="activityModalTitle" data-i18n="modal_add_activity_title">Schedule Farm Activity</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="activityForm" class="modal-form">
+                    <input type="hidden" id="activityId" value="">
+
+                    <div class="form-group">
+                        <label for="activityTitleInput" data-i18n="lbl_activity_title">Activity Title <span class="required">*</span></label>
+                        <input type="text" id="activityTitleInput" class="form-control" placeholder="e.g. Morning drip irrigation for wheat field" required>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="activityCategorySelect" data-i18n="lbl_activity_category">Category <span class="required">*</span></label>
+                            <select id="activityCategorySelect" class="form-control" required>
+                                <option value="" data-i18n="opt_choose_category">-- Choose Category --</option>
+                                <option value="Land preparation" data-i18n="cat_land_prep">🚜 Land preparation</option>
+                                <option value="Sowing and planting" data-i18n="cat_sowing">🌱 Sowing and planting</option>
+                                <option value="Irrigation" data-i18n="cat_irrigation">💧 Irrigation</option>
+                                <option value="Fertilizer application" data-i18n="cat_fertilizer">🧪 Fertilizer application</option>
+                                <option value="Pesticide application" data-i18n="cat_pesticide">🛡️ Pesticide application</option>
+                                <option value="Weed management" data-i18n="cat_weed">🌿 Weed management</option>
+                                <option value="Crop inspection" data-i18n="cat_crop_inspect">🔍 Crop inspection</option>
+                                <option value="Disease monitoring" data-i18n="cat_disease_monitor">🍃 Disease monitoring</option>
+                                <option value="Harvesting" data-i18n="cat_harvesting">🌾 Harvesting</option>
+                                <option value="Other activities" data-i18n="cat_other_act">📦 Other activities</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activityPrioritySelect" data-i18n="lbl_activity_priority">Priority</label>
+                            <select id="activityPrioritySelect" class="form-control">
+                                <option value="Medium" data-i18n="priority_medium">🟡 Medium</option>
+                                <option value="High" data-i18n="priority_high">🔴 High</option>
+                                <option value="Low" data-i18n="priority_low">🟢 Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="activityDateInput" data-i18n="lbl_scheduled_date">Scheduled Date <span class="required">*</span></label>
+                            <input type="date" id="activityDateInput" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activityTimeInput" data-i18n="lbl_scheduled_time">Scheduled Time (Optional)</label>
+                            <input type="time" id="activityTimeInput" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="activityCropSelect" data-i18n="lbl_assigned_crop">Assigned Crop (Optional)</label>
+                            <select id="activityCropSelect" class="form-control">
+                                <option value="" data-i18n="opt_general_crop">-- General / Entire Farm --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activityFarmSelect" data-i18n="lbl_assigned_farm">Assigned Farm (Optional)</label>
+                            <select id="activityFarmSelect" class="form-control">
+                                <option value="" data-i18n="opt_choose_farm">-- Choose Farm --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label for="activityStatusSelect" data-i18n="lbl_activity_status">Status</label>
+                            <select id="activityStatusSelect" class="form-control">
+                                <option value="Pending" data-i18n="status_pending">Pending</option>
+                                <option value="In Progress" data-i18n="status_in_progress">In Progress</option>
+                                <option value="Completed" data-i18n="status_completed">Completed</option>
+                                <option value="Postponed" data-i18n="status_postponed">Postponed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:28px;">
+                            <input type="checkbox" id="activityReminderToggle" checked style="width:18px; height:18px;">
+                            <label for="activityReminderToggle" style="margin:0; font-size:13px; cursor:pointer;" data-i18n="lbl_enable_reminder">Enable Notification Reminder</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activityDescriptionInput" data-i18n="lbl_activity_desc">Description / Instructions (Optional)</label>
+                        <textarea id="activityDescriptionInput" class="form-control" rows="2" placeholder="Details about fertilizer dosage, irrigation duration, required tools, etc."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activityNotesInput" data-i18n="lbl_notes">Notes (Optional)</label>
+                        <textarea id="activityNotesInput" class="form-control" rows="1" placeholder="Observations, labor involved, etc."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveActivity" data-i18n="btn_save_activity">Save Activity</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. VIEW ACTIVITY DETAILS MODAL -->
+        <div class="farm-modal-backdrop" id="activityDetailsModal">
+            <div class="farm-modal-dialog">
+                <div class="modal-header">
+                    <h3 id="detailsModalTitle">Farm Activity Details</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <div class="activity-details-body" style="padding:16px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span id="detailsCategoryBadge" class="activity-badge-category">Category</span>
+                        <div style="display:flex; gap:6px;">
+                            <span id="detailsPriorityBadge" class="activity-badge-priority">Priority</span>
+                            <span id="detailsStatusBadge" class="activity-badge-status">Status</span>
+                        </div>
+                    </div>
+
+                    <h3 id="detailsActivityTitle" style="margin:0 0 8px 0; font-size:18px; font-weight:700;"></h3>
+                    <p id="detailsActivityDescription" style="color:var(--text-secondary); margin:0 0 16px 0; font-size:14px; line-height:1.5;"></p>
+
+                    <div class="details-meta-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:16px;">
+                        <div>
+                            <small style="color:var(--text-secondary); font-size:11px;" data-i18n="lbl_scheduled_date">Scheduled Date</small>
+                            <div id="detailsScheduledDate" style="font-weight:600; font-size:14px;"></div>
+                        </div>
+                        <div>
+                            <small style="color:var(--text-secondary); font-size:11px;" data-i18n="lbl_scheduled_time">Scheduled Time</small>
+                            <div id="detailsScheduledTime" style="font-weight:600; font-size:14px;"></div>
+                        </div>
+                        <div>
+                            <small style="color:var(--text-secondary); font-size:11px;" data-i18n="lbl_assigned_crop">Crop</small>
+                            <div id="detailsCropName" style="font-weight:600; font-size:14px;"></div>
+                        </div>
+                        <div>
+                            <small style="color:var(--text-secondary); font-size:11px;" data-i18n="lbl_assigned_farm">Farm</small>
+                            <div id="detailsFarmName" style="font-weight:600; font-size:14px;"></div>
+                        </div>
+                    </div>
+
+                    <div id="detailsNotesContainer" style="display:none; margin-bottom:16px;">
+                        <small style="color:var(--text-secondary); font-size:11px;" data-i18n="lbl_notes">Notes</small>
+                        <div id="detailsNotesText" style="background:#fff; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; font-size:13px; margin-top:4px;"></div>
+                    </div>
+
+                    <div class="details-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-top:1px solid #e2e8f0; padding-top:16px;">
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-primary" id="btnQuickComplete" style="background:#10b981; border-color:#10b981;" data-i18n="btn_mark_completed">✓ Complete</button>
+                            <button type="button" class="btn-secondary" id="btnQuickPostpone" data-i18n="btn_postpone">⏰ Postpone</button>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-secondary" id="btnEditFromDetails" data-i18n="btn_edit">✏️ Edit</button>
+                            <button type="button" class="btn-danger" id="btnDeleteFromDetails" style="background:#fee2e2; color:#b91c1c; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;" data-i18n="btn_delete">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. POSTPONE / RESCHEDULE MODAL -->
+        <div class="farm-modal-backdrop" id="postponeModal">
+            <div class="farm-modal-dialog" style="max-width:440px;">
+                <div class="modal-header">
+                    <h3 data-i18n="modal_postpone_title">Reschedule Farm Activity</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="postponeForm" class="modal-form">
+                    <input type="hidden" id="postponeActivityId" value="">
+
+                    <p id="postponeActivityTitle" style="font-weight:600; color:var(--text-primary); margin-bottom:12px;"></p>
+
+                    <div class="form-group">
+                        <label for="postponeDateInput" data-i18n="lbl_new_scheduled_date">New Scheduled Date <span class="required">*</span></label>
+                        <input type="date" id="postponeDateInput" class="form-control" required>
+                    </div>
+
+                    <div style="display:flex; gap:6px; margin-bottom:14px;">
+                        <button type="button" class="btn-secondary" id="btnPostpone1Day" style="font-size:12px; padding:4px 8px;">+1 Day</button>
+                        <button type="button" class="btn-secondary" id="btnPostpone3Days" style="font-size:12px; padding:4px 8px;">+3 Days</button>
+                        <button type="button" class="btn-secondary" id="btnPostpone1Week" style="font-size:12px; padding:4px 8px;">+1 Week</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postponeNotesInput" data-i18n="lbl_postpone_reason">Reason for Postponing (Optional)</label>
+                        <textarea id="postponeNotesInput" class="form-control" rows="2" placeholder="e.g. Inclement weather, delayed seed arrival"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSavePostpone" data-i18n="btn_save_reschedule">Reschedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 
@@ -2072,6 +2534,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
     <script src="js/notifications.js"></script>
     <script src="js/iot_monitoring.js"></script>
     <script src="js/finance.js"></script>
+    <script src="js/activity.js"></script>
     <script src="js/mobile-nav.js"></script>
     <script src="js/scroll-reveal.js"></script>
 
