@@ -386,7 +386,7 @@ def get_notifications():
         where_sql = " AND ".join(where_clauses)
 
         cursor.execute(f"""
-            SELECT id, category, title, message, severity, is_read, link, related_id, created_at
+            SELECT id, category, title, message, severity, is_read, link, related_id, unique_key, created_at
             FROM notifications
             WHERE {where_sql}
             ORDER BY created_at DESC, id DESC

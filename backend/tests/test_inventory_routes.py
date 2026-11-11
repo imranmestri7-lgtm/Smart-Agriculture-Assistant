@@ -357,6 +357,44 @@ class TestInventoryRoutes(unittest.TestCase):
         self.assertEqual(item_check.status_code, 200)
         self.assertEqual(item_check.get_json()["data"]["quantity"], 2.0)
 
+    def test_sync_inventory_alerts_and_notifications(self):
+        """Test automatic generation and deduplication of low-stock and expiry alerts in notifications."""
+        today = date.today()
+
+        # Item 1: Low stock
+        self.client.post("/api/inventory", headers=self.headers1, json={
+            "item_name": "Chlorpyrifos 20% EC",
+            "category": "Pesticides",
+            "quantity": 2.0,
+            "unit": "litre",
+            "purchase_price": 380.0,
+            "min_threshold": 5.0
+        })
+
+        # Item 2: Expiring soon (10 days away)
+        self.client.post("/api/inventory", headers=self.headers1, json={
+            "item_name": "Bio Fungicide Trichoderma",
+            "category": "Pesticides",
+            "quantity": 10.0,
+            "unit": "kg",
+            "purchase_price": 250.0,
+            "min_threshold": 2.0,
+            "expiry_date": (today + timedelta(days=10)).strftime("%Y-%m-%d")
+        })
+
+        # Fetch notifications for user 1
+        notif_res = self.client.get("/api/notifications", headers=self.headers1)
+        self.assertEqual(notif_res.status_code, 200)
+        notifs = notif_res.get_json()["notifications"]
+
+        inv_notifs = [n for n in notifs if n.get("category") == "inventory" or "inv_" in (n.get("unique_key") or "")]
+        self.assertGreaterEqual(len(inv_notifs), 2)
+        
+        # Verify titles / alert categories
+        titles = [n["title"] for n in inv_notifs]
+        self.assertTrue(any("Low Stock" in t for t in titles))
+        self.assertTrue(any("Expiring Soon" in t for t in titles))
+
     def test_unauthenticated_requests(self):
         """Requests without JWT must return 401 Unauthorized."""
         res = self.client.get("/api/inventory")

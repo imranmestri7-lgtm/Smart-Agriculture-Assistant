@@ -168,7 +168,7 @@ def sync_inventory_alerts_for_user(user_id, cursor, connection):
                 u_key = f"inv_out_{item_id}_{today_str}"
                 title = f"Out of Stock: {name}"
                 msg = f"'{name}' is completely out of stock (0 {unit}). Restock immediately to avoid field delays."
-                if _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "urgent", "#inventorySection", u_key, item_id):
+                if _insert_notification_if_new(connection, cursor, user_id, "inventory", title, msg, "urgent", "#inventorySection", u_key, item_id):
                     inserted_count += 1
 
             # 2. Low Stock Warning
@@ -176,7 +176,7 @@ def sync_inventory_alerts_for_user(user_id, cursor, connection):
                 u_key = f"inv_low_{item_id}_{today_str}"
                 title = f"Low Stock Warning: {name}"
                 msg = f"'{name}' is running low with only {qty:.2f} {unit} left (threshold: {threshold:.2f} {unit})."
-                if _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "warning", "#inventorySection", u_key, item_id):
+                if _insert_notification_if_new(connection, cursor, user_id, "inventory", title, msg, "warning", "#inventorySection", u_key, item_id):
                     inserted_count += 1
 
             # 3. Expiry Checks
@@ -190,13 +190,13 @@ def sync_inventory_alerts_for_user(user_id, cursor, connection):
                     u_key = f"inv_expired_{item_id}_{today_str}"
                     title = f"Expired Inventory: {name}"
                     msg = f"'{name}' expired on {exp_date_str} ({abs(diff_days)} days ago). Do not use expired agricultural chemicals or seeds."
-                    if _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "urgent", "#inventorySection", u_key, item_id):
+                    if _insert_notification_if_new(connection, cursor, user_id, "inventory", title, msg, "urgent", "#inventorySection", u_key, item_id):
                         inserted_count += 1
                 elif 0 <= diff_days <= 14:
                     u_key = f"inv_expiring_{item_id}_{exp_date_str}"
                     title = f"Stock Expiring Soon: {name}"
                     msg = f"'{name}' will expire in {diff_days} days on {exp_date_str}. Plan usage before expiration."
-                    if _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "warning", "#inventorySection", u_key, item_id):
+                    if _insert_notification_if_new(connection, cursor, user_id, "inventory", title, msg, "warning", "#inventorySection", u_key, item_id):
                         inserted_count += 1
 
         return inserted_count
@@ -560,7 +560,9 @@ def get_inventory_detail(item_id):
             "storage_location": r.get("storage_location") or "",
             "notes": r.get("notes") or "",
             "status": status,
-            "movements": movements
+            "stock_status": status.lower().replace(" ", "_"),
+            "movements": movements,
+            "recent_movements": movements
         }
 
         return jsonify({
@@ -941,16 +943,18 @@ def record_stock_movement(item_id):
             new_qty = current_qty - quantity
 
         elif norm_mov_type == "Adjustment":
-            # Direct adjustment mode
-            adjust_mode = str(data.get("adjust_mode", "relative")).lower()
-            if adjust_mode == "absolute":
-                new_qty = quantity
-            else:
+            # Direct adjustment mode: defaults to absolute (farmer enters actual stock count)
+            adjust_mode = str(data.get("adjust_mode", "absolute")).lower()
+            if adjust_mode == "relative":
                 # Relative delta (can be positive or negative)
                 is_reduction = bool(data.get("is_reduction", False))
                 new_qty = current_qty - quantity if is_reduction else current_qty + quantity
                 if new_qty < 0:
                     return jsonify({"status": "error", "message": "Adjustment would result in negative stock."}), 400
+            else:
+                new_qty = quantity
+                if new_qty < 0:
+                    return jsonify({"status": "error", "message": "Adjusted stock cannot be negative."}), 400
 
         elif norm_mov_type == "Transfer":
             if current_qty < quantity:
@@ -972,7 +976,7 @@ def record_stock_movement(item_id):
             INSERT INTO farm_inventory_movements (
                 inventory_id, user_id, crop_id, farm_id, movement_type,
                 quantity, unit, movement_date, movement_time, reason, notes
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s)
         """, (
             item_id, user_id, crop_id or None, farm_id or item.get("farm_id"),
             norm_mov_type, quantity, unit, movement_date, reason, notes
@@ -1044,6 +1048,7 @@ def get_item_movements(item_id):
         return jsonify({
             "status": "success",
             "movements": movements,
+            "data": movements,
             "count": len(movements)
         }), 200
 
