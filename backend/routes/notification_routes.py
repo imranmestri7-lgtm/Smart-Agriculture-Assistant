@@ -33,7 +33,7 @@ def _authenticate():
 def _get_preferences(cursor, user_id):
     """Retrieve farmer's notification preferences, defaulting to enabled."""
     cursor.execute("""
-        SELECT crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, push_enabled, activity_reminders
+        SELECT crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, push_enabled, activity_reminders, inventory_alerts
         FROM notification_preferences
         WHERE user_id = %s
     """, (user_id,))
@@ -45,6 +45,7 @@ def _get_preferences(cursor, user_id):
             "weather_alerts": bool(row.get("weather_alerts", 1)),
             "disease_reminders": bool(row.get("disease_reminders", 1)),
             "activity_reminders": bool(row.get("activity_reminders", 1)),
+            "inventory_alerts": bool(row.get("inventory_alerts", 1)),
             "push_enabled": bool(row["push_enabled"]) if "push_enabled" in row and row["push_enabled"] is not None else True
         }
     return {
@@ -53,6 +54,7 @@ def _get_preferences(cursor, user_id):
         "weather_alerts": True,
         "disease_reminders": True,
         "activity_reminders": True,
+        "inventory_alerts": True,
         "push_enabled": True
     }
 
@@ -704,6 +706,7 @@ def update_preferences():
     weather_alerts = 1 if data.get("weather_alerts", True) else 0
     disease_reminders = 1 if data.get("disease_reminders", True) else 0
     activity_reminders = 1 if data.get("activity_reminders", True) else 0
+    inventory_alerts = 1 if data.get("inventory_alerts", True) else 0
     push_enabled = 1 if data.get("push_enabled", True) else 0
 
     connection = None
@@ -713,16 +716,17 @@ def update_preferences():
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute("""
-            INSERT INTO notification_preferences (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, activity_reminders, push_enabled)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO notification_preferences (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, activity_reminders, inventory_alerts, push_enabled)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 crop_reminders = VALUES(crop_reminders),
                 irrigation_alerts = VALUES(irrigation_alerts),
                 weather_alerts = VALUES(weather_alerts),
                 disease_reminders = VALUES(disease_reminders),
                 activity_reminders = VALUES(activity_reminders),
+                inventory_alerts = VALUES(inventory_alerts),
                 push_enabled = VALUES(push_enabled)
-        """, (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, activity_reminders, push_enabled))
+        """, (user_id, crop_reminders, irrigation_alerts, weather_alerts, disease_reminders, activity_reminders, inventory_alerts, push_enabled))
         connection.commit()
 
         updated_prefs = _get_preferences(cursor, user_id)
