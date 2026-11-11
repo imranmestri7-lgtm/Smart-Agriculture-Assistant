@@ -35,6 +35,7 @@ from routes.notification_routes import notification_bp
 from routes.iot_routes import iot_bp
 from routes.financial_routes import financial_bp
 from routes.activity_routes import activity_bp
+from routes.inventory_routes import inventory_bp
 
 app = Flask(__name__)
 

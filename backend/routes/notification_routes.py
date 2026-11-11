@@ -333,6 +333,13 @@ def _generate_notifications(connection, cursor, user_id):
     except Exception as e:
         print(f"Error invoking activity notifications sync: {e}")
 
+    # 6. Smart Farm Inventory & Stock Alerts
+    try:
+        from routes.inventory_routes import sync_inventory_alerts_for_user
+        sync_inventory_alerts_for_user(user_id, cursor, connection)
+    except Exception as e:
+        print(f"Error invoking inventory alerts sync: {e}")
+
 
 # =============================================================================
 # API ROUTES
