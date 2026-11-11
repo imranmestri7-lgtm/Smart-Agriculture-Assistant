@@ -65,6 +65,7 @@ app.register_blueprint(notification_bp)
 app.register_blueprint(iot_bp)
 app.register_blueprint(financial_bp)
 app.register_blueprint(activity_bp)
+app.register_blueprint(inventory_bp)
 
 
 # =========================================================================
