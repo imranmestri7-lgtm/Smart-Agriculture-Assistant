@@ -327,19 +327,22 @@ def get_inventory_summary():
                 "reason": m.get("reason") or ""
             })
 
+        summary_payload = {
+            "total_items": int(metrics.get("total_items") or 0),
+            "total_valuation": float(metrics.get("total_valuation") or 0.0),
+            "low_stock_count": int(metrics.get("low_stock_count") or 0),
+            "out_of_stock_count": int(metrics.get("out_of_stock_count") or 0),
+            "expiring_count": int(metrics.get("expiring_count") or 0),
+            "expiring_soon_count": int(metrics.get("expiring_count") or 0),
+            "expired_count": int(metrics.get("expired_count") or 0),
+            "by_category": by_category,
+            "critical_items": critical_items,
+            "recent_movements": recent_movements
+        }
         return jsonify({
             "status": "success",
-            "summary": {
-                "total_items": int(metrics.get("total_items") or 0),
-                "total_valuation": float(metrics.get("total_valuation") or 0.0),
-                "low_stock_count": int(metrics.get("low_stock_count") or 0),
-                "out_of_stock_count": int(metrics.get("out_of_stock_count") or 0),
-                "expiring_count": int(metrics.get("expiring_count") or 0),
-                "expired_count": int(metrics.get("expired_count") or 0),
-                "by_category": by_category,
-                "critical_items": critical_items,
-                "recent_movements": recent_movements
-            }
+            "summary": summary_payload,
+            "data": summary_payload
         }), 200
 
     except Exception as e:
@@ -459,7 +462,9 @@ def list_inventory():
         return jsonify({
             "status": "success",
             "items": items,
-            "count": len(items)
+            "data": items,
+            "count": len(items),
+            "total": len(items)
         }), 200
 
     except Exception as e:
@@ -560,7 +565,8 @@ def get_inventory_detail(item_id):
 
         return jsonify({
             "status": "success",
-            "item": item
+            "item": item,
+            "data": item
         }), 200
 
     except Exception as e:
@@ -599,19 +605,22 @@ def create_inventory_item():
     if len(item_name) > 150:
         return jsonify({"status": "error", "message": "Item name must not exceed 150 characters."}), 400
 
-    normalized_cat = CATEGORY_LOOKUP.get(category_raw.lower())
-    if not normalized_cat:
-        normalized_cat = next((c for c in VALID_INVENTORY_CATEGORIES if c.lower() == category_raw.lower()), None)
-    if not normalized_cat:
-        return jsonify({
-            "status": "error",
-            "message": f"Invalid category. Must be one of: {', '.join(VALID_INVENTORY_CATEGORIES)}"
-        }), 400
+    if not category_raw:
+        normalized_cat = "Other agricultural supplies"
+    else:
+        normalized_cat = CATEGORY_LOOKUP.get(category_raw.lower())
+        if not normalized_cat:
+            normalized_cat = next((c for c in VALID_INVENTORY_CATEGORIES if c.lower() == category_raw.lower()), None)
+        if not normalized_cat:
+            return jsonify({
+                "status": "error",
+                "message": f"Invalid category. Must be one of: {', '.join(VALID_INVENTORY_CATEGORIES)}"
+            }), 400
 
     try:
         quantity = float(quantity_raw)
         if quantity < 0:
-            return jsonify({"status": "error", "message": "Initial quantity cannot be negative."}), 400
+            return jsonify({"status": "error", "message": "Initial quantity must be a non-negative number."}), 400
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Quantity must be a valid number."}), 400
 
@@ -718,51 +727,69 @@ def update_inventory_item(item_id):
 
     data = request.get_json(silent=True) or {}
 
-    item_name = str(data.get("item_name", "")).strip()
-    category_raw = str(data.get("category", "")).strip()
-    unit = str(data.get("unit", "kg")).strip() or "kg"
-    purchase_price_raw = data.get("purchase_price", 0.0)
-    purchase_date_raw = str(data.get("purchase_date", "")).strip()
-    supplier_name = str(data.get("supplier_name", "")).strip() if data.get("supplier_name") else None
-    min_threshold_raw = data.get("min_threshold", 5.0)
-    expiry_date_raw = str(data.get("expiry_date", "")).strip() if data.get("expiry_date") else None
-    storage_location = str(data.get("storage_location", "")).strip() if data.get("storage_location") else None
-    farm_id = data.get("farm_id")
-    notes = str(data.get("notes", "")).strip() if data.get("notes") else None
-
-    if not item_name:
-        return jsonify({"status": "error", "message": "Item name is required."}), 400
-
-    normalized_cat = CATEGORY_LOOKUP.get(category_raw.lower())
-    if not normalized_cat:
-        normalized_cat = next((c for c in VALID_INVENTORY_CATEGORIES if c.lower() == category_raw.lower()), None)
-    if not normalized_cat:
-        return jsonify({"status": "error", "message": "Invalid category."}), 400
-
-    try:
-        purchase_price = float(purchase_price_raw)
-        min_threshold = float(min_threshold_raw)
-        purchase_date = datetime.strptime(purchase_date_raw, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
-        return jsonify({"status": "error", "message": "Invalid price, threshold, or date."}), 400
-
-    expiry_date = None
-    if expiry_date_raw:
-        try:
-            expiry_date = datetime.strptime(expiry_date_raw, "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({"status": "error", "message": "Invalid expiry date format."}), 400
-
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT id FROM farm_inventory WHERE id = %s AND user_id = %s", (item_id, user_id))
-        if not cursor.fetchone():
+        cursor.execute("SELECT * FROM farm_inventory WHERE id = %s AND user_id = %s", (item_id, user_id))
+        existing = cursor.fetchone()
+        if not existing:
             return jsonify({"status": "error", "message": "Inventory item not found."}), 404
 
+        item_name = str(data.get("item_name", existing["item_name"])).strip()
+        if not item_name:
+            return jsonify({"status": "error", "message": "Item name is required."}), 400
+
+        category_raw = str(data.get("category", existing["category"])).strip()
+        normalized_cat = CATEGORY_LOOKUP.get(category_raw.lower())
+        if not normalized_cat:
+            normalized_cat = next((c for c in VALID_INVENTORY_CATEGORIES if c.lower() == category_raw.lower()), None)
+        if not normalized_cat:
+            return jsonify({"status": "error", "message": "Invalid category."}), 400
+
+        unit = str(data.get("unit", existing["unit"])).strip() or existing["unit"]
+        
+        try:
+            purchase_price = float(data.get("purchase_price", existing["purchase_price"]))
+            if purchase_price < 0:
+                return jsonify({"status": "error", "message": "Purchase price cannot be negative."}), 400
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Purchase price must be a valid number."}), 400
+
+        try:
+            min_threshold = float(data.get("min_threshold", existing["min_threshold"]))
+            if min_threshold < 0:
+                return jsonify({"status": "error", "message": "Minimum threshold cannot be negative."}), 400
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Minimum threshold must be a valid number."}), 400
+
+        purchase_date_val = data.get("purchase_date")
+        if purchase_date_val is not None and str(purchase_date_val).strip() != "":
+            try:
+                purchase_date = datetime.strptime(str(purchase_date_val)[:10], "%Y-%m-%d").date()
+            except ValueError:
+                return jsonify({"status": "error", "message": "Invalid purchase date format."}), 400
+        else:
+            purchase_date = existing["purchase_date"]
+
+        expiry_date = None
+        if "expiry_date" in data:
+            exp_val = data.get("expiry_date")
+            if exp_val and str(exp_val).strip():
+                try:
+                    expiry_date = datetime.strptime(str(exp_val)[:10], "%Y-%m-%d").date()
+                except ValueError:
+                    return jsonify({"status": "error", "message": "Invalid expiry date format."}), 400
+        else:
+            expiry_date = existing.get("expiry_date")
+
+        supplier_name = str(data.get("supplier_name", "")).strip() if "supplier_name" in data else existing.get("supplier_name")
+        storage_location = str(data.get("storage_location", "")).strip() if "storage_location" in data else existing.get("storage_location")
+        notes = str(data.get("notes", "")).strip() if "notes" in data else existing.get("notes")
+
         # Validate farm
+        farm_id = data.get("farm_id") if "farm_id" in data else existing.get("farm_id")
         validated_farm_id = None
         if farm_id is not None and str(farm_id).strip() != "":
             try:
@@ -791,8 +818,8 @@ def update_inventory_item(item_id):
             WHERE id = %s AND user_id = %s
         """, (
             validated_farm_id, item_name, normalized_cat, unit, purchase_price,
-            purchase_date, supplier_name, min_threshold, expiry_date,
-            storage_location, notes, item_id, user_id
+            purchase_date, supplier_name or None, min_threshold, expiry_date,
+            storage_location or None, notes or None, item_id, user_id
         ))
         conn.commit()
 
@@ -1085,7 +1112,9 @@ def get_low_stock_items():
         return jsonify({
             "status": "success",
             "items": items,
-            "count": len(items)
+            "data": items,
+            "count": len(items),
+            "total": len(items)
         }), 200
 
     except Exception as e:
