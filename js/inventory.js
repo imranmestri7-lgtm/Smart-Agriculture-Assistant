@@ -893,8 +893,8 @@
             movement_type: movType,
             quantity: quantity,
             movement_date: document.getElementById("movDate").value,
-            crop_id: document.getElementById("movCropSelect").value || null,
-            farm_id: document.getElementById("movFarmSelect").value || null,
+            crop_id: document.getElementById("movCropSelect") ? document.getElementById("movCropSelect").value || null : null,
+            farm_id: document.getElementById("movFarmSelect") ? document.getElementById("movFarmSelect").value || null : null,
             adjust_mode: adjustMode,
             reason: document.getElementById("movReason").value.trim(),
             notes: document.getElementById("movNotes").value.trim() || null
