@@ -458,6 +458,39 @@
                 </a>
 
 
+                <!-- SMART FARM REPORTS DASHBOARD (FEATURE UPGRADE 8) -->
+
+                <a href="#reportsSection" class="dashboard-card" id="reportsDashboardCard">
+
+                    <div class="dashboard-card-icon reports-card-icon" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;">
+                        📑
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="reports_card_title">
+                                Farm Reports &amp; Insights
+                            </h3>
+
+                            <span class="notification-card-badge" id="cardReportsBadge" style="display:none; background:#0284c7; color:#fff;">New</span>
+
+                        </div>
+
+                        <p data-i18n="reports_card_desc">
+                            Comprehensive farm performance reports for crops, disease checks, irrigation, expenses, profit, tasks, and inventory.
+                        </p>
+
+                        <span class="card-link" data-i18n="reports_card_link">
+                            View Reports →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
                 <!-- FARMER ASSISTANT -->
 
                 <a href="#assistant" class="dashboard-card">
@@ -1711,6 +1744,724 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 <div id="recentMovementsEmptyState" class="inventory-empty-state" style="display:none; padding: 24px;">
                     <p data-i18n="empty_movements_msg" style="color:var(--text-secondary); margin:0;">No stock movements recorded yet. Log usage, additions, or adjustments to see audit history.</p>
                 </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SMART FARM REPORTS DASHBOARD (FEATURE UPGRADE 8)
+        ================================================== -->
+        <section class="reports-section" id="reportsSection">
+
+            <div class="section-heading">
+                <span>FARM ANALYTICS &amp; INSIGHTS</span>
+                <h2 data-i18n="reports_heading">Smart Farm Reports Dashboard</h2>
+                <p data-i18n="reports_subheading">
+                    Generate centralized, actionable farm reports for crops, diseases, irrigation, finances, harvest sales, tasks, and inventory.
+                </p>
+            </div>
+
+            <!-- 1. GLOBAL FILTER TOOLBAR -->
+            <div class="reports-filter-bar">
+                <div class="filter-controls-group">
+                    <!-- Date Range Preset -->
+                    <div class="filter-field">
+                        <label for="reportsDateRangePreset" data-i18n="lbl_report_period">Report Period</label>
+                        <select id="reportsDateRangePreset" class="form-control">
+                            <option value="last_30_days" selected data-i18n="opt_range_last_30_days">Last 30 Days</option>
+                            <option value="today" data-i18n="opt_range_today">Today</option>
+                            <option value="last_7_days" data-i18n="opt_range_last_7_days">Last 7 Days</option>
+                            <option value="current_month" data-i18n="opt_range_current_month">Current Month</option>
+                            <option value="previous_month" data-i18n="opt_range_previous_month">Previous Month</option>
+                            <option value="current_season" data-i18n="opt_range_current_season">Current Season</option>
+                            <option value="custom" data-i18n="opt_range_custom">Custom Date Range...</option>
+                            <option value="all" data-i18n="opt_range_all">All Recorded Time</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Pickers (Shown when custom is selected) -->
+                    <div class="filter-field custom-date-field" id="reportsCustomDateGroup" style="display: none;">
+                        <label data-i18n="lbl_custom_dates">Custom Range (From - To)</label>
+                        <div class="custom-date-inputs">
+                            <input type="date" id="reportsStartDate" class="form-control">
+                            <span>-</span>
+                            <input type="date" id="reportsEndDate" class="form-control">
+                            <button type="button" class="btn-sm btn-primary" id="btnApplyCustomDate" data-i18n="btn_apply">Apply</button>
+                        </div>
+                    </div>
+
+                    <!-- Farm Filter -->
+                    <div class="filter-field">
+                        <label for="reportsFarmFilter" data-i18n="lbl_filter_farm">Farm Location</label>
+                        <select id="reportsFarmFilter" class="form-control">
+                            <option value="all" data-i18n="opt_all_farms">All Farms</option>
+                        </select>
+                    </div>
+
+                    <!-- Crop Filter -->
+                    <div class="filter-field">
+                        <label for="reportsCropFilter" data-i18n="lbl_filter_crop">Crop Filter</label>
+                        <select id="reportsCropFilter" class="form-control">
+                            <option value="all" data-i18n="opt_all_crops">All Crops</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions-group">
+                    <span class="active-range-pill" id="reportsActiveRangeLabel">Last 30 Days</span>
+                    <button type="button" class="btn-secondary btn-icon-refresh" id="btnRefreshReports" title="Refresh Report Data" data-i18n-title="btn_refresh_reports">
+                        🔄 <span data-i18n="btn_refresh">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. REPORT CATEGORY NAVIGATION TABS -->
+            <div class="reports-nav-tabs" role="tablist">
+                <button type="button" class="reports-tab-btn active" data-tab="overview" role="tab" aria-selected="true">
+                    <span>📊</span> <span data-i18n="tab_overview">Overview</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="crops" role="tab" aria-selected="false">
+                    <span>🌾</span> <span data-i18n="tab_crops">Crops</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="disease" role="tab" aria-selected="false">
+                    <span>🍃</span> <span data-i18n="tab_disease">Disease Checks</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="irrigation" role="tab" aria-selected="false">
+                    <span>💧</span> <span data-i18n="tab_irrigation">Irrigation &amp; Water</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="financial" role="tab" aria-selected="false">
+                    <span>💰</span> <span data-i18n="tab_financial">Expenses &amp; Profit</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="harvest" role="tab" aria-selected="false">
+                    <span>🌾</span> <span data-i18n="tab_harvest">Harvest &amp; Sales</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="activities" role="tab" aria-selected="false">
+                    <span>🗓️</span> <span data-i18n="tab_activities">Farm Activities</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="inventory" role="tab" aria-selected="false">
+                    <span>📦</span> <span data-i18n="tab_inventory">Inventory &amp; Stock</span>
+                </button>
+                <button type="button" class="reports-tab-btn" data-tab="alerts" role="tab" aria-selected="false">
+                    <span>🔔</span> <span data-i18n="tab_alerts">Alerts &amp; Logs</span>
+                </button>
+            </div>
+
+            <!-- 3. REPORT VIEWS CONTAINER -->
+            <div id="reportsViewContainer" class="reports-view-container">
+
+                <!-- VIEW 1: FARM OVERVIEW -->
+                <div class="report-view-pane active" id="viewPaneOverview">
+                    <!-- Top KPI Summary Grid -->
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card kpi-card-farms">
+                            <div class="kpi-icon">🏡</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_farms">Total Farms</span>
+                                <h3 class="kpi-number" id="repOverviewFarms">0</h3>
+                                <small class="kpi-sub" id="repOverviewArea">0 Acres</small>
+                            </div>
+                        </div>
+
+                        <div class="reports-kpi-card kpi-card-crops">
+                            <div class="kpi-icon">🌾</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_registered_crops">Active Crops</span>
+                                <h3 class="kpi-number" id="repOverviewActiveCrops">0</h3>
+                                <small class="kpi-sub" id="repOverviewTotalCrops">0 Total Registered</small>
+                            </div>
+                        </div>
+
+                        <div class="reports-kpi-card kpi-card-financial">
+                            <div class="kpi-icon">💰</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_net_profit_loss">Net Profit / Loss</span>
+                                <h3 class="kpi-number" id="repOverviewNetProfit">₹0</h3>
+                                <small class="kpi-sub" id="repOverviewMargin">0% Margin</small>
+                            </div>
+                        </div>
+
+                        <div class="reports-kpi-card kpi-card-tasks">
+                            <div class="kpi-icon">🗓️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_completed_tasks">Completed Tasks</span>
+                                <h3 class="kpi-number" id="repOverviewCompletedTasks">0</h3>
+                                <small class="kpi-sub" id="repOverviewPendingTasks">0 Pending / Overdue</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module Highlight Cards Grid -->
+                    <div class="reports-two-col-grid">
+                        <!-- Financial & Harvest Health -->
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_financial_performance">Financial Performance in Period</h4>
+                                <span class="sub-label" id="repFinPeriodLabel">Last 30 Days</span>
+                            </div>
+                            <div class="financial-summary-row">
+                                <div class="fin-stat-box revenue-box">
+                                    <small data-i18n="lbl_total_revenue">Total Revenue</small>
+                                    <h4 id="repOverviewTotalRevenue">₹0.00</h4>
+                                </div>
+                                <div class="fin-stat-box expense-box">
+                                    <small data-i18n="lbl_total_expenses">Total Expenses</small>
+                                    <h4 id="repOverviewTotalExpenses">₹0.00</h4>
+                                </div>
+                            </div>
+                            <div class="fin-profit-badge-bar" id="repProfitBadgeBar">
+                                <span id="repProfitBadgeText">Balanced (₹0.00)</span>
+                            </div>
+                        </div>
+
+                        <!-- Supplies & Water Conservation -->
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_resources_water">Resources &amp; Water Management</h4>
+                                <span class="sub-label" data-i18n="rep_sub_actual_records">Actual Recorded Telemetry</span>
+                            </div>
+                            <div class="resource-stats-grid">
+                                <div class="res-stat-item">
+                                    <span class="res-stat-icon">📦</span>
+                                    <div>
+                                        <strong id="repOverviewInventoryItems">0</strong>
+                                        <small data-i18n="lbl_inventory_items">Inventory Items</small>
+                                        <div class="text-warning-sm" id="repOverviewLowStock">0 Low Stock</div>
+                                    </div>
+                                </div>
+                                <div class="res-stat-item">
+                                    <span class="res-stat-icon">💧</span>
+                                    <div>
+                                        <strong id="repOverviewWaterApplied">0 mm</strong>
+                                        <small data-i18n="lbl_water_applied">Water Applied</small>
+                                        <div class="text-success-sm" id="repOverviewWaterSaved">0 mm Saved</div>
+                                    </div>
+                                </div>
+                                <div class="res-stat-item">
+                                    <span class="res-stat-icon">🍃</span>
+                                    <div>
+                                        <strong id="repOverviewDiseaseScans">0</strong>
+                                        <small data-i18n="lbl_disease_scans">Disease Scans</small>
+                                        <div class="text-info-sm" id="repOverviewScanConfidence">0% Avg Conf</div>
+                                    </div>
+                                </div>
+                                <div class="res-stat-item">
+                                    <span class="res-stat-icon">🔔</span>
+                                    <div>
+                                        <strong id="repOverviewAlertsTotal">0</strong>
+                                        <small data-i18n="lbl_alerts_logged">Alerts Generated</small>
+                                        <div class="text-danger-sm" id="repOverviewUrgentAlerts">0 Urgent</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Highlights List -->
+                    <div class="reports-card" style="margin-top: 20px;">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_recent_milestones">Recent Farm Activity Highlights</h4>
+                            <span class="sub-label" data-i18n="rep_sub_recent_operations">Latest scheduled operations</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repOverviewActivitiesTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_act_date">Date</th>
+                                        <th data-i18n="th_act_title">Activity</th>
+                                        <th data-i18n="th_act_category">Category</th>
+                                        <th data-i18n="th_act_crop">Crop / Farm</th>
+                                        <th data-i18n="th_act_status">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repOverviewActivitiesBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repOverviewActivitiesEmpty" class="reports-empty-state" style="display:none; padding:20px;">
+                            <p data-i18n="empty_activities_msg">No recent farm activities recorded in this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: CROP MANAGEMENT -->
+                <div class="report-view-pane" id="viewPaneCrops" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🌾</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_registered_crops">Total Crops</span>
+                                <h3 class="kpi-number" id="repCropTotal">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🌱</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_active_cultivation">Active Crops</span>
+                                <h3 class="kpi-number" id="repCropActive">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🌾</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_harvested_crops">Harvested</span>
+                                <h3 class="kpi-number" id="repCropHarvested">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">📐</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_cultivated_area">Total Area</span>
+                                <h3 class="kpi-number" id="repCropArea">0 Acres</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_crops_inventory">Crop Registry &amp; Growth Stages</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repCropsTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_crop_name">Crop Name</th>
+                                        <th data-i18n="th_crop_variety">Variety</th>
+                                        <th data-i18n="th_crop_farm">Farm</th>
+                                        <th data-i18n="th_planting_date">Planting Date</th>
+                                        <th data-i18n="th_expected_harvest">Expected Harvest</th>
+                                        <th data-i18n="th_cultivated_area">Area</th>
+                                        <th data-i18n="th_growth_stage">Growth Status</th>
+                                        <th data-i18n="th_days_planted">Days in Ground</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repCropsBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repCropsEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_crops_msg">No crop records found for the selected filters.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: DISEASE DIAGNOSIS -->
+                <div class="report-view-pane" id="viewPaneDisease" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🔍</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_scans">Total Scans</span>
+                                <h3 class="kpi-number" id="repDiseaseTotalScans">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🍃</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_healthy_scans">Healthy Foliage</span>
+                                <h3 class="kpi-number text-success" id="repDiseaseHealthy">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⚠️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_diseased_scans">Problems Detected</span>
+                                <h3 class="kpi-number text-danger" id="repDiseaseDiseased">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🎯</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_healthy_ratio">Foliage Health Rate</span>
+                                <h3 class="kpi-number" id="repDiseaseHealthRate">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_disease_history">Disease Diagnosis History</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repDiseaseTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_diag_date">Date</th>
+                                        <th data-i18n="th_crop_name">Crop</th>
+                                        <th data-i18n="th_predicted_disease">Identified Condition</th>
+                                        <th data-i18n="th_confidence">Confidence</th>
+                                        <th data-i18n="th_status">Status</th>
+                                        <th data-i18n="th_notes">Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repDiseaseBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repDiseaseEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_disease_msg">No disease scan records found in this date range.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: IRRIGATION & WATER USAGE -->
+                <div class="report-view-pane" id="viewPaneIrrigation" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">💧</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_checks">Irrigation Checks</span>
+                                <h3 class="kpi-number" id="repIrrigTotal">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🚿</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_water_applied">Water Applied</span>
+                                <h3 class="kpi-number" id="repIrrigApplied">0 mm</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🌱</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_water_saved">Water Conserved</span>
+                                <h3 class="kpi-number text-success" id="repIrrigSaved">0 mm</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🌡️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_avg_soil_moisture">Avg Soil Moisture</span>
+                                <h3 class="kpi-number" id="repIrrigMoisture">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_irrigation_log">Irrigation &amp; Moisture Check Records</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repIrrigTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_date">Date</th>
+                                        <th data-i18n="th_crop_name">Crop</th>
+                                        <th data-i18n="th_soil_moisture">Moisture (%)</th>
+                                        <th data-i18n="th_soil_type">Soil Type</th>
+                                        <th data-i18n="th_stage">Growth Stage</th>
+                                        <th data-i18n="th_water_applied">Applied (mm)</th>
+                                        <th data-i18n="th_water_saved">Saved (mm)</th>
+                                        <th data-i18n="th_recommendation">Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repIrrigBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repIrrigEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_irrigation_msg">No irrigation checks recorded for this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 5: EXPENSES & PROFIT -->
+                <div class="report-view-pane" id="viewPaneFinancial" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">💰</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_revenue">Total Revenue</span>
+                                <h3 class="kpi-number text-success" id="repFinRevenue">₹0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🧾</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_expenses">Total Expenses</span>
+                                <h3 class="kpi-number text-danger" id="repFinExpenses">₹0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⚖️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_net_profit_loss">Net Margin</span>
+                                <h3 class="kpi-number" id="repFinNet">₹0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">📈</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_profit_margin_pct">Profit Margin</span>
+                                <h3 class="kpi-number" id="repFinMargin">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <!-- Expenses by Category -->
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_expense_categories">Expense Breakdown by Category</h4>
+                            </div>
+                            <div id="repExpenseCategoriesList" class="breakdown-list"></div>
+                        </div>
+
+                        <!-- Crop Profitability -->
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_crop_profitability">Crop-wise Profitability</h4>
+                            </div>
+                            <div id="repCropProfitabilityList" class="breakdown-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_expense_ledger">Farm Expense Ledger</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repExpenseTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_date">Date</th>
+                                        <th data-i18n="th_category">Category</th>
+                                        <th data-i18n="th_crop_farm">Crop / Farm</th>
+                                        <th data-i18n="th_description">Description</th>
+                                        <th data-i18n="th_amount">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repExpenseBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repExpenseEmpty" class="reports-empty-state" style="display:none; padding:20px;">
+                            <p data-i18n="empty_expenses_msg">No expenses recorded for this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 6: HARVEST & SALES -->
+                <div class="report-view-pane" id="viewPaneHarvest" style="display:none;">
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_harvest_sales">Recorded Harvest Sales &amp; Buyers</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repHarvestTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_date">Harvest Date</th>
+                                        <th data-i18n="th_crop_name">Crop</th>
+                                        <th data-i18n="th_farm">Farm</th>
+                                        <th data-i18n="th_yield_quantity">Yield / Quantity</th>
+                                        <th data-i18n="th_unit_price">Unit Price</th>
+                                        <th data-i18n="th_revenue">Total Revenue</th>
+                                        <th data-i18n="th_buyer">Buyer Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repHarvestBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repHarvestEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_harvests_msg">No harvest sales recorded for this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 7: FARM ACTIVITIES -->
+                <div class="report-view-pane" id="viewPaneActivities" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🗓️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_activities">Scheduled Tasks</span>
+                                <h3 class="kpi-number" id="repActTotal">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">✅</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_completed">Completed</span>
+                                <h3 class="kpi-number text-success" id="repActCompleted">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⏳</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_pending">Pending</span>
+                                <h3 class="kpi-number" id="repActPending">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⚠️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_overdue">Overdue</span>
+                                <h3 class="kpi-number text-danger" id="repActOverdue">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_activities_log">Farm Activities &amp; Operations Log</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repActivitiesTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_act_date">Date</th>
+                                        <th data-i18n="th_act_title">Activity</th>
+                                        <th data-i18n="th_act_category">Category</th>
+                                        <th data-i18n="th_act_crop">Crop / Farm</th>
+                                        <th data-i18n="th_act_priority">Priority</th>
+                                        <th data-i18n="th_act_status">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repActivitiesBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repActivitiesEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_activities_msg">No farm activities scheduled in this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 8: INVENTORY & STOCK -->
+                <div class="report-view-pane" id="viewPaneInventory" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">📦</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_items">Total Items</span>
+                                <h3 class="kpi-number" id="repInvTotalItems">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">💰</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_stock_value">Total Valuation</span>
+                                <h3 class="kpi-number" id="repInvValuation">₹0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⚠️</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_low_stock">Low Stock</span>
+                                <h3 class="kpi-number text-warning" id="repInvLowStock">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">⏳</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_expiring_soon">Expiring / Expired</span>
+                                <h3 class="kpi-number text-danger" id="repInvExpiring">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card" style="margin-bottom:20px;">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_inventory_stock">Stock Supplies &amp; Buffer Thresholds</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repInventoryTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_inv_item">Item Name</th>
+                                        <th data-i18n="th_inv_category">Category</th>
+                                        <th data-i18n="th_inv_quantity">Stock</th>
+                                        <th data-i18n="th_inv_pricing">Unit Price</th>
+                                        <th data-i18n="th_total_value">Total Value</th>
+                                        <th data-i18n="th_inv_threshold">Min Reorder</th>
+                                        <th data-i18n="th_inv_status">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repInventoryBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repInventoryEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_inventory_msg">No inventory items recorded yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="recent_movements_heading">Stock Movement Ledger in Period</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repMovementsTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_mov_date">Date</th>
+                                        <th data-i18n="th_mov_item">Item</th>
+                                        <th data-i18n="th_mov_type">Type</th>
+                                        <th data-i18n="th_mov_qty">Quantity</th>
+                                        <th data-i18n="th_mov_target">Crop / Farm</th>
+                                        <th data-i18n="th_mov_reason">Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repMovementsBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repMovementsEmpty" class="reports-empty-state" style="display:none; padding:20px;">
+                            <p data-i18n="empty_movements_msg">No stock movements recorded in this period.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 9: ALERTS & NOTIFICATIONS -->
+                <div class="report-view-pane" id="viewPaneAlerts" style="display:none;">
+                    <div class="reports-kpi-grid">
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🔔</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_total_alerts">Total Alerts</span>
+                                <h3 class="kpi-number" id="repAlertsTotal">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">📩</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_unread_alerts">Unread Alerts</span>
+                                <h3 class="kpi-number text-warning" id="repAlertsUnread">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">🚨</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_urgent_alerts">Urgent Warnings</span>
+                                <h3 class="kpi-number text-danger" id="repAlertsUrgent">0</h3>
+                            </div>
+                        </div>
+                        <div class="reports-kpi-card">
+                            <div class="kpi-icon">📬</div>
+                            <div class="kpi-info">
+                                <span class="kpi-title" data-i18n="kpi_read_alerts">Reviewed</span>
+                                <h3 class="kpi-number text-success" id="repAlertsRead">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_alerts_history">Alerts &amp; Notification History</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="reports-table" id="repAlertsTable">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_date">Date</th>
+                                        <th data-i18n="th_category">Category</th>
+                                        <th data-i18n="th_title">Title</th>
+                                        <th data-i18n="th_severity">Severity</th>
+                                        <th data-i18n="th_message">Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="repAlertsBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="repAlertsEmpty" class="reports-empty-state" style="display:none; padding:24px;">
+                            <p data-i18n="empty_alerts_msg">No alerts or notifications recorded in this period.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </section>
