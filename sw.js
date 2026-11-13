@@ -5,7 +5,7 @@
  * and friendly fallback to offline.html.
  */
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `agrismart-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `agrismart-pages-${CACHE_VERSION}`;
 const DATA_CACHE = `agrismart-data-${CACHE_VERSION}`;

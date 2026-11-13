@@ -2555,7 +2555,35 @@ mr: {
   "kpi_unread_alerts": "न वाचलेल्या सूचना",
   "kpi_urgent_alerts": "तातडीच्या सूचना",
   "kpi_read_alerts": "पाहिलेले",
-  "rep_title_alerts_history": "सूचना व माहिती इतिहास"
+  "rep_title_alerts_history": "सूचना व माहिती इतिहास",
+
+  // FEATURE UPGRADE 8 (PROMPT 2): DETAILED REPORTS & VISUAL ANALYTICS (MARATHI)
+  "rep_title_crop_stages_chart": "वाढ टप्प्यांचे वितरण",
+  "rep_title_crop_summaries": "पीकनिहाय लागवड व कामे",
+  "th_crop_acts": "शेती कामे",
+  "rep_title_disease_dist_chart": "रोग निदान वितरण आढावा",
+  "rep_title_crop_disease_history": "पीकनिहाय आरोग्य स्थिती",
+  "th_guidance_action": "मार्गदर्शन",
+  "btn_view_treatment": "मार्गदर्शन",
+  "lbl_symptoms": "दिसणारी लक्षणे",
+  "lbl_safe_treatment": "सुरक्षित कृषी उपचार",
+  "lbl_prevention": "प्रतिबंध आणि व्यवस्थापन",
+  "disease_disclaimer": "सल्ला केवळ कृषी मार्गदर्शनासाठी आहे. औषध फवारणीपूर्वी शेतातील प्रत्यक्ष परिस्थिती तपासा.",
+  "rep_title_irrig_advisory_vs_logged": "शिफारस वि. प्रत्यक्ष सिंचन",
+  "rep_title_water_trends_chart": "पाणी वापर आणि बचत कल",
+  "lbl_water_applied_mm": "वापरलेले पाणी (मिमी)",
+  "lbl_water_conserved_mm": "बचत केलेले पाणी (मिमी)",
+  "rep_title_fin_monthly_trends": "मासिक खर्च आणि उत्पन्न कल",
+  "rep_title_seasonal_summaries": "हंगामी आर्थिक कामगिरी",
+  "rep_title_act_completion_chart": "काम पूर्णत्वाचे वितरण",
+  "rep_title_act_monthly_trends": "मासिक काम नियोजन कल",
+  "rep_title_act_crop_grouping": "पीक आणि वर्गवारीनुसार कामे",
+  "rep_title_inv_category_chart": "वर्गवारीनुसार साठा मूल्यांकन",
+  "rep_title_inv_movements_highlight": "साठा हालचालींचे ठळक मुद्दे",
+  "rep_title_alerts_breakdown_types": "प्रकारानुसार सूचना तपशील",
+  "empty_chart_data": "या कालावधीसाठी आलेखासाठी पुरेशी माहिती उपलब्ध नाही.",
+  "empty_trends_data": "या कालावधीत मासिक नोंदी उपलब्ध नाहीत.",
+  "empty_irrigation_trends": "सिंचन कल आकडेवारी उपलब्ध नाही."
 },
 hi: {
   "choose_language": "अपनी भाषा चुनें",
@@ -3817,7 +3845,35 @@ hi: {
   "kpi_unread_alerts": "अपठित अलर्ट",
   "kpi_urgent_alerts": "जरूरी चेतावनी",
   "kpi_read_alerts": "समीक्षित",
-  "rep_title_alerts_history": "अलर्ट एवं सूचना इतिहास"
+  "rep_title_alerts_history": "अलर्ट एवं सूचना इतिहास",
+
+  // FEATURE UPGRADE 8 (PROMPT 2): DETAILED REPORTS & VISUAL ANALYTICS (HINDI)
+  "rep_title_crop_stages_chart": "वृद्धि चरण वितरण",
+  "rep_title_crop_summaries": "फसलवार बुवाई एवं कार्य",
+  "th_crop_acts": "कृषि कार्य",
+  "rep_title_disease_dist_chart": "रोग निदान वितरण अवलोकन",
+  "rep_title_crop_disease_history": "फसलवार स्वास्थ्य स्थिति",
+  "th_guidance_action": "मार्गदर्शन",
+  "btn_view_treatment": "मार्गदर्शन",
+  "lbl_symptoms": "दिखने वाले लक्षण",
+  "lbl_safe_treatment": "सुरक्षित कृषि उपचार",
+  "lbl_prevention": "रोकथाम एवं प्रबंधन",
+  "disease_disclaimer": "यह मार्गदर्शन केवल सलाहकारी उद्देश्यों के लिए है। रासायनिक उपचार से पहले खेत का निरीक्षण करें।",
+  "rep_title_irrig_advisory_vs_logged": "अनुशंसा बनाम वास्तविक सिंचाई",
+  "rep_title_water_trends_chart": "जल उपयोग एवं संरक्षण रुझान",
+  "lbl_water_applied_mm": "प्रयुक्त जल (मिमी)",
+  "lbl_water_conserved_mm": "बचत जल (मिमी)",
+  "rep_title_fin_monthly_trends": "मासिक व्यय बनाम आय रुझान",
+  "rep_title_seasonal_summaries": "मौसमी वित्तीय प्रदर्शन",
+  "rep_title_act_completion_chart": "कार्य पूर्णता वितरण",
+  "rep_title_act_monthly_trends": "मासिक कार्य योजना रुझान",
+  "rep_title_act_crop_grouping": "फसल एवं श्रेणी अनुसार कार्य",
+  "rep_title_inv_category_chart": "श्रेणी अनुसार स्टॉक मूल्यांकन",
+  "rep_title_inv_movements_highlight": "स्टॉक प्रवाह मुख्य बिंदु",
+  "rep_title_alerts_breakdown_types": "प्रकार अनुसार अलर्ट विवरण",
+  "empty_chart_data": "इस अवधि के लिए चार्ट हेतु पर्याप्त डेटा उपलब्ध नहीं है।",
+  "empty_trends_data": "इस अवधि में मासिक रुझान डेटा उपलब्ध नहीं है।",
+  "empty_irrigation_trends": "सिंचाई रुझान का कोई डेटा दर्ज नहीं है।"
 }
 };
 
