@@ -17,6 +17,7 @@ from flask import Blueprint, jsonify, request
 
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
+from utils import disease_knowledge
 
 reports_bp = Blueprint("reports_bp", __name__, url_prefix="/api/reports")
 
@@ -43,6 +44,27 @@ def _authenticate():
         }), 401)
 
     return user_id, None
+
+
+def _get_season_for_date(date_val):
+    """Determine Indian crop season (Kharif, Rabi, Zaid) for a given date."""
+    if not date_val:
+        return "Unknown"
+    if isinstance(date_val, str):
+        try:
+            date_val = datetime.strptime(str(date_val)[:10], "%Y-%m-%d").date()
+        except ValueError:
+            return "Unknown"
+    month = date_val.month
+    year = date_val.year
+    if 6 <= month <= 10:
+        return f"Kharif {year}"
+    elif month in (11, 12):
+        return f"Rabi {year}-{year+1}"
+    elif month in (1, 2, 3):
+        return f"Rabi {year-1}-{year}"
+    else:  # 4, 5
+        return f"Zaid {year}"
 
 
 def _format_date(val):
@@ -577,6 +599,20 @@ def get_crop_management_report():
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall() or []
 
+        # Crop activities mapping
+        cursor.execute("""
+            SELECT crop_id,
+                   COUNT(*) AS total_acts,
+                   SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_acts,
+                   SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_acts,
+                   SUM(CASE WHEN status = 'Pending' AND scheduled_date < %s THEN 1 ELSE 0 END) AS overdue_acts
+            FROM farm_activities
+            WHERE user_id = %s
+            GROUP BY crop_id
+        """, (date.today(), user_id))
+        act_rows = cursor.fetchall() or []
+        crop_act_map = {r["crop_id"]: r for r in act_rows}
+
         total_crops = len(rows)
         active_crops = sum(1 for r in rows if r.get("growth_status") != "Harvested")
         harvested_crops = total_crops - active_crops
@@ -585,6 +621,7 @@ def get_crop_management_report():
         status_counts = {}
         variety_counts = {}
         crops_list = []
+        crop_summaries = {}
         today = date.today()
 
         for r in rows:
@@ -600,6 +637,29 @@ def get_crop_management_report():
                 p_obj = pdate if isinstance(pdate, date) else datetime.strptime(str(pdate)[:10], "%Y-%m-%d").date()
                 days_planted = max(0, (today - p_obj).days)
 
+            act_info = crop_act_map.get(r["id"]) or {}
+            act_summary = {
+                "total_activities": int(act_info.get("total_acts") or 0),
+                "completed_activities": int(act_info.get("completed_acts") or 0),
+                "pending_activities": int(act_info.get("pending_acts") or 0),
+                "overdue_activities": int(act_info.get("overdue_acts") or 0)
+            }
+
+            c_area = float(r.get("cultivated_area") or 0.0)
+            if cname not in crop_summaries:
+                crop_summaries[cname] = {
+                    "crop_name": cname,
+                    "crop_count": 0,
+                    "total_area": 0.0,
+                    "area_unit": r.get("area_unit") or "acres",
+                    "total_activities": 0,
+                    "completed_activities": 0
+                }
+            crop_summaries[cname]["crop_count"] += 1
+            crop_summaries[cname]["total_area"] = round(crop_summaries[cname]["total_area"] + c_area, 2)
+            crop_summaries[cname]["total_activities"] += act_summary["total_activities"]
+            crop_summaries[cname]["completed_activities"] += act_summary["completed_activities"]
+
             crops_list.append({
                 "id": r["id"],
                 "crop_name": r["crop_name"],
@@ -608,11 +668,12 @@ def get_crop_management_report():
                 "farm_location": r.get("farm_location") or "",
                 "planting_date": _format_date(r.get("planting_date")),
                 "expected_harvest_date": _format_date(r.get("expected_harvest_date")),
-                "cultivated_area": float(r.get("cultivated_area") or 0.0),
+                "cultivated_area": c_area,
                 "area_unit": r.get("area_unit") or "acres",
                 "growth_status": st,
                 "days_in_ground": days_planted,
-                "notes": r.get("notes") or ""
+                "notes": r.get("notes") or "",
+                "activity_summary": act_summary
             })
 
         return jsonify({
@@ -631,6 +692,7 @@ def get_crop_management_report():
                 "total_area": round(total_area, 2),
                 "status_distribution": status_counts,
                 "variety_distribution": variety_counts,
+                "crop_summaries": list(crop_summaries.values()),
                 "crops_list": crops_list
             }
         }), 200
@@ -697,6 +759,19 @@ def get_disease_diagnosis_report():
             conf = float(r.get("confidence") or 0.0)
             conf_sum += conf
 
+            # Retrieve rich agronomic guidance for this condition
+            info = {}
+            if cls and cls != "Unknown":
+                try:
+                    info = disease_knowledge.get_disease_info(cls, confidence=conf)
+                except Exception:
+                    pass
+
+            treatment_list = info.get("safe_treatment") or []
+            prevention_list = info.get("prevention") or []
+            symptoms_list = info.get("symptoms") or []
+            desc = info.get("description") or ""
+
             if is_healthy:
                 healthy_scans += 1
                 disease_counts["Healthy Foliage"] = disease_counts.get("Healthy Foliage", 0) + 1
@@ -713,11 +788,34 @@ def get_disease_diagnosis_report():
                 "is_healthy": is_healthy,
                 "diagnosis_date": _format_date(r.get("diagnosis_date")),
                 "image_path": r.get("image_path") or "",
-                "notes": r.get("notes") or ""
+                "notes": r.get("notes") or "",
+                "safe_treatment": treatment_list,
+                "prevention": prevention_list,
+                "symptoms": symptoms_list,
+                "description": desc
             })
 
         avg_conf = round((conf_sum / total_scans * 100), 1) if total_scans > 0 else 0.0
         healthy_rate = round((healthy_scans / total_scans * 100), 1) if total_scans > 0 else 0.0
+
+        # Crop-wise diagnosis history grouping
+        crop_diagnosis_history = {}
+        for s in scans_list:
+            cname = s["crop_name"] or "General Foliage"
+            if cname not in crop_diagnosis_history:
+                crop_diagnosis_history[cname] = {
+                    "crop_name": cname,
+                    "total_scans": 0,
+                    "healthy_scans": 0,
+                    "diseased_scans": 0,
+                    "scans": []
+                }
+            crop_diagnosis_history[cname]["total_scans"] += 1
+            if s["is_healthy"]:
+                crop_diagnosis_history[cname]["healthy_scans"] += 1
+            else:
+                crop_diagnosis_history[cname]["diseased_scans"] += 1
+            crop_diagnosis_history[cname]["scans"].append(s)
 
         return jsonify({
             "status": "success",
@@ -735,6 +833,7 @@ def get_disease_diagnosis_report():
                 "healthy_rate_pct": healthy_rate,
                 "avg_confidence_pct": avg_conf,
                 "disease_distribution": disease_counts,
+                "crop_diagnosis_history": list(crop_diagnosis_history.values()),
                 "scans_list": scans_list
             }
         }), 200
@@ -815,6 +914,42 @@ def get_irrigation_report():
                 "created_at": _format_date(r.get("created_at"))
             })
 
+        # Query completed irrigation operations from farm_activities
+        cursor.execute("""
+            SELECT COUNT(*) AS completed_irrigation_ops,
+                   MAX(completion_date) AS last_completed_irrigation
+            FROM farm_activities
+            WHERE user_id = %s AND LOWER(category) = 'irrigation' AND status = 'Completed'
+        """, (user_id,))
+        act_irrig = cursor.fetchone() or {}
+        completed_irrigation_ops = int(act_irrig.get("completed_irrigation_ops") or 0)
+        last_completed_irrig = _format_date(act_irrig.get("last_completed_irrigation"))
+
+        # Water usage trends timeline
+        trend_map = {}
+        for r in rows:
+            dt = str(r.get("created_at") or "")[:10]
+            if dt:
+                if dt not in trend_map:
+                    trend_map[dt] = {
+                        "date": dt,
+                        "water_applied_mm": 0.0,
+                        "water_saved_mm": 0.0,
+                        "rainfall": 0.0,
+                        "count": 0
+                    }
+                trend_map[dt]["water_applied_mm"] += float(r.get("water_quantity_mm") or 0.0)
+                trend_map[dt]["water_saved_mm"] += float(r.get("water_saved_mm") or 0.0)
+                if r.get("rainfall") is not None:
+                    trend_map[dt]["rainfall"] = max(trend_map[dt]["rainfall"], float(r["rainfall"]))
+                trend_map[dt]["count"] += 1
+
+        water_trends = sorted(trend_map.values(), key=lambda x: x["date"])
+        for wt in water_trends:
+            wt["water_applied_mm"] = round(wt["water_applied_mm"], 1)
+            wt["water_saved_mm"] = round(wt["water_saved_mm"], 1)
+            wt["rainfall"] = round(wt["rainfall"], 1)
+
         # Round crop totals
         for c in crop_water_usage:
             crop_water_usage[c] = round(crop_water_usage[c], 1)
@@ -837,6 +972,14 @@ def get_irrigation_report():
                 "avg_soil_moisture": avg_moisture,
                 "crop_water_usage": crop_water_usage,
                 "recommendation_distribution": recommendation_counts,
+                "recommendation_vs_completed": {
+                    "total_recommendation_checks": total_records,
+                    "irrigation_needed_recommendations": needed_count,
+                    "sufficient_moisture_recommendations": not_needed_count,
+                    "completed_irrigation_operations": completed_irrigation_ops,
+                    "last_completed_irrigation": last_completed_irrig
+                },
+                "water_trends": water_trends,
                 "records_list": records_list
             }
         }), 200
@@ -996,6 +1139,64 @@ def get_financial_report():
                 "notes": r.get("notes") or ""
             })
 
+        # Monthly expense & revenue trends
+        month_exp_map = {}
+        for r in exp_rows:
+            d = r.get("expense_date")
+            if d:
+                ym = str(d)[:7]
+                month_exp_map[ym] = month_exp_map.get(ym, 0.0) + float(r["amount"])
+
+        month_rev_map = {}
+        for r in harv_rows:
+            d = r.get("harvest_date")
+            if d:
+                ym = str(d)[:7]
+                month_rev_map[ym] = month_rev_map.get(ym, 0.0) + float(r["total_revenue"])
+
+        all_months = sorted(list(set(month_exp_map.keys()) | set(month_rev_map.keys())))
+        monthly_trends = []
+        for ym in all_months:
+            m_exp = round(month_exp_map.get(ym, 0.0), 2)
+            m_rev = round(month_rev_map.get(ym, 0.0), 2)
+            m_net = round(m_rev - m_exp, 2)
+            monthly_trends.append({
+                "month": ym,
+                "expenses": m_exp,
+                "revenue": m_rev,
+                "net_profit": m_net
+            })
+
+        # Seasonal financial summaries (Kharif, Rabi, Zaid)
+        seasons_data = {}
+        for r in exp_rows:
+            s_name = _get_season_for_date(r.get("expense_date"))
+            if s_name not in seasons_data:
+                seasons_data[s_name] = {"season": s_name, "expenses": 0.0, "revenue": 0.0}
+            seasons_data[s_name]["expenses"] += float(r["amount"])
+
+        for r in harv_rows:
+            s_name = _get_season_for_date(r.get("harvest_date"))
+            if s_name not in seasons_data:
+                seasons_data[s_name] = {"season": s_name, "expenses": 0.0, "revenue": 0.0}
+            seasons_data[s_name]["revenue"] += float(r["total_revenue"])
+
+        seasonal_summary = []
+        for s_name, s_val in seasons_data.items():
+            s_exp = round(s_val["expenses"], 2)
+            s_rev = round(s_val["revenue"], 2)
+            s_profit = round(s_rev - s_exp, 2)
+            s_margin = round((s_profit / s_rev) * 100, 1) if s_rev > 0 else 0.0
+            seasonal_summary.append({
+                "season": s_name,
+                "expenses": s_exp,
+                "revenue": s_rev,
+                "net_profit": s_profit,
+                "profit_margin": s_margin,
+                "is_profitable": s_profit >= 0
+            })
+        seasonal_summary.sort(key=lambda x: x["season"], reverse=True)
+
         return jsonify({
             "status": "success",
             "report_type": "financial",
@@ -1013,6 +1214,8 @@ def get_financial_report():
                 "expense_categories": category_breakdown,
                 "buyer_breakdown": buyer_breakdown,
                 "crop_profitability": crop_profitability,
+                "monthly_trends": monthly_trends,
+                "seasonal_summary": seasonal_summary,
                 "expense_records": expense_records,
                 "harvest_records": harvest_records
             }
@@ -1127,6 +1330,44 @@ def get_activities_report():
 
         completion_rate = round((completed_count / total_activities * 100), 1) if total_activities > 0 else 0.0
 
+        # Group activities by crop
+        crop_act_group = {}
+        for a in activities_list:
+            cname = a.get("crop_name") or "General Farm Tasks"
+            if cname not in crop_act_group:
+                crop_act_group[cname] = {
+                    "crop_name": cname,
+                    "total": 0,
+                    "completed": 0,
+                    "pending": 0,
+                    "overdue": 0
+                }
+            crop_act_group[cname]["total"] += 1
+            if a["status"] == "Completed":
+                crop_act_group[cname]["completed"] += 1
+            elif a["is_overdue"]:
+                crop_act_group[cname]["overdue"] += 1
+            elif a["status"] == "Pending":
+                crop_act_group[cname]["pending"] += 1
+        crop_activity_grouping = sorted(list(crop_act_group.values()), key=lambda x: x["total"], reverse=True)
+
+        # Monthly activity trends
+        month_act_map = {}
+        for a in activities_list:
+            d = a.get("scheduled_date")
+            if d:
+                ym = str(d)[:7]
+                if ym not in month_act_map:
+                    month_act_map[ym] = {"month": ym, "total": 0, "completed": 0, "pending": 0, "overdue": 0}
+                month_act_map[ym]["total"] += 1
+                if a["status"] == "Completed":
+                    month_act_map[ym]["completed"] += 1
+                elif a["is_overdue"]:
+                    month_act_map[ym]["overdue"] += 1
+                elif a["status"] == "Pending":
+                    month_act_map[ym]["pending"] += 1
+        monthly_activity_trends = sorted(list(month_act_map.values()), key=lambda x: x["month"])
+
         return jsonify({
             "status": "success",
             "report_type": "activities",
@@ -1146,6 +1387,8 @@ def get_activities_report():
                 "completion_rate_pct": completion_rate,
                 "category_distribution": category_counts,
                 "priority_distribution": priority_counts,
+                "crop_activity_grouping": crop_activity_grouping,
+                "monthly_activity_trends": monthly_activity_trends,
                 "activities_list": activities_list
             }
         }), 200
@@ -1287,20 +1530,50 @@ def get_inventory_report():
 
         movement_types = {}
         movements_list = []
+        stock_additions_count = 0
+        stock_additions_qty = 0.0
+        stock_consumption_count = 0
+        stock_consumption_qty = 0.0
+        damaged_stock_count = 0
+        damaged_stock_qty = 0.0
+
         for m in mov_rows:
             mtype = m.get("movement_type") or "Usage / Consumption"
             movement_types[mtype] = movement_types.get(mtype, 0) + 1
+            mqty = float(m.get("quantity") or 0.0)
+
+            mtype_lower = mtype.lower()
+            if mtype_lower in ("in", "addition", "purchase", "restock"):
+                stock_additions_count += 1
+                stock_additions_qty += mqty
+            elif mtype_lower in ("out", "usage", "consumption", "application"):
+                stock_consumption_count += 1
+                stock_consumption_qty += mqty
+            elif mtype_lower in ("damaged", "expired", "loss", "waste"):
+                damaged_stock_count += 1
+                damaged_stock_qty += mqty
+
             movements_list.append({
                 "id": m["id"],
                 "item_name": m["item_name"],
                 "movement_type": mtype,
-                "quantity": float(m["quantity"]),
+                "quantity": mqty,
                 "unit": m["unit"],
                 "movement_date": _format_date(m["movement_date"]),
                 "crop_name": m.get("crop_name"),
                 "farm_name": m.get("farm_name"),
                 "reason": m.get("reason") or ""
             })
+
+        # Category distribution for visual charts
+        category_distribution = []
+        for cat_name, cat_data in category_breakdown.items():
+            category_distribution.append({
+                "category": cat_name,
+                "count": cat_data["count"],
+                "valuation": cat_data["valuation"]
+            })
+        category_distribution.sort(key=lambda x: x["valuation"], reverse=True)
 
         return jsonify({
             "status": "success",
@@ -1319,7 +1592,21 @@ def get_inventory_report():
                 "expiring_soon_count": expiring_count,
                 "expired_count": expired_count,
                 "category_breakdown": category_breakdown,
+                "category_distribution": category_distribution,
                 "status_breakdown": status_breakdown,
+                "stock_additions": {
+                    "count": stock_additions_count,
+                    "quantity": round(stock_additions_qty, 2)
+                },
+                "stock_consumption": {
+                    "count": stock_consumption_count,
+                    "quantity": round(stock_consumption_qty, 2)
+                },
+                "damaged_or_expired_stock": {
+                    "movement_count": damaged_stock_count,
+                    "movement_quantity": round(damaged_stock_qty, 2),
+                    "expired_items_count": expired_count
+                },
                 "movement_type_distribution": movement_types,
                 "items_list": items_list,
                 "movements_list": movements_list
