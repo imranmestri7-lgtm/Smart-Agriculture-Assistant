@@ -5559,3 +5559,130 @@
     }
 }
 
+/* =========================================================================
+   FEATURE UPGRADE 8 (PROMPT 2): INTERACTIVE CHARTS & VISUAL ANALYTICS
+   ========================================================================= */
+
+.reports-section .chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 180px;
+    padding: 10px 0;
+}
+
+.rep-donut-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.rep-donut-svg {
+    width: 150px;
+    height: 150px;
+    transform: rotate(-90deg);
+}
+
+.rep-donut-circle-bg {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 22;
+}
+
+.rep-donut-segment {
+    fill: none;
+    stroke-width: 22;
+    transition: stroke-dasharray 0.5s ease;
+    cursor: pointer;
+}
+
+.rep-bar-svg,
+.rep-trend-svg {
+    width: 100%;
+    max-height: 200px;
+}
+
+.rep-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 18px;
+    font-size: 12px;
+    color: #475569;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.rep-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.rep-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.rep-btn-view-guidance {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 14px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rep-btn-view-guidance:hover {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+}
+
+.rep-empty-chart-notice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 30px 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.rep-empty-chart-notice .empty-icon {
+    font-size: 28px;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .rep-donut-wrap {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .rep-chart-legend {
+        justify-content: flex-start;
+        font-size: 11px;
+        gap: 8px 12px;
+    }
+}
+
+

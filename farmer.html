@@ -2259,6 +2259,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                         </div>
                     </div>
 
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_fin_monthly_trends">Monthly Expenses vs. Revenue Trends</h4>
+                            </div>
+                            <div id="repFinMonthlyTrendsChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_seasonal_summaries">Seasonal Financial Performance</h4>
+                            </div>
+                            <div id="repFinSeasonalSummaryContainer" class="breakdown-list"></div>
+                        </div>
+                    </div>
+
                     <div class="reports-card">
                         <div class="card-header-row">
                             <h4 data-i18n="rep_title_expense_ledger">Farm Expense Ledger</h4>
@@ -2344,6 +2359,28 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                         </div>
                     </div>
 
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_act_completion_chart">Task Completion Distribution</h4>
+                            </div>
+                            <div id="repActivityCompletionChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_act_monthly_trends">Monthly Task Planning Trends</h4>
+                            </div>
+                            <div id="repActivityMonthlyTrendsChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="reports-card" style="margin-bottom: 20px;">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_act_crop_grouping">Crop &amp; Category Task Breakdown</h4>
+                        </div>
+                        <div id="repActivityCropGroupingList" class="breakdown-list"></div>
+                    </div>
+
                     <div class="reports-card">
                         <div class="card-header-row">
                             <h4 data-i18n="rep_title_activities_log">Farm Activities &amp; Operations Log</h4>
@@ -2399,6 +2436,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                 <span class="kpi-title" data-i18n="kpi_expiring_soon">Expiring / Expired</span>
                                 <h3 class="kpi-number text-danger" id="repInvExpiring">0</h3>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_inv_category_chart">Stock Valuation by Category</h4>
+                            </div>
+                            <div id="repInventoryCategoryChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_inv_movements_highlight">Stock Flow Highlights (Period)</h4>
+                            </div>
+                            <div id="repInventoryFlowHighlightsContainer" class="resource-stats-grid"></div>
                         </div>
                     </div>
 
@@ -2483,6 +2535,13 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                 <h3 class="kpi-number text-success" id="repAlertsRead">0</h3>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="reports-card" style="margin-bottom: 20px;">
+                        <div class="card-header-row">
+                            <h4 data-i18n="rep_title_alerts_breakdown_types">Alerts Breakdown by Notification Type</h4>
+                        </div>
+                        <div id="repAlertsCategoryCardsGrid" class="resource-stats-grid"></div>
                     </div>
 
                     <div class="reports-card">
@@ -3765,6 +3824,42 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </div>
                 <div class="modal-footer" style="padding:12px 20px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
                     <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_close">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DISEASE GUIDANCE & TREATMENT MODAL (FEATURE UPGRADE 8 PROMPT 2) -->
+        <div class="farm-modal-backdrop" id="diseaseGuidanceModal" style="display:none;">
+            <div class="farm-modal-dialog" style="max-width:680px;">
+                <div class="modal-header">
+                    <div>
+                        <h3 id="diseaseGuidanceTitle" style="margin:0;">Condition Treatment &amp; Guidance</h3>
+                        <small id="diseaseGuidanceSubtitle" style="color:var(--text-secondary); font-size:12px;"></small>
+                    </div>
+                    <button type="button" class="modal-close-btn" id="btnCloseDiseaseGuidance" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" style="padding:18px 22px; max-height:480px; overflow-y:auto;">
+                    <div id="diseaseGuidanceOverview" style="margin-bottom:16px;"></div>
+
+                    <div style="margin-bottom:16px;">
+                        <h5 style="color:#0f172a; margin:0 0 6px 0; font-size:14px; font-weight:700;" data-i18n="lbl_symptoms">Visible Symptoms</h5>
+                        <ul id="diseaseGuidanceSymptoms" style="padding-left:20px; margin:0; font-size:13px; color:#475569;"></ul>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <h5 style="color:#15803d; margin:0 0 6px 0; font-size:14px; font-weight:700;" data-i18n="lbl_safe_treatment">Safe Agronomic Treatment</h5>
+                        <ul id="diseaseGuidanceTreatment" style="padding-left:20px; margin:0; font-size:13px; color:#475569;"></ul>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <h5 style="color:#0369a1; margin:0 0 6px 0; font-size:14px; font-weight:700;" data-i18n="lbl_prevention">Prevention &amp; Cultural Control</h5>
+                        <ul id="diseaseGuidancePrevention" style="padding-left:20px; margin:0; font-size:13px; color:#475569;"></ul>
+                    </div>
+
+                    <div id="diseaseGuidanceDisclaimer" style="background:#f8fafc; border-left:3px solid #cbd5e1; padding:10px 14px; font-size:12px; color:#64748b; border-radius:4px;"></div>
+                </div>
+                <div class="modal-footer" style="padding:12px 20px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+                    <button type="button" class="btn-secondary modal-close-btn" id="btnDismissDiseaseGuidance" data-i18n="btn_close">Close</button>
                 </div>
             </div>
         </div>
