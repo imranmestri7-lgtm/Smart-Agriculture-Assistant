@@ -1655,13 +1655,33 @@ def get_alerts_report():
         unread_count = sum(1 for r in rows if not r.get("is_read"))
         read_count = total_alerts - unread_count
 
+        weather_alerts_count = 0
+        irrigation_alerts_count = 0
+        disease_alerts_count = 0
+        crop_reminders_count = 0
+        inventory_alerts_count = 0
+        system_alerts_count = 0
+
         category_counts = {}
         severity_counts = {"urgent": 0, "warning": 0, "info": 0}
         alerts_list = []
 
         for r in rows:
-            cat = r.get("category") or "system"
+            cat = str(r.get("category") or "system").lower()
             category_counts[cat] = category_counts.get(cat, 0) + 1
+
+            if "weather" in cat:
+                weather_alerts_count += 1
+            elif "irrig" in cat:
+                irrigation_alerts_count += 1
+            elif "disease" in cat:
+                disease_alerts_count += 1
+            elif "crop" in cat or "activ" in cat or "remind" in cat:
+                crop_reminders_count += 1
+            elif "invent" in cat or "stock" in cat:
+                inventory_alerts_count += 1
+            else:
+                system_alerts_count += 1
 
             sev = r.get("severity") or "info"
             severity_counts[sev] = severity_counts.get(sev, 0) + 1
@@ -1689,6 +1709,14 @@ def get_alerts_report():
                 "total_alerts": total_alerts,
                 "unread_count": unread_count,
                 "read_count": read_count,
+                "alert_types": {
+                    "weather_alerts": weather_alerts_count,
+                    "irrigation_alerts": irrigation_alerts_count,
+                    "disease_alerts": disease_alerts_count,
+                    "crop_reminders": crop_reminders_count,
+                    "inventory_alerts": inventory_alerts_count,
+                    "system_alerts": system_alerts_count
+                },
                 "category_distribution": category_counts,
                 "severity_distribution": severity_counts,
                 "alerts_list": alerts_list

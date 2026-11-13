@@ -2016,6 +2016,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                         </div>
                     </div>
 
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_crop_stages_chart">Growth Stage Distribution</h4>
+                            </div>
+                            <div id="repCropGrowthDistChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_crop_summaries">Crop-wise Cultivation &amp; Operations</h4>
+                            </div>
+                            <div id="repCropSummariesList" class="breakdown-list"></div>
+                        </div>
+                    </div>
+
                     <div class="reports-card">
                         <div class="card-header-row">
                             <h4 data-i18n="rep_title_crops_inventory">Crop Registry &amp; Growth Stages</h4>
@@ -2032,6 +2047,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                         <th data-i18n="th_cultivated_area">Area</th>
                                         <th data-i18n="th_growth_stage">Growth Status</th>
                                         <th data-i18n="th_days_planted">Days in Ground</th>
+                                        <th data-i18n="th_crop_acts">Operations</th>
                                     </tr>
                                 </thead>
                                 <tbody id="repCropsBody"></tbody>
@@ -2076,6 +2092,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                         </div>
                     </div>
 
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_disease_dist_chart">Diagnosis Distribution Overview</h4>
+                            </div>
+                            <div id="repDiseaseDonutChartContainer" class="chart-container" style="min-height: 180px;"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_crop_disease_history">Crop-wise Health Breakdown</h4>
+                            </div>
+                            <div id="repCropDiseaseSummaryList" class="breakdown-list"></div>
+                        </div>
+                    </div>
+
                     <div class="reports-card">
                         <div class="card-header-row">
                             <h4 data-i18n="rep_title_disease_history">Disease Diagnosis History</h4>
@@ -2089,6 +2120,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                         <th data-i18n="th_predicted_disease">Identified Condition</th>
                                         <th data-i18n="th_confidence">Confidence</th>
                                         <th data-i18n="th_status">Status</th>
+                                        <th data-i18n="th_guidance_action">Guidance</th>
                                         <th data-i18n="th_notes">Notes</th>
                                     </tr>
                                 </thead>
@@ -2131,6 +2163,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                                 <span class="kpi-title" data-i18n="kpi_avg_soil_moisture">Avg Soil Moisture</span>
                                 <h3 class="kpi-number" id="repIrrigMoisture">0%</h3>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="reports-two-col-grid" style="margin-bottom: 20px;">
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_irrig_advisory_vs_logged">Advisory vs. Actual Operations</h4>
+                            </div>
+                            <div id="repIrrigAdvisoryVsLoggedContainer" class="breakdown-list"></div>
+                        </div>
+                        <div class="reports-card">
+                            <div class="card-header-row">
+                                <h4 data-i18n="rep_title_water_trends_chart">Water Volume &amp; Conservation Trends</h4>
+                            </div>
+                            <div id="repIrrigationTrendsChartContainer" class="chart-container" style="min-height: 180px;"></div>
                         </div>
                     </div>
 

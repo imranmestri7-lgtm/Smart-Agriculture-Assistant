@@ -275,6 +275,95 @@ class TestReportRoutes(unittest.TestCase):
         item_names = [i["item_name"] for i in inv_res.get_json()["data"]["items_list"]]
         self.assertNotIn("User 2 Secret Diamond Plow", item_names)
 
+    def test_phase2_detailed_crop_features(self):
+        """Prompt 2: Verify crop-wise summaries and activity summary in crops report."""
+        res = self.client.get("/api/reports/crops", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("crop_summaries", data)
+        self.assertIsInstance(data["crop_summaries"], list)
+        for crop in data["crops_list"]:
+            self.assertIn("activity_summary", crop)
+            self.assertIn("total_activities", crop["activity_summary"])
+            self.assertIn("completed_activities", crop["activity_summary"])
+
+    def test_phase2_detailed_disease_features(self):
+        """Prompt 2: Verify treatment, prevention and crop diagnosis history in disease report."""
+        res = self.client.get("/api/reports/disease", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("crop_diagnosis_history", data)
+        self.assertIsInstance(data["crop_diagnosis_history"], list)
+        for scan in data["scans_list"]:
+            self.assertIn("safe_treatment", scan)
+            self.assertIn("prevention", scan)
+            self.assertIn("symptoms", scan)
+            self.assertIsInstance(scan["safe_treatment"], list)
+            self.assertIsInstance(scan["prevention"], list)
+
+    def test_phase2_detailed_irrigation_features(self):
+        """Prompt 2: Verify recommendation vs completed comparison & water trends in irrigation report."""
+        res = self.client.get("/api/reports/irrigation", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("recommendation_vs_completed", data)
+        self.assertIn("water_trends", data)
+        rvc = data["recommendation_vs_completed"]
+        self.assertIn("total_recommendation_checks", rvc)
+        self.assertIn("completed_irrigation_operations", rvc)
+        self.assertIsInstance(data["water_trends"], list)
+
+    def test_phase2_detailed_financial_features(self):
+        """Prompt 2: Verify monthly trends & seasonal summaries in financial report."""
+        res = self.client.get("/api/reports/financial", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("monthly_trends", data)
+        self.assertIn("seasonal_summary", data)
+        self.assertIsInstance(data["monthly_trends"], list)
+        self.assertIsInstance(data["seasonal_summary"], list)
+        for m in data["monthly_trends"]:
+            self.assertIn("month", m)
+            self.assertIn("expenses", m)
+            self.assertIn("revenue", m)
+            self.assertIn("net_profit", m)
+
+    def test_phase2_detailed_activities_features(self):
+        """Prompt 2: Verify crop activity grouping and monthly trends in activities report."""
+        res = self.client.get("/api/reports/activities", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("crop_activity_grouping", data)
+        self.assertIn("monthly_activity_trends", data)
+        self.assertIsInstance(data["crop_activity_grouping"], list)
+        self.assertIsInstance(data["monthly_activity_trends"], list)
+
+    def test_phase2_detailed_inventory_features(self):
+        """Prompt 2: Verify stock additions, consumption, damaged/expired stock & category distribution."""
+        res = self.client.get("/api/reports/inventory", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("stock_additions", data)
+        self.assertIn("stock_consumption", data)
+        self.assertIn("damaged_or_expired_stock", data)
+        self.assertIn("category_distribution", data)
+        self.assertIn("count", data["stock_additions"])
+        self.assertIn("count", data["stock_consumption"])
+        self.assertIn("movement_count", data["damaged_or_expired_stock"])
+
+    def test_phase2_detailed_alerts_features(self):
+        """Prompt 2: Verify alert_types breakdown (weather, irrigation, disease, reminders, inventory)."""
+        res = self.client.get("/api/reports/alerts", headers=self.headers1)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()["data"]
+        self.assertIn("alert_types", data)
+        types = data["alert_types"]
+        self.assertIn("weather_alerts", types)
+        self.assertIn("irrigation_alerts", types)
+        self.assertIn("disease_alerts", types)
+        self.assertIn("crop_reminders", types)
+        self.assertIn("inventory_alerts", types)
+
 
 if __name__ == "__main__":
     unittest.main()
