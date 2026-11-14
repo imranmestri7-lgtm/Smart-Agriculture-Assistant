@@ -373,23 +373,53 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 1. FARM OVERVIEW
     if category == "overview":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or {}
+        if not sum_m:
+            f = data.get("farms", {})
+            c = data.get("crops", {})
+            fin = data.get("financials", {})
+            act = data.get("activities", {})
+            inv = data.get("inventory", {})
+            dis = data.get("disease", {})
+            irr = data.get("irrigation", {})
+            alt = data.get("alerts", {})
+            sum_m = {
+                "total_farms": f.get("total_farms", 0),
+                "total_farm_area": f.get("total_area", 0.0),
+                "total_crops": c.get("total_crops", 0),
+                "active_crops": c.get("active_crops", 0),
+                "harvested_crops": c.get("harvested_crops", 0),
+                "total_cultivated_area": c.get("total_cultivated_area", 0.0),
+                "total_expenses": fin.get("total_expenses", 0.0),
+                "total_revenue": fin.get("total_revenue", 0.0),
+                "net_profit": fin.get("net_profit", 0.0),
+                "margin_pct": fin.get("profit_margin", 0.0),
+                "total_water_volume_mm": irr.get("water_applied_mm", 0.0),
+                "water_saved_mm": irr.get("water_saved_mm", 0.0),
+                "total_diagnoses": dis.get("total_scans", 0),
+                "health_ratio_pct": (dis.get("healthy_scans", 0) / dis.get("total_scans", 1) * 100) if dis.get("total_scans") else 0.0,
+                "completed_activities": act.get("completed", 0),
+                "total_activities": act.get("total_activities", 0),
+                "completion_rate": act.get("completion_rate", 0.0),
+                "total_inventory_valuation": inv.get("total_valuation", 0.0),
+                "total_alerts": alt.get("total_alerts", 0),
+            }
         kpis = [
             ("Total Farms", sum_m.get("total_farms", 0)),
-            ("Total Farm Area", f"{sum_m.get('total_farm_area', 0.0):.1f} Ac"),
+            ("Total Farm Area", f"{float(sum_m.get('total_farm_area') or 0.0):.1f} Ac"),
             ("Active Crops", sum_m.get("active_crops", 0)),
-            ("Cultivated Area", f"{sum_m.get('total_cultivated_area', 0.0):.1f} Ac"),
-            ("Total Expenses", f"₹ {sum_m.get('total_expenses', 0.0):,.2f}"),
-            ("Total Revenue", f"₹ {sum_m.get('total_revenue', 0.0):,.2f}"),
-            ("Net Profit", f"₹ {sum_m.get('net_profit', 0.0):,.2f}"),
-            ("Profit Margin", f"{sum_m.get('margin_pct', 0.0):.1f}%"),
-            ("Irrigation Vol.", f"{sum_m.get('total_water_volume_mm', 0.0):.1f} mm"),
-            ("Water Saved", f"{sum_m.get('water_saved_mm', 0.0):.1f} mm"),
+            ("Cultivated Area", f"{float(sum_m.get('total_cultivated_area') or 0.0):.1f} Ac"),
+            ("Total Expenses", f"₹ {float(sum_m.get('total_expenses') or 0.0):,.2f}"),
+            ("Total Revenue", f"₹ {float(sum_m.get('total_revenue') or 0.0):,.2f}"),
+            ("Net Profit", f"₹ {float(sum_m.get('net_profit') or 0.0):,.2f}"),
+            ("Profit Margin", f"{float(sum_m.get('margin_pct') or 0.0):.1f}%"),
+            ("Irrigation Vol.", f"{float(sum_m.get('total_water_volume_mm') or 0.0):.1f} mm"),
+            ("Water Saved", f"{float(sum_m.get('water_saved_mm') or 0.0):.1f} mm"),
             ("Plant Scans", sum_m.get("total_diagnoses", 0)),
-            ("Foliage Health", f"{sum_m.get('health_ratio_pct', 0.0):.1f}%"),
+            ("Foliage Health", f"{float(sum_m.get('health_ratio_pct') or 0.0):.1f}%"),
             ("Completed Tasks", f"{sum_m.get('completed_activities', 0)} / {sum_m.get('total_activities', 0)}"),
-            ("Task Rate", f"{sum_m.get('completion_rate', 0.0):.1f}%"),
-            ("Stock Valuation", f"₹ {sum_m.get('total_inventory_valuation', 0.0):,.2f}"),
+            ("Task Rate", f"{float(sum_m.get('completion_rate') or 0.0):.1f}%"),
+            ("Stock Valuation", f"₹ {float(sum_m.get('total_inventory_valuation') or 0.0):,.2f}"),
             ("Active Alerts", sum_m.get("total_alerts", 0)),
         ]
         story.append(_build_kpi_table(kpis, styles))
@@ -422,18 +452,18 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 2. CROPS REPORT
     elif category == "crops":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or data
         kpis = [
             ("Total Crops", sum_m.get("total_crops", 0)),
             ("Active Growing", sum_m.get("active_crops", 0)),
             ("Harvested", sum_m.get("harvested_crops", 0)),
-            ("Cultivated Area", f"{sum_m.get('total_area', 0.0):.1f} Acres"),
+            ("Cultivated Area", f"{float(sum_m.get('total_area') or 0.0):.1f} Acres"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
         # Crop table
-        crops = data.get("crops", [])
+        crops = data.get("crops") or data.get("crops_list") or []
         story.append(Paragraph("Registered Crops & Growth Status", styles["SectionHead"]))
         if crops:
             tbl_data = [[
@@ -463,18 +493,20 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 3. DISEASE REPORT
     elif category == "disease":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or data
+        health_ratio = sum_m.get("health_ratio") or sum_m.get("health_ratio_pct") or 0.0
+        avg_conf = sum_m.get("avg_confidence") or sum_m.get("avg_confidence_pct") or 0.0
         kpis = [
             ("Total Scans", sum_m.get("total_scans", 0)),
             ("Healthy Foliage", sum_m.get("healthy_scans", 0)),
             ("Diseased Scans", sum_m.get("diseased_scans", 0)),
-            ("Foliage Health Ratio", f"{sum_m.get('health_ratio', 0.0):.1f}%"),
-            ("Avg Model Confidence", f"{sum_m.get('avg_confidence', 0.0):.1f}%"),
+            ("Foliage Health Ratio", f"{float(health_ratio):.1f}%"),
+            ("Avg Model Confidence", f"{float(avg_conf):.1f}%"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
-        scans = data.get("scans", [])
+        scans = data.get("scans") or data.get("scans_list") or []
         story.append(Paragraph("Plant Disease Diagnosis Log & Recommendations", styles["SectionHead"]))
         if scans:
             tbl_data = [[
@@ -507,20 +539,24 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 4. IRRIGATION REPORT
     elif category == "irrigation":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or data
+        tot_recs = sum_m.get("total_recommendations") or len(data.get("records_list") or data.get("recommendations") or [])
+        skip_cnt = sum_m.get("skip_count") or sum_m.get("not_needed_count", 0)
+        tot_water = sum_m.get("total_water_mm") or sum_m.get("total_water_applied_mm", 0.0)
+        water_saved = sum_m.get("water_saved_mm") or sum_m.get("total_water_saved_mm", 0.0)
         kpis = [
-            ("Advisories Generated", sum_m.get("total_recommendations", 0)),
-            ("Irrigation Needed", sum_m.get("water_needed_count", 0)),
-            ("Water Skipped", sum_m.get("skip_count", 0)),
-            ("Total Water Vol.", f"{sum_m.get('total_water_mm', 0.0):.1f} mm"),
-            ("Water Saved", f"{sum_m.get('water_saved_mm', 0.0):.1f} mm"),
-            ("Avg Soil Moisture", f"{sum_m.get('avg_soil_moisture', 0.0):.1f}%"),
+            ("Advisories Generated", tot_recs),
+            ("Irrigation Needed", sum_m.get("irrigation_needed_count", 0)),
+            ("Water Skipped", skip_cnt),
+            ("Total Water Vol.", f"{float(tot_water):.1f} mm"),
+            ("Water Saved", f"{float(water_saved):.1f} mm"),
+            ("Avg Soil Moisture", f"{float(sum_m.get('avg_soil_moisture') or 0.0):.1f}%"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
         # Advisory history
-        recs = data.get("recommendations", [])
+        recs = data.get("recommendations") or data.get("records_list") or []
         story.append(Paragraph("Smart Irrigation Advisory Telemetry Log", styles["SectionHead"]))
         if recs:
             tbl_data = [[
@@ -550,12 +586,13 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 5. FINANCIAL REPORT
     elif category == "financial":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("financial_summary") or data.get("summary") or data
+        margin = sum_m.get("profit_margin_pct") or sum_m.get("profit_margin", 0.0)
         kpis = [
-            ("Total Expenses", f"₹ {sum_m.get('total_expenses', 0.0):,.2f}"),
-            ("Total Revenue", f"₹ {sum_m.get('total_revenue', 0.0):,.2f}"),
-            ("Net Profit / Loss", f"₹ {sum_m.get('net_profit', 0.0):,.2f}"),
-            ("Profit Margin", f"{sum_m.get('profit_margin_pct', 0.0):.1f}%"),
+            ("Total Expenses", f"₹ {float(sum_m.get('total_expenses') or 0.0):,.2f}"),
+            ("Total Revenue", f"₹ {float(sum_m.get('total_revenue') or 0.0):,.2f}"),
+            ("Net Profit / Loss", f"₹ {float(sum_m.get('net_profit') or 0.0):,.2f}"),
+            ("Profit Margin", f"{float(margin):.1f}%"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
@@ -585,7 +622,7 @@ def generate_pdf_report(category, data, metadata, lang="en"):
             story.append(Spacer(1, 12))
 
         # Itemized Expenses
-        exps = data.get("expenses", [])
+        exps = data.get("expenses") or data.get("expense_records") or []
         story.append(Paragraph("Itemized Farm Expenses Ledger", styles["SectionHead"]))
         if exps:
             tbl_data = [[
@@ -611,7 +648,7 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 6. HARVEST REPORT
     elif category == "harvest":
-        harvs = data.get("harvests", [])
+        harvs = data.get("harvests") or data.get("harvest_records") or []
         tot_rev = sum(float(h.get("total_revenue") or 0.0) for h in harvs)
         tot_qty = sum(float(h.get("quantity") or 0.0) for h in harvs)
         kpis = [
@@ -649,18 +686,22 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 7. ACTIVITIES REPORT
     elif category == "activities":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or data
+        completed = sum_m.get("completed_activities") or sum_m.get("completed_count", 0)
+        pending = sum_m.get("pending_activities") or sum_m.get("pending_count", 0)
+        overdue = sum_m.get("overdue_activities") or sum_m.get("overdue_count", 0)
+        comp_rate = sum_m.get("completion_rate") or sum_m.get("completion_rate_pct", 0.0)
         kpis = [
             ("Total Tasks", sum_m.get("total_activities", 0)),
-            ("Completed", sum_m.get("completed_activities", 0)),
-            ("Pending", sum_m.get("pending_activities", 0)),
-            ("Overdue", sum_m.get("overdue_activities", 0)),
-            ("Completion Rate", f"{sum_m.get('completion_rate', 0.0):.1f}%"),
+            ("Completed", completed),
+            ("Pending", pending),
+            ("Overdue", overdue),
+            ("Completion Rate", f"{float(comp_rate):.1f}%"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
-        acts = data.get("activities", [])
+        acts = data.get("activities") or data.get("activities_list") or []
         story.append(Paragraph("Farm Operations & Task Schedule", styles["SectionHead"]))
         if acts:
             tbl_data = [[
@@ -688,17 +729,20 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 8. INVENTORY REPORT
     elif category == "inventory":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or data
+        low_stock = sum_m.get("low_stock_items") or sum_m.get("low_stock_count", 0)
+        expiring = sum_m.get("expiring_items") or sum_m.get("expiring_soon_count", 0)
+        valuation = sum_m.get("total_valuation") or sum_m.get("total_inventory_valuation", 0.0)
         kpis = [
             ("Total Items", sum_m.get("total_items", 0)),
-            ("Low Stock Items", sum_m.get("low_stock_items", 0)),
-            ("Expiring Soon", sum_m.get("expiring_items", 0)),
-            ("Stock Valuation", f"₹ {sum_m.get('total_valuation', 0.0):,.2f}"),
+            ("Low Stock Items", low_stock),
+            ("Expiring Soon", expiring),
+            ("Stock Valuation", f"₹ {float(valuation):,.2f}"),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
-        items = data.get("items", [])
+        items = data.get("items") or data.get("items_list") or []
         story.append(Paragraph("Current Farm Inventory & Valuation", styles["SectionHead"]))
         if items:
             tbl_data = [[
@@ -726,17 +770,23 @@ def generate_pdf_report(category, data, metadata, lang="en"):
 
     # 9. ALERTS REPORT
     elif category == "alerts":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or {}
+        tot_alerts = sum_m.get("total_notifications") or sum_m.get("total_alerts") or data.get("total_alerts") or 0
+        unread_alerts = sum_m.get("unread_notifications") or sum_m.get("unread_count") or data.get("unread_count") or 0
+        sev_dist = data.get("severity_distribution") or {}
+        high_alerts = sum_m.get("high_severity_notifications") or sev_dist.get("high", 0)
+        med_alerts = sum_m.get("medium_severity_notifications") or sev_dist.get("medium", 0)
+
         kpis = [
-            ("Total Alerts", sum_m.get("total_notifications", 0)),
-            ("Unread", sum_m.get("unread_notifications", 0)),
-            ("High Severity", sum_m.get("high_severity_notifications", 0)),
-            ("Medium", sum_m.get("medium_severity_notifications", 0)),
+            ("Total Alerts", tot_alerts),
+            ("Unread", unread_alerts),
+            ("High Severity", high_alerts),
+            ("Medium", med_alerts),
         ]
         story.append(_build_kpi_table(kpis, styles))
         story.append(Spacer(1, 14))
 
-        notifs = data.get("notifications", [])
+        notifs = data.get("notifications") or data.get("alerts_list") or []
         story.append(Paragraph("Audit Trail: Alerts & System Notifications", styles["SectionHead"]))
         if notifs:
             tbl_data = [[
@@ -821,7 +871,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "crops":
         writer.writerow(["Crop ID", "Crop Name", "Variety", "Growth Stage", "Planting Date", "Expected Harvest", "Cultivated Area (Acres)", "Farm Name", "Days in Ground"])
-        for c in data.get("crops", []):
+        for c in data.get("crops") or data.get("crops_list") or []:
             writer.writerow([
                 sanitize_csv_cell(c.get("id")),
                 sanitize_csv_cell(c.get("crop_name")),
@@ -836,7 +886,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "disease":
         writer.writerow(["Scan ID", "Date", "Time", "Crop Name", "Diagnosed Condition", "Model Confidence (%)", "Health Status", "Recommended Action"])
-        for s in data.get("scans", []):
+        for s in data.get("scans") or data.get("scans_list") or []:
             writer.writerow([
                 sanitize_csv_cell(s.get("id")),
                 sanitize_csv_cell(s.get("date")),
@@ -850,7 +900,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "irrigation":
         writer.writerow(["Record ID", "Date", "Time", "Crop Name", "Soil Type", "Growth Stage", "Soil Moisture (%)", "Temperature (°C)", "Rainfall (mm)", "Action", "Water Volume (mm)", "Reason"])
-        for r in data.get("recommendations", []):
+        for r in data.get("recommendations") or data.get("records_list") or []:
             writer.writerow([
                 sanitize_csv_cell(r.get("id")),
                 sanitize_csv_cell(r.get("date")),
@@ -868,7 +918,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "financial":
         writer.writerow(["Expense ID", "Date", "Category", "Amount (INR)", "Crop Name", "Farm Name", "Description", "Notes"])
-        for e in data.get("expenses", []):
+        for e in data.get("expenses") or data.get("expense_records") or []:
             writer.writerow([
                 sanitize_csv_cell(e.get("id")),
                 sanitize_csv_cell(e.get("date")),
@@ -892,7 +942,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "harvest":
         writer.writerow(["Harvest ID", "Date", "Crop Name", "Farm Name", "Quantity", "Unit", "Price Per Unit (INR)", "Total Revenue (INR)", "Buyer Name", "Notes"])
-        for h in data.get("harvests", []):
+        for h in data.get("harvests") or data.get("harvest_records") or []:
             writer.writerow([
                 sanitize_csv_cell(h.get("id")),
                 sanitize_csv_cell(h.get("date")),
@@ -908,7 +958,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "activities":
         writer.writerow(["Activity ID", "Title", "Category", "Crop Name", "Farm Name", "Scheduled Date", "Scheduled Time", "Priority", "Status", "Completed Date", "Description"])
-        for a in data.get("activities", []):
+        for a in data.get("activities") or data.get("activities_list") or []:
             writer.writerow([
                 sanitize_csv_cell(a.get("id")),
                 sanitize_csv_cell(a.get("title")),
@@ -925,7 +975,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "inventory":
         writer.writerow(["Item ID", "Item Name", "Category", "Quantity", "Unit", "Unit Price (INR)", "Total Value (INR)", "Low Stock Threshold", "Expiry Date", "Location"])
-        for itm in data.get("items", []):
+        for itm in data.get("items") or data.get("items_list") or []:
             writer.writerow([
                 sanitize_csv_cell(itm.get("id")),
                 sanitize_csv_cell(itm.get("item_name")),
@@ -941,7 +991,7 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     elif category == "alerts":
         writer.writerow(["Notification ID", "Created At", "Type", "Severity", "Title", "Message", "Is Read"])
-        for n in data.get("notifications", []):
+        for n in data.get("notifications") or data.get("alerts_list") or []:
             writer.writerow([
                 sanitize_csv_cell(n.get("id")),
                 sanitize_csv_cell(n.get("created_at")),
@@ -1080,7 +1130,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        crops = data.get("crops", [])
+        crops = data.get("crops") or data.get("crops_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, c in enumerate(crops, 5):
             ws.append([
@@ -1114,7 +1164,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        scans = data.get("scans", [])
+        scans = data.get("scans") or data.get("scans_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, s in enumerate(scans, 5):
             ws.append([
@@ -1147,7 +1197,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        recs = data.get("recommendations", [])
+        recs = data.get("recommendations") or data.get("records_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, r in enumerate(recs, 5):
             ws.append([
@@ -1187,7 +1237,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws1.append([])
         _style_excel_headers(ws1, 4, headers1)
 
-        exps = data.get("expenses", [])
+        exps = data.get("expenses") or data.get("expense_records") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, e in enumerate(exps, 5):
             ws1.append([
@@ -1218,7 +1268,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws2.append([])
         _style_excel_headers(ws2, 4, headers2)
 
-        harvs = data.get("harvests", [])
+        harvs = data.get("harvests") or data.get("harvest_records") or []
         for idx, h in enumerate(harvs, 5):
             ws2.append([
                 h.get("id"),
@@ -1283,7 +1333,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        harvs = data.get("harvests", [])
+        harvs = data.get("harvests") or data.get("harvest_records") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, h in enumerate(harvs, 5):
             ws.append([
@@ -1320,7 +1370,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        acts = data.get("activities", [])
+        acts = data.get("activities") or data.get("activities_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, a in enumerate(acts, 5):
             ws.append([
@@ -1354,7 +1404,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        items = data.get("items", [])
+        items = data.get("items") or data.get("items_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, itm in enumerate(items, 5):
             ws.append([
@@ -1391,7 +1441,7 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.append([])
         _style_excel_headers(ws, 4, headers)
 
-        notifs = data.get("notifications", [])
+        notifs = data.get("notifications") or data.get("alerts_list") or []
         zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
         for idx, n in enumerate(notifs, 5):
             ws.append([
