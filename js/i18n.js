@@ -1291,7 +1291,17 @@ const translations = {
   "rep_title_alerts_breakdown_types": "Alerts Breakdown by Notification Type",
   "empty_chart_data": "No records found for visual distribution in this period.",
   "empty_trends_data": "No monthly trend records available in this period.",
-  "empty_irrigation_trends": "No irrigation trend telemetry recorded."
+  "empty_irrigation_trends": "No irrigation trend telemetry recorded.",
+  "btn_pdf": "PDF",
+  "btn_excel": "Excel",
+  "btn_csv": "CSV",
+  "btn_print": "Print",
+  "btn_export_pdf": "Export as PDF",
+  "btn_export_excel": "Export as Excel",
+  "btn_export_csv": "Export as CSV",
+  "lbl_exporting": "Exporting...",
+  "lbl_export_success": "Report exported successfully!",
+  "lbl_export_failed": "Failed to export report. Please try again."
 },
 mr: {
   "choose_language": "तुमची भाषा निवडा",
@@ -2583,7 +2593,17 @@ mr: {
   "rep_title_alerts_breakdown_types": "प्रकारानुसार सूचना तपशील",
   "empty_chart_data": "या कालावधीसाठी आलेखासाठी पुरेशी माहिती उपलब्ध नाही.",
   "empty_trends_data": "या कालावधीत मासिक नोंदी उपलब्ध नाहीत.",
-  "empty_irrigation_trends": "सिंचन कल आकडेवारी उपलब्ध नाही."
+  "empty_irrigation_trends": "सिंचन कल आकडेवारी उपलब्ध नाही.",
+  "btn_pdf": "पीडीएफ",
+  "btn_excel": "एक्सेल",
+  "btn_csv": "सीएसव्ही",
+  "btn_print": "प्रिंट करा",
+  "btn_export_pdf": "पीडीएफ डाउनलोड करा",
+  "btn_export_excel": "एक्सेल डाउनलोड करा",
+  "btn_export_csv": "सीएसव्ही डाउनलोड करा",
+  "lbl_exporting": "डाउनलोड होत आहे...",
+  "lbl_export_success": "अहवाल यशस्वीरित्या डाऊनलोड झाला!",
+  "lbl_export_failed": "अहवाल डाउनलोड करण्यात त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
 },
 hi: {
   "choose_language": "अपनी भाषा चुनें",
@@ -3873,7 +3893,17 @@ hi: {
   "rep_title_alerts_breakdown_types": "प्रकार अनुसार अलर्ट विवरण",
   "empty_chart_data": "इस अवधि के लिए चार्ट हेतु पर्याप्त डेटा उपलब्ध नहीं है।",
   "empty_trends_data": "इस अवधि में मासिक रुझान डेटा उपलब्ध नहीं है।",
-  "empty_irrigation_trends": "सिंचाई रुझान का कोई डेटा दर्ज नहीं है।"
+  "empty_irrigation_trends": "सिंचाई रुझान का कोई डेटा दर्ज नहीं है।",
+  "btn_pdf": "पीडीएफ",
+  "btn_excel": "एक्सेल",
+  "btn_csv": "सीएसवी",
+  "btn_print": "प्रिंट करें",
+  "btn_export_pdf": "पीडीएफ निर्यात करें",
+  "btn_export_excel": "एक्सेल निर्यात करें",
+  "btn_export_csv": "सीएसवी निर्यात करें",
+  "lbl_exporting": "निर्यात हो रहा है...",
+  "lbl_export_success": "रिपोर्ट सफलतापूर्वक निर्यात की गई!",
+  "lbl_export_failed": "रिपोर्ट निर्यात करने में विफल. कृपया पुन: प्रयास करें."
 }
 };
 

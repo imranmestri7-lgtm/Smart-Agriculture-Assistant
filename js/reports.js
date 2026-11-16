@@ -1766,6 +1766,17 @@
             });
         }
 
+        // Export Action Buttons (Feature Upgrade 8 - Phase 3)
+        const btnPdf = document.getElementById('btnExportPdf');
+        const btnExcel = document.getElementById('btnExportExcel');
+        const btnCsv = document.getElementById('btnExportCsv');
+        const btnPrint = document.getElementById('btnExportPrint');
+
+        if (btnPdf) btnPdf.addEventListener('click', () => exportReport('pdf'));
+        if (btnExcel) btnExcel.addEventListener('click', () => exportReport('excel'));
+        if (btnCsv) btnCsv.addEventListener('click', () => exportReport('csv'));
+        if (btnPrint) btnPrint.addEventListener('click', printCurrentReport);
+
         // Multilingual Language Change Listener
         document.addEventListener('languageChanged', function () {
             populateFarmFilter();
@@ -1773,6 +1784,148 @@
             updateDateRangeLabel();
             loadCurrentTab();
         });
+    }
+
+    // -------------------------------------------------------------
+    // Export Handlers (Feature Upgrade 8 - Phase 3)
+    // -------------------------------------------------------------
+    let toastTimeout = null;
+
+    function showExportToast(msg, type = 'info') {
+        const toastEl = document.getElementById('reportsExportToast');
+        if (!toastEl) return;
+        if (toastTimeout) clearTimeout(toastTimeout);
+
+        toastEl.className = `reports-export-toast toast-${type}`;
+        toastEl.textContent = msg;
+        toastEl.style.display = 'block';
+
+        toastTimeout = setTimeout(() => {
+            toastEl.style.display = 'none';
+        }, 4000);
+    }
+
+    async function exportReport(format) {
+        const token = getToken();
+        if (!token) {
+            showExportToast('Authentication required. Please log in.', 'error');
+            return;
+        }
+
+        const btnMap = {
+            'pdf': document.getElementById('btnExportPdf'),
+            'excel': document.getElementById('btnExportExcel'),
+            'csv': document.getElementById('btnExportCsv')
+        };
+        const targetBtn = btnMap[format];
+        const origHtml = targetBtn ? targetBtn.innerHTML : '';
+
+        try {
+            if (targetBtn) {
+                targetBtn.disabled = true;
+                targetBtn.innerHTML = `⏳ <span>${t('lbl_exporting', 'Exporting...')}</span>`;
+            }
+
+            const activeLang = localStorage.getItem('language') || 'en';
+            const qs = buildQueryParams();
+            const exportUrl = `/api/reports/export/${format}?category=${encodeURIComponent(state.currentTab)}&${qs}&lang=${encodeURIComponent(activeLang)}`;
+
+            const res = await fetch(exportUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (!res.ok) {
+                let errText = t('lbl_export_failed', 'Failed to export report. Please try again.');
+                try {
+                    const errJson = await res.json();
+                    if (errJson && errJson.message) errText = errJson.message;
+                } catch (e) { }
+                showExportToast(errText, 'error');
+                return;
+            }
+
+            // Extract filename from Content-Disposition header if available
+            const disp = res.headers.get('Content-Disposition') || '';
+            let filename = '';
+            const match = disp.match(/filename=["']?([^"';]+)["']?/i);
+            if (match && match[1]) {
+                filename = match[1].trim();
+            } else {
+                const nowStr = new Date().toISOString().slice(0, 10);
+                const ext = format === 'excel' ? 'xlsx' : format;
+                filename = `AgriSmart_${state.currentTab}_${nowStr}.${ext}`;
+            }
+
+            const blob = await res.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(blobUrl);
+
+            showExportToast(t('lbl_export_success', 'Report exported successfully!'), 'success');
+        } catch (err) {
+            console.error(`Export ${format} error:`, err);
+            showExportToast(t('lbl_export_failed', 'Failed to export report. Please try again.'), 'error');
+        } finally {
+            if (targetBtn) {
+                targetBtn.disabled = false;
+                targetBtn.innerHTML = origHtml;
+            }
+        }
+    }
+
+    function printCurrentReport() {
+        // 1. Populate printable header details
+        const titleEl = document.getElementById('printReportTitle');
+        const periodEl = document.getElementById('printReportPeriod');
+        const filterEl = document.getElementById('printReportFilters');
+        const timeEl = document.getElementById('printReportTimestamp');
+
+        const tabTitleMap = {
+            'overview': t('tab_overview', 'Farm Overview Report'),
+            'crops': t('tab_crops', 'Crop Management Report'),
+            'disease': t('tab_disease', 'Plant Disease Diagnosis Report'),
+            'irrigation': t('tab_irrigation', 'Smart Irrigation & Water Usage Report'),
+            'financial': t('tab_financial', 'Farm Financial & Profitability Report'),
+            'harvest': t('tab_harvest', 'Crop Harvest & Sales Revenue Report'),
+            'activities': t('tab_activities', 'Farm Activities & Task Schedule Report'),
+            'inventory': t('tab_inventory', 'Farm Inventory & Stock Movement Report'),
+            'alerts': t('tab_alerts', 'Farm Alerts & System Audit Log')
+        };
+
+        if (titleEl) {
+            titleEl.innerHTML = `<strong>${tabTitleMap[state.currentTab] || 'Farm Report'}</strong>`;
+        }
+
+        const rangeLabelEl = document.getElementById('reportsActiveRangeLabel');
+        const rangeText = rangeLabelEl ? rangeLabelEl.textContent.trim() : 'Last 30 Days';
+        if (periodEl) {
+            periodEl.textContent = `Period: ${rangeText}`;
+        }
+
+        if (filterEl) {
+            const farmSelect = document.getElementById('reportsFarmFilter');
+            const cropSelect = document.getElementById('reportsCropFilter');
+            const farmTxt = farmSelect && farmSelect.selectedIndex >= 0 ? farmSelect.options[farmSelect.selectedIndex].text : 'All Farms';
+            const cropTxt = cropSelect && cropSelect.selectedIndex >= 0 ? cropSelect.options[cropSelect.selectedIndex].text : 'All Crops';
+            filterEl.textContent = `Farm: ${farmTxt} | Crop: ${cropTxt}`;
+        }
+
+        if (timeEl) {
+            const now = new Date();
+            timeEl.textContent = `Generated: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+
+        // 2. Invoke native browser print dialog
+        window.print();
     }
 
     // -------------------------------------------------------------
@@ -1798,6 +1951,8 @@
         reload: loadCurrentTab,
         loadOverview: loadOverviewReport,
         showGuidance: showDiseaseGuidanceModal,
-        hideGuidance: hideDiseaseGuidanceModal
+        hideGuidance: hideDiseaseGuidanceModal,
+        exportReport: exportReport,
+        printReport: printCurrentReport
     };
 })();

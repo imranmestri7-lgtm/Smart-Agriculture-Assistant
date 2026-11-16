@@ -364,6 +364,92 @@ class TestReportRoutes(unittest.TestCase):
         self.assertIn("crop_reminders", types)
         self.assertIn("inventory_alerts", types)
 
+    # =========================================================================
+    # PHASE 3: EXPORT TESTS (PDF, CSV, EXCEL, SECURITY & LOCALIZATION)
+    # =========================================================================
+
+    def test_phase3_unauthenticated_exports_rejected(self):
+        """Prompt 3: Verify unauthenticated export requests are rejected with 401."""
+        for fmt in ["pdf", "csv", "excel", "xlsx"]:
+            res = self.client.get(f"/api/reports/export/{fmt}")
+            self.assertEqual(res.status_code, 401, f"Expected 401 for unauthenticated {fmt}")
+
+    def test_phase3_export_pdf_all_categories(self):
+        """Prompt 3: Verify PDF export generates valid PDF stream with headers for all 9 categories."""
+        categories = ["overview", "crops", "disease", "irrigation", "financial", "harvest", "activities", "inventory", "alerts"]
+        for cat in categories:
+            res = self.client.get(f"/api/reports/export/pdf?category={cat}&range=last_30_days", headers=self.headers1)
+            self.assertEqual(res.status_code, 200, f"PDF export failed for category '{cat}'")
+            self.assertEqual(res.headers.get("Content-Type"), "application/pdf")
+            self.assertTrue(res.data.startswith(b"%PDF-"), f"PDF magic bytes missing for category '{cat}'")
+            self.assertIn(f"AgriSmart_{cat.capitalize()}_Report_", res.headers.get("Content-Disposition", ""))
+            self.assertGreater(len(res.data), 1000, f"PDF data suspiciously small for '{cat}'")
+
+    def test_phase3_export_csv_all_categories(self):
+        """Prompt 3: Verify CSV export generates UTF-8 BOM CSV with proper headings for all 9 categories."""
+        categories = ["overview", "crops", "disease", "irrigation", "financial", "harvest", "activities", "inventory", "alerts"]
+        for cat in categories:
+            res = self.client.get(f"/api/reports/export/csv?category={cat}&range=last_30_days", headers=self.headers1)
+            self.assertEqual(res.status_code, 200, f"CSV export failed for category '{cat}'")
+            self.assertIn("text/csv", res.headers.get("Content-Type", ""))
+            # Must include UTF-8 BOM (\xef\xbb\xbf)
+            self.assertTrue(res.data.startswith(b"\xef\xbb\xbf"), f"UTF-8 BOM missing for category '{cat}'")
+            self.assertIn(f"AgriSmart_{cat.capitalize()}_Report_", res.headers.get("Content-Disposition", ""))
+            csv_text = res.data.decode("utf-8-sig")
+            self.assertIn("AgriSmart Farm Report", csv_text)
+
+    def test_phase3_export_excel_all_categories(self):
+        """Prompt 3: Verify Excel (.xlsx) export generates valid openpyxl workbooks for all 9 categories."""
+        categories = ["overview", "crops", "disease", "irrigation", "financial", "harvest", "activities", "inventory", "alerts"]
+        for cat in categories:
+            res = self.client.get(f"/api/reports/export/excel?category={cat}&range=last_30_days", headers=self.headers1)
+            self.assertEqual(res.status_code, 200, f"Excel export failed for category '{cat}'")
+            self.assertIn("openxmlformats", res.headers.get("Content-Type", ""))
+            self.assertIn(f"AgriSmart_{cat.capitalize()}_Report_", res.headers.get("Content-Disposition", ""))
+            # PK zip header for xlsx
+            self.assertTrue(res.data.startswith(b"PK"), f"PK zip header missing for Excel category '{cat}'")
+            self.assertGreater(len(res.data), 2000, f"Excel file too small for '{cat}'")
+
+    def test_phase3_export_localization_devanagari(self):
+        """Prompt 3: Verify Marathi (mr) and Hindi (hi) localized exports run cleanly without font errors."""
+        for lang in ["mr", "hi"]:
+            res_pdf = self.client.get(f"/api/reports/export/pdf?category=financial&range=last_30_days&lang={lang}", headers=self.headers1)
+            self.assertEqual(res_pdf.status_code, 200, f"Localized PDF failed for lang '{lang}'")
+            self.assertTrue(res_pdf.data.startswith(b"%PDF-"))
+
+            res_csv = self.client.get(f"/api/reports/export/csv?category=crops&range=last_30_days&lang={lang}", headers=self.headers1)
+            self.assertEqual(res_csv.status_code, 200, f"Localized CSV failed for lang '{lang}'")
+            csv_str = res_csv.data.decode("utf-8-sig")
+            self.assertTrue(len(csv_str) > 0)
+
+            res_xlsx = self.client.get(f"/api/reports/export/excel?category=disease&range=last_30_days&lang={lang}", headers=self.headers1)
+            self.assertEqual(res_xlsx.status_code, 200, f"Localized Excel failed for lang '{lang}'")
+
+    def test_phase3_export_multi_tenant_isolation(self):
+        """Prompt 3: Verify strict farmer data isolation — User B's export contains zero data from User A."""
+        # Export crops for User 2 (who has 0 crops)
+        res_csv = self.client.get("/api/reports/export/csv?category=crops&range=all", headers=self.headers2)
+        self.assertEqual(res_csv.status_code, 200)
+        csv_text = res_csv.data.decode("utf-8-sig")
+        # Ensure User 1's crops are not in User 2's CSV
+        self.assertNotIn("Tomato Test", csv_text)
+        self.assertNotIn("Cotton Test", csv_text)
+
+    def test_phase3_export_empty_records_graceful(self):
+        """Prompt 3: Verify export runs gracefully with zero crash when no records match filter."""
+        res_pdf = self.client.get(
+            "/api/reports/export/pdf?category=financial&range=custom&start_date=1990-01-01&end_date=1990-01-02",
+            headers=self.headers1
+        )
+        self.assertEqual(res_pdf.status_code, 200)
+        self.assertTrue(res_pdf.data.startswith(b"%PDF-"))
+
+        res_csv = self.client.get(
+            "/api/reports/export/csv?category=irrigation&range=custom&start_date=1990-01-01&end_date=1990-01-02",
+            headers=self.headers1
+        )
+        self.assertEqual(res_csv.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
