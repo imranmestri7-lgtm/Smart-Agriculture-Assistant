@@ -5,7 +5,7 @@
  * and friendly fallback to offline.html.
  */
 
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const STATIC_CACHE = `agrismart-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `agrismart-pages-${CACHE_VERSION}`;
 const DATA_CACHE = `agrismart-data-${CACHE_VERSION}`;
@@ -71,7 +71,8 @@ const NEVER_CACHE_PATTERNS = [
     /\/api\/iot\/ingest/,
     /\/api\/iot\/telemetry\/ingest/,
     /\/api\/disease\/predict/,
-    /\/api\/disease\/image\//
+    /\/api\/disease\/image\//,
+    /\/api\/reports\/export\//
 ];
 
 // Safe read-only API endpoints eligible for network-first offline caching

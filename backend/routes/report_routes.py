@@ -13,11 +13,16 @@ Provides secure, parameterized analytics and reporting endpoints covering:
 
 import calendar
 from datetime import date, datetime, timedelta
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
 from utils import disease_knowledge
+from utils.report_exporter import (
+    generate_pdf_report,
+    generate_csv_report,
+    generate_excel_report
+)
 
 reports_bp = Blueprint("reports_bp", __name__, url_prefix="/api/reports")
 
@@ -1729,3 +1734,145 @@ def get_alerts_report():
     finally:
         if conn:
             conn.close()
+
+
+# =============================================================================
+# 9. EXPORT ENDPOINTS (FEATURE UPGRADE 8 - PHASE 3)
+# =============================================================================
+
+CATEGORY_HANDLERS = {
+    "overview": get_farm_overview_report,
+    "crops": get_crop_management_report,
+    "disease": get_disease_diagnosis_report,
+    "irrigation": get_irrigation_report,
+    "financial": get_financial_report,
+    "harvest": get_financial_report,
+    "activities": get_activities_report,
+    "inventory": get_inventory_report,
+    "alerts": get_alerts_report,
+}
+
+
+def _handle_report_export(export_format):
+    """
+    Unified, secure export handler for PDF, CSV, and Excel reports.
+    Reuses the exact report logic, calculations, date resolvers, and SQL parameterization.
+    Enforces strict multi-tenant farmer data isolation via JWT token.
+    """
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    flt = _parse_common_filters()
+    category = request.args.get("category", "overview").strip().lower()
+    if category not in CATEGORY_HANDLERS and category != "all":
+        category = "overview"
+
+    lang = request.args.get("lang", "en").strip().lower()
+    if lang not in ("en", "mr", "hi"):
+        lang = "en"
+
+    # Fetch context names for metadata banner
+    farm_name = None
+    crop_name = None
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        if flt["farm_id"]:
+            cursor.execute("SELECT farm_name FROM farms WHERE id = %s AND user_id = %s", (flt["farm_id"], user_id))
+            f_row = cursor.fetchone()
+            if f_row:
+                farm_name = f_row.get("farm_name")
+        if flt["crop_id"]:
+            cursor.execute("SELECT crop_name FROM crops WHERE id = %s AND user_id = %s", (flt["crop_id"], user_id))
+            c_row = cursor.fetchone()
+            if c_row:
+                crop_name = c_row.get("crop_name")
+    except Exception as e:
+        print(f"Error resolving filter names for export: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+    metadata = {
+        "range_label": flt["range_label"],
+        "preset": flt["preset"],
+        "start_date": flt["start_date_str"],
+        "end_date": flt["end_date_str"],
+        "farm_name": farm_name or ("All Farms" if lang == "en" else ("सर्व शेत" if lang == "mr" else "सभी खेत")),
+        "crop_name": crop_name or ("All Crops" if lang == "en" else ("सर्व पिके" if lang == "mr" else "सभी फसलें")),
+        "lang": lang
+    }
+
+    # Retrieve data by invoking existing endpoint logic directly in current request context
+    handler_fn = CATEGORY_HANDLERS.get(category, get_farm_overview_report)
+    res = handler_fn()
+    resp_obj = res[0] if isinstance(res, tuple) else res
+    json_payload = resp_obj.get_json() or {}
+
+    if not json_payload.get("status") == "success" and not json_payload.get("data"):
+        return jsonify({
+            "status": "error",
+            "message": "Failed to retrieve report data for export."
+        }), 500
+
+    report_data = json_payload.get("data", {})
+    now_str = datetime.now().strftime("%Y%m%d_%H%M")
+    cat_label = category.capitalize()
+
+    try:
+        if export_format == "pdf":
+            buf = generate_pdf_report(category, report_data, metadata, lang=lang)
+            mimetype = "application/pdf"
+            filename = f"AgriSmart_{cat_label}_Report_{now_str}.pdf"
+        elif export_format == "csv":
+            buf = generate_csv_report(category, report_data, metadata, lang=lang)
+            mimetype = "text/csv; charset=utf-8"
+            filename = f"AgriSmart_{cat_label}_Report_{now_str}.csv"
+        elif export_format in ("excel", "xlsx"):
+            buf = generate_excel_report(category, report_data, metadata, lang=lang)
+            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            filename = f"AgriSmart_{cat_label}_Report_{now_str}.xlsx"
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"Unsupported export format '{export_format}'. Supported: pdf, csv, excel."
+            }), 400
+
+        resp = send_file(
+            buf,
+            mimetype=mimetype,
+            as_attachment=True,
+            download_name=filename
+        )
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        resp.headers["Pragma"] = "no-cache"
+        return resp
+
+    except Exception as e:
+        print(f"Error generating {export_format} export: {e}")
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to generate {export_format.upper()} report. Please try again."
+        }), 500
+
+
+@reports_bp.route("/export/pdf", methods=["GET"])
+def export_pdf_report():
+    """Export report as formatted, styled PDF with NumberedCanvas page numbering."""
+    return _handle_report_export("pdf")
+
+
+@reports_bp.route("/export/csv", methods=["GET"])
+def export_csv_report():
+    """Export report as UTF-8 BOM CSV with formula injection protection."""
+    return _handle_report_export("csv")
+
+
+@reports_bp.route("/export/excel", methods=["GET"])
+@reports_bp.route("/export/xlsx", methods=["GET"])
+def export_excel_report():
+    """Export report as styled .xlsx workbook with auto-filters and freeze panes."""
+    return _handle_report_export("excel")
+

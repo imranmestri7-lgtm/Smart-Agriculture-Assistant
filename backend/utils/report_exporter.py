@@ -854,7 +854,36 @@ def generate_csv_report(category, data, metadata, lang="en"):
 
     # 2. Category-specific rows
     if category == "overview":
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or {}
+        if not sum_m:
+            f = data.get("farms", {})
+            c = data.get("crops", {})
+            fin = data.get("financials", {})
+            act = data.get("activities", {})
+            inv = data.get("inventory", {})
+            dis = data.get("disease", {})
+            irr = data.get("irrigation", {})
+            alt = data.get("alerts", {})
+            sum_m = {
+                "total_farms": f.get("total_farms", 0),
+                "total_farm_area": f.get("total_area", 0.0),
+                "total_crops": c.get("total_crops", 0),
+                "active_crops": c.get("active_crops", 0),
+                "harvested_crops": c.get("harvested_crops", 0),
+                "total_cultivated_area": c.get("total_cultivated_area", 0.0),
+                "total_expenses": fin.get("total_expenses", 0.0),
+                "total_revenue": fin.get("total_revenue", 0.0),
+                "net_profit": fin.get("net_profit", 0.0),
+                "margin_pct": fin.get("profit_margin", 0.0),
+                "total_water_volume_mm": irr.get("water_applied_mm", 0.0),
+                "water_saved_mm": irr.get("water_saved_mm", 0.0),
+                "total_diagnoses": dis.get("total_scans", 0),
+                "completed_activities": act.get("completed", 0),
+                "total_activities": act.get("total_activities", 0),
+                "completion_rate": act.get("completion_rate", 0.0),
+                "total_inventory_valuation": inv.get("total_valuation", 0.0),
+                "total_alerts": alt.get("total_alerts", 0),
+            }
         writer.writerow(["Metric", "Value", "Unit"])
         for k, v in sum_m.items():
             writer.writerow([sanitize_csv_cell(k.replace("_", " ").title()), sanitize_csv_cell(v), ""])
@@ -1079,7 +1108,36 @@ def generate_excel_report(category, data, metadata, lang="en"):
         ws.title = "Overview_KPIs"
         _style_excel_sheet(ws, title, metadata)
 
-        sum_m = data.get("summary", {})
+        sum_m = data.get("summary") or {}
+        if not sum_m:
+            f = data.get("farms", {})
+            c = data.get("crops", {})
+            fin = data.get("financials", {})
+            act = data.get("activities", {})
+            inv = data.get("inventory", {})
+            dis = data.get("disease", {})
+            irr = data.get("irrigation", {})
+            alt = data.get("alerts", {})
+            sum_m = {
+                "total_farms": f.get("total_farms", 0),
+                "total_farm_area": f.get("total_area", 0.0),
+                "total_crops": c.get("total_crops", 0),
+                "active_crops": c.get("active_crops", 0),
+                "harvested_crops": c.get("harvested_crops", 0),
+                "total_cultivated_area": c.get("total_cultivated_area", 0.0),
+                "total_expenses": fin.get("total_expenses", 0.0),
+                "total_revenue": fin.get("total_revenue", 0.0),
+                "net_profit": fin.get("net_profit", 0.0),
+                "margin_pct": fin.get("profit_margin", 0.0),
+                "total_water_volume_mm": irr.get("water_applied_mm", 0.0),
+                "water_saved_mm": irr.get("water_saved_mm", 0.0),
+                "total_diagnoses": dis.get("total_scans", 0),
+                "completed_activities": act.get("completed", 0),
+                "total_activities": act.get("total_activities", 0),
+                "completion_rate": act.get("completion_rate", 0.0),
+                "total_inventory_valuation": inv.get("total_valuation", 0.0),
+                "total_alerts": alt.get("total_alerts", 0),
+            }
         headers = ["Metric Category", "Indicator Name", "Metric Value", "Unit / Format"]
         ws.append([])
         _style_excel_headers(ws, 4, headers)

@@ -1762,6 +1762,23 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </p>
             </div>
 
+            <!-- PRINTABLE REPORT HEADER (Active only during browser print) -->
+            <div class="reports-print-header" id="reportsPrintHeader" style="display: none;">
+                <div class="print-brand-col">
+                    <h2 class="print-brand-title">🌿 AgriSmart</h2>
+                    <span class="print-brand-subtitle">Smart Agriculture Assistant — Confidential Farm Record</span>
+                </div>
+                <div class="print-meta-col">
+                    <div class="print-meta-item" id="printReportTitle"><strong>Farm Overview Report</strong></div>
+                    <div class="print-meta-item" id="printReportPeriod">Period: Last 30 Days</div>
+                    <div class="print-meta-item" id="printReportFilters">Farm: All Farms | Crop: All Crops</div>
+                    <div class="print-meta-item" id="printReportTimestamp">Generated: 2026-11-16</div>
+                </div>
+            </div>
+
+            <!-- EXPORT FEEDBACK TOAST / STATUS -->
+            <div id="reportsExportToast" class="reports-export-toast" style="display: none;"></div>
+
             <!-- 1. GLOBAL FILTER TOOLBAR -->
             <div class="reports-filter-bar">
                 <div class="filter-controls-group">
@@ -1813,6 +1830,21 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                     <button type="button" class="btn-secondary btn-icon-refresh" id="btnRefreshReports" title="Refresh Report Data" data-i18n-title="btn_refresh_reports">
                         🔄 <span data-i18n="btn_refresh">Refresh</span>
                     </button>
+                    <!-- Export Actions Group (Feature Upgrade 8 - Phase 3) -->
+                    <div class="reports-export-btn-group" role="group" aria-label="Export Actions">
+                        <button type="button" class="btn-export-action btn-export-pdf" id="btnExportPdf" title="Export as PDF" data-i18n-title="btn_export_pdf">
+                            📥 <span data-i18n="btn_pdf">PDF</span>
+                        </button>
+                        <button type="button" class="btn-export-action btn-export-excel" id="btnExportExcel" title="Export as Excel" data-i18n-title="btn_export_excel">
+                            📊 <span data-i18n="btn_excel">Excel</span>
+                        </button>
+                        <button type="button" class="btn-export-action btn-export-csv" id="btnExportCsv" title="Export as CSV" data-i18n-title="btn_export_csv">
+                            📄 <span data-i18n="btn_csv">CSV</span>
+                        </button>
+                        <button type="button" class="btn-export-action btn-export-print" id="btnExportPrint" title="Print Current Report" data-i18n-title="btn_print">
+                            🖨️ <span data-i18n="btn_print">Print</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
