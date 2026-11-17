@@ -150,8 +150,8 @@ async function runTest() {
 
   // Scroll to reports section
   await cdp.evaluate(`
-    const el = document.getElementById('reportsSection');
-    if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+    var elMobile = document.getElementById('reportsSection');
+    if (elMobile) elMobile.scrollIntoView({ behavior: 'instant', block: 'start' });
     if (window.AgriSmartReports && typeof window.AgriSmartReports.loadOverview === 'function') {
       window.AgriSmartReports.loadOverview();
     }
@@ -236,8 +236,8 @@ async function runTest() {
       window.i18n.setLanguage('en');
     }
     document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: 'en' } }));
-    const el = document.getElementById('reportsSection');
-    if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+    var elMobile = document.getElementById('reportsSection');
+    if (elMobile) elMobile.scrollIntoView({ behavior: 'instant', block: 'start' });
   `);
   await sleep(1500);
   await cdp.captureScreenshot('20_reports_export_mobile_view.png');
