@@ -105,6 +105,28 @@
 
 
         <!-- =================================================
+             UPCOMING CROP PLANS (FEATURE UPGRADE 9)
+        ================================================== -->
+
+        <section class="upcoming-crop-plans-banner" id="upcomingCropPlansBanner">
+            <div class="banner-header">
+                <div class="banner-title-area">
+                    <span class="banner-badge" data-i18n="badge_seasonal_planning">🌱 SEASONAL PLANNING</span>
+                    <h3 data-i18n="upcoming_crop_plans_title">Upcoming Crop Plans</h3>
+                    <p data-i18n="upcoming_crop_plans_desc">Sowing scheduled in the coming weeks and months</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="#cropPlanningSection" class="btn-banner-view-all" data-i18n="btn_view_all_plans">View All Plans →</a>
+                    <button type="button" class="btn-banner-add" id="btnOpenNewCropPlan" data-i18n="btn_new_crop_plan">➕ New Plan</button>
+                </div>
+            </div>
+            <div class="upcoming-plans-row" id="dashboardUpcomingPlansContainer">
+                <!-- Dynamically populated by js/crop_planning.js -->
+            </div>
+        </section>
+
+
+        <!-- =================================================
              FARMING TOOLS
         ================================================== -->
 
@@ -484,6 +506,39 @@
 
                         <span class="card-link" data-i18n="reports_card_link">
                             View Reports →
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <!-- SMART CROP PLANNING DASHBOARD (FEATURE UPGRADE 9) -->
+
+                <a href="#cropPlanningSection" class="dashboard-card" id="cropPlanningDashboardCard">
+
+                    <div class="dashboard-card-icon crop-planning-card-icon" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
+                        🌱
+                    </div>
+
+                    <div class="dashboard-card-content">
+
+                        <div class="card-title-row">
+
+                            <h3 data-i18n="crop_planning_card_title">
+                                Smart Crop Planning
+                            </h3>
+
+                            <span class="notification-card-badge" id="cardCropPlanBadge" style="display:none; background:#059669; color:#fff;">0</span>
+
+                        </div>
+
+                        <p data-i18n="crop_planning_card_desc">
+                            Plan seasonal Kharif, Rabi and Zaid crops, schedule sowing and harvest dates, and manage land allocation.
+                        </p>
+
+                        <span class="card-link" data-i18n="crop_planning_card_link">
+                            Plan Crops →
                         </span>
 
                     </div>
@@ -2606,6 +2661,107 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
 
 
         <!-- =================================================
+             SMART CROP PLANNING SECTION (FEATURE UPGRADE 9)
+        ================================================== -->
+
+        <section class="crop-planning-section" id="cropPlanningSection">
+
+            <div class="crop-planning-header">
+                <div class="section-title-wrap">
+                    <span class="dashboard-label" data-i18n="badge_seasonal_planning">SEASONAL PLANNING</span>
+                    <h2 data-i18n="crop_planning_heading">Smart Crop Planning</h2>
+                    <p data-i18n="crop_planning_subheading">Plan seasonal crop cycles, track sowing &amp; harvest timelines, and optimize field land allocation.</p>
+                </div>
+                <div class="crop-planning-actions">
+                    <button type="button" class="btn-farm-action btn-add-plan" id="btnSectionNewCropPlan" data-i18n="btn_new_crop_plan">➕ New Crop Plan</button>
+                </div>
+            </div>
+
+            <!-- SUMMARY KPIS -->
+            <div class="plan-summary-grid">
+                <div class="plan-summary-card">
+                    <div class="summary-icon icon-total-plans">📋</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="kpiTotalCropPlans">0</span>
+                        <span class="summary-label" data-i18n="kpi_total_crop_plans">Total Crop Plans</span>
+                    </div>
+                </div>
+                <div class="plan-summary-card">
+                    <div class="summary-icon icon-kharif">🌧️</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="kpiKharifPlans">0</span>
+                        <span class="summary-label" data-i18n="kpi_kharif_plans">Kharif Plans</span>
+                    </div>
+                </div>
+                <div class="plan-summary-card">
+                    <div class="summary-icon icon-rabi">❄️</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="kpiRabiPlans">0</span>
+                        <span class="summary-label" data-i18n="kpi_rabi_plans">Rabi Plans</span>
+                    </div>
+                </div>
+                <div class="plan-summary-card">
+                    <div class="summary-icon icon-zaid">☀️</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="kpiZaidPlans">0</span>
+                        <span class="summary-label" data-i18n="kpi_zaid_plans">Zaid Plans</span>
+                    </div>
+                </div>
+                <div class="plan-summary-card">
+                    <div class="summary-icon icon-area">📐</div>
+                    <div class="summary-info">
+                        <span class="summary-count" id="kpiTotalPlannedArea">0</span>
+                        <span class="summary-label" data-i18n="kpi_planned_area">Planned Area (Acres)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEASON TABS -->
+            <div class="season-tabs-bar">
+                <button type="button" class="season-tab-btn active" data-season="all" data-i18n="tab_all_seasons">🌱 All Seasons</button>
+                <button type="button" class="season-tab-btn" data-season="Kharif" data-i18n="tab_kharif">🌧️ Kharif (Monsoon)</button>
+                <button type="button" class="season-tab-btn" data-season="Rabi" data-i18n="tab_rabi">❄️ Rabi (Winter)</button>
+                <button type="button" class="season-tab-btn" data-season="Zaid" data-i18n="tab_zaid">☀️ Zaid (Summer)</button>
+                <button type="button" class="season-tab-btn" data-season="Year-round" data-i18n="tab_year_round">🔄 Year-round</button>
+            </div>
+
+            <!-- FILTER & SEARCH TOOLBAR -->
+            <div class="plan-toolbar">
+                <div class="toolbar-filters">
+                    <div class="filter-item">
+                        <label for="planFilterStatus" data-i18n="lbl_filter_status">Status</label>
+                        <select id="planFilterStatus" class="form-control-sm">
+                            <option value="all" data-i18n="opt_all_statuses">All Statuses</option>
+                            <option value="Planned" data-i18n="status_planned">Planned</option>
+                            <option value="In Progress" data-i18n="status_in_progress">In Progress</option>
+                            <option value="Draft" data-i18n="status_draft">Draft</option>
+                            <option value="Completed" data-i18n="status_completed">Completed</option>
+                            <option value="Cancelled" data-i18n="status_cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="planFilterFarm" data-i18n="lbl_filter_farm">Farm / Field</label>
+                        <select id="planFilterFarm" class="form-control-sm">
+                            <option value="all" data-i18n="lbl_all_farms">All Farms / Fields</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="toolbar-search">
+                    <input type="text" id="planSearchInput" class="form-control-sm search-box" placeholder="🔍 Search plans by crop, variety, notes..." data-i18n-placeholder="search_plans_placeholder">
+                </div>
+            </div>
+
+            <!-- CROP PLANS GRID CONTAINER -->
+            <div class="crop-plans-grid" id="cropPlansList">
+                <!-- Dynamically populated by js/crop_planning.js -->
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
              FARMER ASSISTANT
         ================================================== -->
 
@@ -3896,6 +4052,123 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
             </div>
         </div>
 
+        <!-- 5. SMART CROP PLANNING MODAL (FEATURE UPGRADE 9) -->
+        <div class="farm-modal-backdrop" id="cropPlanModal">
+            <div class="farm-modal-dialog" style="max-width:680px;">
+                <div class="modal-header">
+                    <h3 id="cropPlanModalTitle" data-i18n="modal_add_crop_plan_title">Create New Crop Plan</h3>
+                    <button type="button" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+                <form id="cropPlanForm" class="modal-form">
+                    <input type="hidden" id="cropPlanId" value="">
+
+                    <div class="form-row">
+                        <div class="form-group form-col-8">
+                            <label for="planCropName" data-i18n="lbl_crop_name">Crop Name <span class="required">*</span></label>
+                            <input type="text" id="planCropName" list="commonCropsList" class="form-control" placeholder="e.g. Cotton, Soybean, Wheat, Rice, Tomato" required maxlength="100">
+                            <datalist id="commonCropsList"></datalist>
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="planVariety" data-i18n="lbl_variety">Variety / Hybrid</label>
+                            <input type="text" id="planVariety" class="form-control" placeholder="e.g. BG-II, HD-2967, Shriram" maxlength="100">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="planFarmSelect" data-i18n="lbl_farm_field">Farm / Field</label>
+                            <select id="planFarmSelect" class="form-control">
+                                <option value="">-- Select Farm (Optional) --</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="planFieldLocation" data-i18n="lbl_field_location">Plot / Field Location</label>
+                            <input type="text" id="planFieldLocation" class="form-control" placeholder="e.g. North Plot, Sector 3, Well Side" maxlength="120">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-4">
+                            <label for="planSeason" data-i18n="lbl_season">Season <span class="required">*</span></label>
+                            <select id="planSeason" class="form-control" required>
+                                <option value="Kharif" data-i18n="tab_kharif">Kharif (Monsoon)</option>
+                                <option value="Rabi" data-i18n="tab_rabi">Rabi (Winter)</option>
+                                <option value="Zaid" data-i18n="tab_zaid">Zaid (Summer)</option>
+                                <option value="Year-round" data-i18n="tab_year_round">Year-round</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="planYear" data-i18n="lbl_planning_year">Planning Year <span class="required">*</span></label>
+                            <input type="number" id="planYear" class="form-control" min="2020" max="2100" value="2026" required>
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="planStatus" data-i18n="lbl_plan_status">Plan Status <span class="required">*</span></label>
+                            <select id="planStatus" class="form-control" required>
+                                <option value="Planned" data-i18n="status_planned">Planned</option>
+                                <option value="In Progress" data-i18n="status_in_progress">In Progress</option>
+                                <option value="Draft" data-i18n="status_draft">Draft</option>
+                                <option value="Completed" data-i18n="status_completed">Completed</option>
+                                <option value="Cancelled" data-i18n="status_cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="planSowingDate" data-i18n="lbl_planned_sowing_date">Planned Sowing Date <span class="required">*</span></label>
+                            <input type="date" id="planSowingDate" class="form-control" required>
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="planHarvestDate" data-i18n="lbl_expected_harvest_date">Expected Harvest Date</label>
+                            <input type="date" id="planHarvestDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-6">
+                            <label for="planLandArea" data-i18n="lbl_land_area">Land Area</label>
+                            <input type="number" id="planLandArea" class="form-control" placeholder="e.g. 2.5" step="0.01" min="0">
+                        </div>
+                        <div class="form-group form-col-6">
+                            <label for="planAreaUnit" data-i18n="lbl_area_unit">Area Unit</label>
+                            <select id="planAreaUnit" class="form-control">
+                                <option value="Acres">Acres</option>
+                                <option value="Hectares">Hectares</option>
+                                <option value="Guntha">Guntha</option>
+                                <option value="Bigha">Bigha</option>
+                                <option value="Sq Meters">Sq Meters</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-4">
+                            <label for="planTargetYield" data-i18n="lbl_target_yield">Target Yield</label>
+                            <input type="number" id="planTargetYield" class="form-control" placeholder="e.g. 25" step="0.1" min="0">
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="planTargetYieldUnit" data-i18n="lbl_yield_unit">Yield Unit</label>
+                            <input type="text" id="planTargetYieldUnit" class="form-control" placeholder="e.g. Quintals, Tons, Kg">
+                        </div>
+                        <div class="form-group form-col-4">
+                            <label for="planEstimatedBudget" data-i18n="lbl_estimated_budget">Estimated Budget (₹)</label>
+                            <input type="number" id="planEstimatedBudget" class="form-control" placeholder="e.g. 45000" step="0.01" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="planNotes" data-i18n="lbl_plan_notes">Planning Strategy &amp; Notes</label>
+                        <textarea id="planNotes" class="form-control" rows="3" placeholder="e.g. Drip irrigation planned, intercropping with marigold, sowing after first monsoon shower." maxlength="1000"></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary modal-close-btn" data-i18n="btn_cancel">Cancel</button>
+                        <button type="submit" class="btn-primary" id="btnSaveCropPlan" data-i18n="btn_save_crop_plan">Save Crop Plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 
@@ -3909,6 +4182,7 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
     <script src="js/activity.js"></script>
     <script src="js/inventory.js"></script>
     <script src="js/reports.js"></script>
+    <script src="js/crop_planning.js"></script>
     <script src="js/mobile-nav.js"></script>
     <script src="js/scroll-reveal.js"></script>
 

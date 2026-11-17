@@ -5936,3 +5936,597 @@
 }
 
 
+
+
+/* ==========================================================================
+   FEATURE UPGRADE 9: SMART CROP PLANNING STYLES
+   ========================================================================== */
+
+/* 1. Dashboard Upcoming Crop Plans Banner */
+.upcoming-crop-plans-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-lg, 14px);
+    padding: 20px 24px;
+    margin: 24px 0 32px 0;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.upcoming-crop-plans-banner .banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.upcoming-crop-plans-banner .banner-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #047857;
+    background: #a7f3d0;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.upcoming-crop-plans-banner .banner-title-area h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #064e3b;
+}
+
+.upcoming-crop-plans-banner .banner-title-area p {
+    margin: 2px 0 0 0;
+    font-size: 13px;
+    color: #047857;
+}
+
+.upcoming-crop-plans-banner .banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-banner-view-all {
+    font-size: 13px;
+    font-weight: 600;
+    color: #047857;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s;
+}
+
+.btn-banner-view-all:hover {
+    background: #ffffff;
+    color: #064e3b;
+}
+
+.btn-banner-add {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #059669;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-banner-add:hover {
+    background: #047857;
+}
+
+.upcoming-plans-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.upcoming-plan-card {
+    background: #ffffff;
+    border: 1px solid #d1fae5;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.upcoming-plan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.14);
+    border-color: #6ee7b7;
+}
+
+.upcoming-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.upcoming-crop-name {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.upcoming-crop-name .crop-variety {
+    font-weight: normal;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.upcoming-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.upcoming-plan-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 24px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+}
+
+.upcoming-plan-empty .empty-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.upcoming-plan-empty p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #065f46;
+}
+
+/* 2. Crop Planning Section */
+.crop-planning-section {
+    margin-top: 48px;
+    margin-bottom: 48px;
+}
+
+.crop-planning-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.btn-add-plan {
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add-plan:hover {
+    background: #047857;
+}
+
+/* Summary KPI Cards */
+.plan-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.plan-summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.plan-summary-card .summary-icon {
+    font-size: 26px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+}
+
+.plan-summary-card .summary-icon.icon-total-plans { background: #e0f2fe; }
+.plan-summary-card .summary-icon.icon-kharif { background: #dcfce7; }
+.plan-summary-card .summary-icon.icon-rabi { background: #ede9fe; }
+.plan-summary-card .summary-icon.icon-zaid { background: #fef3c7; }
+.plan-summary-card .summary-icon.icon-area { background: #ccfbf1; }
+
+.plan-summary-card .summary-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-summary-card .summary-count {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.plan-summary-card .summary-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* Season Tabs */
+.season-tabs-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.season-tab-btn {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.season-tab-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.season-tab-btn.active {
+    background: #059669;
+    color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+}
+
+/* Toolbar */
+.plan-toolbar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.plan-toolbar .toolbar-filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.plan-toolbar .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.plan-toolbar .filter-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.plan-toolbar .search-box {
+    min-width: 250px;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+/* Plans Grid */
+.crop-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+}
+
+.crop-plan-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.crop-plan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.plan-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.header-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Season Badges */
+.season-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.season-badge-kharif {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.season-badge-rabi {
+    background: #ede9fe;
+    color: #6d28d9;
+    border: 1px solid #ddd6fe;
+}
+
+.season-badge-zaid {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.season-badge-yearround {
+    background: #ccfbf1;
+    color: #0f766e;
+    border: 1px solid #99f6e4;
+}
+
+/* Status Badges */
+.status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.badge-status-draft { background: #f1f5f9; color: #475569; }
+.badge-status-planned { background: #e0f2fe; color: #0369a1; }
+.badge-status-progress { background: #dcfce7; color: #15803d; }
+.badge-status-completed { background: #f3e8ff; color: #7e22ce; }
+.badge-status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.plan-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.plan-card-actions .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.plan-card-actions .btn-icon:hover {
+    background: #f1f5f9;
+}
+
+.plan-card-actions .btn-icon-delete:hover {
+    background: #fee2e2;
+}
+
+.plan-card-title-row {
+    margin-bottom: 10px;
+}
+
+.plan-crop-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.plan-crop-name .plan-variety {
+    font-size: 13px;
+    font-weight: normal;
+    color: #64748b;
+    margin-left: 4px;
+}
+
+/* Timeline & Chips */
+.plan-timeline-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.countdown-chip, .timeline-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.countdown-chip-future, .chip-future {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.countdown-chip-today, .chip-today {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    font-weight: 700;
+}
+
+.countdown-chip-past, .chip-past {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.duration-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+
+/* Details Grid */
+.plan-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.detail-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 1px;
+}
+
+.detail-val.highlight {
+    color: #059669;
+    font-weight: 700;
+}
+
+.plan-notes-box {
+    margin-top: auto;
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    padding: 8px 10px;
+    border-radius: 4px;
+}
+
+.notes-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #92400e;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.notes-text {
+    margin: 0;
+    font-size: 12px;
+    color: #78350f;
+    line-height: 1.4;
+}
+
+.crop-plans-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 24px;
+    background: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+}
+
+.crop-plans-empty .empty-illustration {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.crop-plans-empty h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.crop-plans-empty p {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #64748b;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .plan-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .plan-toolbar .search-box {
+        min-width: 100%;
+    }
+    .crop-plans-grid {
+        grid-template-columns: 1fr;
+    }
+    .upcoming-plans-row {
+        grid-template-columns: 1fr;
+    }
+}
