@@ -37,6 +37,7 @@ from routes.financial_routes import financial_bp
 from routes.activity_routes import activity_bp
 from routes.inventory_routes import inventory_bp
 from routes.report_routes import reports_bp
+from routes.crop_plan_routes import crop_plan_bp
 
 app = Flask(__name__)
 
@@ -68,6 +69,7 @@ app.register_blueprint(financial_bp)
 app.register_blueprint(activity_bp)
 app.register_blueprint(inventory_bp)
 app.register_blueprint(reports_bp)
+app.register_blueprint(crop_plan_bp)
 
 
 # =========================================================================
