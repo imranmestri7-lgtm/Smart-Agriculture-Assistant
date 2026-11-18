@@ -69,6 +69,7 @@ const NEVER_CACHE_PATTERNS = [
     /\/api\/auth\/otp/,
     /\/api\/auth\/logout/,
     /\/api\/auth\//,
+    /\/api\/crop-plans/,
     /\/api\/iot\/ingest/,
     /\/api\/iot\/telemetry\/ingest/,
     /\/api\/disease\/predict/,
@@ -79,7 +80,7 @@ const NEVER_CACHE_PATTERNS = [
 // Safe read-only API endpoints eligible for network-first offline caching
 const SAFE_API_CACHE_PATTERNS = [
     /\/api\/farms$/,
-    /\/api\/crops/,
+    /\/api\/crops($|\/|\?)/,
     /\/api\/analytics\/overview/,
     /\/api\/analytics\/filter-options/,
     /\/api\/notifications\/unread-count/,

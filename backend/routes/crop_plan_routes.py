@@ -43,7 +43,20 @@ STATUS_LOOKUP = {
     "canceled": "Cancelled",
 }
 
-VALID_AREA_UNITS = ["acre", "hectare", "bigha", "guntha"]
+AREA_UNIT_LOOKUP = {
+    "acre": "Acres",
+    "acres": "Acres",
+    "hectare": "Hectares",
+    "hectares": "Hectares",
+    "bigha": "Bigha",
+    "bighas": "Bigha",
+    "guntha": "Guntha",
+    "gunthas": "Guntha",
+    "sq meter": "Sq Meters",
+    "sq meters": "Sq Meters",
+}
+
+VALID_AREA_UNITS = ["Acres", "Hectares", "Bigha", "Guntha", "Sq Meters"]
 
 
 # =============================================================================
@@ -171,9 +184,7 @@ def _validate_crop_plan_payload(data, is_update=False):
     harvest_date = None
     if not is_update or "expected_harvest_date" in data:
         h_date_str = str(data.get("expected_harvest_date") or "").strip()
-        if not h_date_str:
-            errors["expected_harvest_date"] = "Expected harvest date is required."
-        else:
+        if h_date_str and h_date_str.lower() != "none" and h_date_str.lower() != "null":
             try:
                 harvest_date = datetime.strptime(h_date_str[:10], "%Y-%m-%d").date()
             except ValueError:
@@ -184,16 +195,17 @@ def _validate_crop_plan_payload(data, is_update=False):
 
     if not is_update or "land_area" in data:
         area_raw = data.get("land_area")
-        try:
-            area_val = float(area_raw)
-            if area_val <= 0:
-                errors["land_area"] = "Land area must be greater than 0."
-        except (TypeError, ValueError):
-            errors["land_area"] = "Land area must be a valid positive number."
+        if area_raw is not None and str(area_raw).strip() != "" and str(area_raw).lower() != "none" and str(area_raw).lower() != "null":
+            try:
+                area_val = float(area_raw)
+                if area_val <= 0:
+                    errors["land_area"] = "Land area must be greater than 0."
+            except (TypeError, ValueError):
+                errors["land_area"] = "Land area must be a valid positive number."
 
     if "area_unit" in data and data["area_unit"]:
         u = str(data["area_unit"]).strip().lower()
-        if u not in VALID_AREA_UNITS:
+        if u not in AREA_UNIT_LOOKUP:
             errors["area_unit"] = f"Invalid area unit. Allowed: {', '.join(VALID_AREA_UNITS)}."
 
     if "status" in data and data["status"]:
@@ -381,6 +393,7 @@ def get_upcoming_crop_plans():
         return jsonify({
             "status": "success",
             "count": len(plans),
+            "plans": plans,
             "upcoming_plans": plans
         }), 200
 
@@ -536,7 +549,8 @@ def create_crop_plan():
         season = SEASON_LOOKUP.get(str(payload["season"]).strip().lower(), "Kharif")
 
         sowing_date_str = str(payload["planned_sowing_date"]).strip()[:10]
-        harvest_date_str = str(payload["expected_harvest_date"]).strip()[:10]
+        harvest_raw = payload.get("expected_harvest_date")
+        harvest_date_str = str(harvest_raw).strip()[:10] if harvest_raw and str(harvest_raw).lower() not in ("none", "null", "") else None
 
         # Derive planning_year
         planning_year = payload.get("planning_year")
@@ -545,10 +559,10 @@ def create_crop_plan():
         else:
             planning_year = int(planning_year)
 
-        land_area = float(payload["land_area"])
-        area_unit = str(payload.get("area_unit") or "acre").strip().lower()
-        if area_unit not in VALID_AREA_UNITS:
-            area_unit = "acre"
+        land_area = payload.get("land_area")
+        land_area = float(land_area) if land_area not in (None, "") else None
+        raw_unit = str(payload.get("area_unit") or "Acres").strip().lower()
+        area_unit = AREA_UNIT_LOOKUP.get(raw_unit, "Acres")
 
         field_location = str(payload.get("field_location") or "").strip() or None
 
@@ -654,20 +668,23 @@ def update_crop_plan(plan_id):
         season_raw = payload.get("season", existing["season"])
         season = SEASON_LOOKUP.get(str(season_raw).strip().lower(), existing["season"])
 
-        sowing_str = str(payload.get("planned_sowing_date", existing["planned_sowing_date"])).strip()[:10]
-        harvest_str = str(payload.get("expected_harvest_date", existing["expected_harvest_date"])).strip()[:10]
+        sowing_val = payload.get("planned_sowing_date") or existing.get("planned_sowing_date")
+        sowing_str = str(sowing_val).strip()[:10] if sowing_val else None
+
+        harvest_val = payload.get("expected_harvest_date") if "expected_harvest_date" in payload else existing.get("expected_harvest_date")
+        harvest_str = str(harvest_val).strip()[:10] if harvest_val and str(harvest_val).lower() not in ("none", "null", "") else None
 
         planning_year = payload.get("planning_year")
         if planning_year and str(planning_year).isdigit():
             planning_year = int(planning_year)
         else:
-            planning_year = datetime.strptime(sowing_str, "%Y-%m-%d").year
+            planning_year = datetime.strptime(sowing_str, "%Y-%m-%d").year if sowing_str else datetime.now().year
 
-        land_area = float(payload.get("land_area", existing["land_area"]))
+        land_area = payload.get("land_area", existing["land_area"])
+        land_area = float(land_area) if land_area not in (None, "") else None
 
-        area_unit = str(payload.get("area_unit", existing["area_unit"])).strip().lower()
-        if area_unit not in VALID_AREA_UNITS:
-            area_unit = existing["area_unit"]
+        raw_unit = str(payload.get("area_unit", existing["area_unit"]) or "Acres").strip().lower()
+        area_unit = AREA_UNIT_LOOKUP.get(raw_unit, existing.get("area_unit") or "Acres")
 
         field_location = str(payload.get("field_location", existing["field_location"]) or "").strip() or None
 

@@ -132,13 +132,14 @@
         if (!token) return;
 
         try {
-            const res = await fetch("/api/crop-plans/summary", {
+            const res = await fetch(`/api/crop-plans/summary?_t=${Date.now()}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
                 if (data.status === "success") {
                     summaryData = data.summary;
+                    console.log("[loadSummary] Summary total_plans:", summaryData ? summaryData.total_plans : "none");
                     renderSummaryUI(summaryData);
                 }
             }
@@ -187,13 +188,13 @@
         if (!token) return;
 
         try {
-            const res = await fetch("/api/crop-plans/upcoming?limit=4", {
+            const res = await fetch(`/api/crop-plans/upcoming?limit=4&_t=${Date.now()}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
                 if (data.status === "success") {
-                    upcomingPlans = data.plans || [];
+                    upcomingPlans = data.plans || data.upcoming_plans || [];
                     renderUpcomingDashboardUI(upcomingPlans);
                 }
             }
@@ -280,6 +281,7 @@
         }
 
         const params = new URLSearchParams();
+        params.append("_t", Date.now());
         if (filters.season !== "all") params.append("season", filters.season);
         if (filters.status !== "all") params.append("status", filters.status);
         if (filters.farm_id !== "all") params.append("farm_id", filters.farm_id);
@@ -293,6 +295,7 @@
                 const data = await res.json();
                 if (data.status === "success") {
                     cropPlans = data.plans || [];
+                    console.log("[loadCropPlans] Loaded plans count:", cropPlans.length, "names:", cropPlans.map(p => p.crop_name).join(", "));
                     renderCropPlansUI(cropPlans);
                 } else {
                     renderPlansError(data.error || "Failed to load crop plans");
@@ -523,8 +526,12 @@
      * Submit Create / Edit Form
      */
     async function handleFormSubmit(e) {
-        e.preventDefault();
-        if (isSubmitting) return;
+        if (e && e.preventDefault) e.preventDefault();
+        console.log("[handleFormSubmit] called. Current isSubmitting =", isSubmitting);
+        if (isSubmitting) {
+            console.warn("[handleFormSubmit] Rejected submit because isSubmitting is true!");
+            return;
+        }
 
         const token = getAuthToken();
         if (!token) {
@@ -535,6 +542,7 @@
         const planId = document.getElementById("cropPlanId").value;
         const cropName = document.getElementById("planCropName").value.trim();
         const sowingDate = document.getElementById("planSowingDate").value;
+        console.log("[handleFormSubmit] planId:", planId, "cropName:", cropName, "sowingDate:", sowingDate);
 
         if (!cropName) {
             showToast("Please enter crop name", "error");
@@ -585,11 +593,13 @@
             });
 
             const data = await res.json();
+            console.log("[handleFormSubmit] Response for", payload.crop_name, ": status =", res.status, "data =", data);
             if (res.ok && data.status === "success") {
                 showToast(isEdit ? t("plan_updated_success", "Crop plan updated successfully!") : t("plan_created_success", "Crop plan created successfully!"), "success");
                 closeModal();
                 await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary()]);
             } else {
+                console.error("Save plan failed with response:", data);
                 showToast(data.error || "Failed to save crop plan", "error");
             }
         } catch (err) {
@@ -597,6 +607,7 @@
             showToast("Network error while saving crop plan", "error");
         } finally {
             isSubmitting = false;
+            console.log("[handleFormSubmit] Finished. isSubmitting reset to false.");
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.textContent = t("btn_save_crop_plan", "Save Crop Plan");
@@ -723,7 +734,8 @@
         openCreateModal,
         openEditModal,
         confirmDeletePlan,
-        closeModal
+        closeModal,
+        handleFormSubmit
     };
 
     // Auto-init when DOM is ready
