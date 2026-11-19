@@ -13,6 +13,7 @@ from flask import Blueprint, jsonify, request
 
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
+from utils.crop_rotation_engine import analyze_all_farmer_farms
 
 crop_plan_bp = Blueprint("crop_plans", __name__, url_prefix="/api/crop-plans")
 
@@ -477,6 +478,31 @@ def get_crop_planning_summary():
     finally:
         if conn:
             conn.close()
+
+
+@crop_plan_bp.route("/rotation-analysis", methods=["GET"])
+def get_crop_rotation_analysis():
+    """Analyze crop rotation patterns, repeated crop families, and legume suggestions per farm."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    farm_id_param = request.args.get("farm_id")
+    farm_id = None
+    if farm_id_param and farm_id_param.strip() and farm_id_param.strip().lower() != "all":
+        if farm_id_param.strip().isdigit():
+            farm_id = int(farm_id_param.strip())
+
+    try:
+        analyses = analyze_all_farmer_farms(user_id=user_id, farm_id=farm_id)
+        return jsonify({
+            "status": "success",
+            "farm_analyses": analyses,
+            "total_farms_analyzed": len(analyses)
+        }), 200
+    except Exception as e:
+        print(f"Error analyzing crop rotation: {e}")
+        return jsonify({"status": "error", "message": "Failed to analyze crop rotation patterns."}), 500
 
 
 @crop_plan_bp.route("/<int:plan_id>", methods=["GET"])

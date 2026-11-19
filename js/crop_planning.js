@@ -13,6 +13,7 @@
     let contextFarms = [];
     let contextCrops = [];
     let isSubmitting = false;
+    let rotationAnalyses = [];
 
     // Filters
     const filters = {
@@ -111,6 +112,15 @@
         if (planFarm) {
             planFarm.innerHTML = `<option value="">-- ${t("select_farm_placeholder", "Select Farm / Field (Optional)")} --</option>` +
                 contextFarms.map(f => `<option value="${f.id}">${escapeHtml(f.farm_name)} (${f.total_area} ${escapeHtml(f.area_unit)})</option>`).join("");
+        }
+
+        // Populate Farm Select in Rotation Analysis
+        const rotFarmSelect = document.getElementById("rotationFarmSelect");
+        if (rotFarmSelect) {
+            const currentRotVal = rotFarmSelect.value;
+            rotFarmSelect.innerHTML = `<option value="all">${t("lbl_all_farms", "All Farms / Fields")}</option>` +
+                contextFarms.map(f => `<option value="${f.id}">${escapeHtml(f.farm_name)} (${f.total_area} ${escapeHtml(f.area_unit)})</option>`).join("");
+            rotFarmSelect.value = currentRotVal || "all";
         }
 
         // Populate Common Crops Datalist
@@ -597,7 +607,7 @@
             if (res.ok && data.status === "success") {
                 showToast(isEdit ? t("plan_updated_success", "Crop plan updated successfully!") : t("plan_created_success", "Crop plan created successfully!"), "success");
                 closeModal();
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis()]);
             } else {
                 console.error("Save plan failed with response:", data);
                 showToast(data.error || "Failed to save crop plan", "error");
@@ -633,7 +643,7 @@
             const data = await res.json();
             if (res.ok && data.status === "success") {
                 showToast(t("plan_deleted_success", "Crop plan deleted successfully!"), "success");
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis()]);
             } else {
                 showToast(data.error || "Failed to delete crop plan", "error");
             }
@@ -641,6 +651,231 @@
             console.error("Error deleting crop plan:", err);
             showToast("Network error while deleting crop plan", "error");
         }
+    }
+
+    /**
+     * Load Crop Rotation & Soil Health Analysis (Phase 2 Part 1)
+     */
+    async function loadRotationAnalysis(farmId = null) {
+        const token = getAuthToken();
+        if (!token) return;
+
+        const content = document.getElementById("cropRotationContent");
+        if (content && (!rotationAnalyses || rotationAnalyses.length === 0)) {
+            content.innerHTML = `<div class="loading-spinner-wrap" style="text-align:center; padding:32px;"><span style="font-size:24px;">🔄</span><p style="color:#64748b; font-size:13px; margin-top:8px;">${t("analyzing_rotation", "Analyzing crop rotation patterns and soil health...")}</p></div>`;
+        }
+
+        try {
+            let url = `/api/crop-plans/rotation-analysis?_t=${Date.now()}`;
+            if (farmId && farmId !== "all") {
+                url += `&farm_id=${encodeURIComponent(farmId)}`;
+            }
+
+            const res = await fetch(url, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status === "success" && Array.isArray(data.farm_analyses)) {
+                    rotationAnalyses = data.farm_analyses;
+                    renderRotationUI(rotationAnalyses);
+                }
+            } else {
+                console.error("Rotation analysis failed:", res.status);
+            }
+        } catch (err) {
+            console.error("Failed to load crop rotation analysis:", err);
+        }
+    }
+
+    /**
+     * Render Crop Rotation UI
+     */
+    function renderRotationUI(analyses) {
+        const container = document.getElementById("cropRotationContent");
+        if (!container) return;
+
+        if (!analyses || analyses.length === 0) {
+            container.innerHTML = `
+                <div class="rotation-insufficient-card">
+                    <div class="rotation-insufficient-icon">🌱</div>
+                    <h4 class="rotation-insufficient-title">${t("no_farms_found", "No Farms or Field Records Found")}</h4>
+                    <p class="rotation-insufficient-msg">${t("register_farm_first", "Add farm plots and register crop plans or past harvests to enable automated rotation analysis.")}</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = "";
+        analyses.forEach(farmAnalysis => {
+            const farmName = escapeHtml(farmAnalysis.farm_name || t("unassigned_farm", "General Farm"));
+            const farmLocation = farmAnalysis.location ? escapeHtml(farmAnalysis.location) : "";
+            const hasHistory = farmAnalysis.has_sufficient_history;
+            const score = farmAnalysis.rotation_score;
+            const rating = farmAnalysis.rotation_rating;
+
+            let scoreBadgeClass = "score-neutral";
+            let scoreBadgeText = `${t("insufficient_data_badge", "Insufficient History")} (${farmAnalysis.crop_count || 0} ${t("crops_recorded", "crops")})`;
+
+            if (hasHistory) {
+                if (score >= 80) {
+                    scoreBadgeClass = "score-green";
+                } else if (score >= 50) {
+                    scoreBadgeClass = "score-amber";
+                } else {
+                    scoreBadgeClass = "score-red";
+                }
+                const ratingKey = rating ? rating.toLowerCase().replace(/\s+/g, "_") : "rating";
+                scoreBadgeText = `${t("rotation_score_lbl", "Score")}: ${score}/100 • ${t(ratingKey, rating)}`;
+            }
+
+            html += `
+                <div class="rotation-farm-card" data-farm-id="${farmAnalysis.farm_id || ""}">
+                    <div class="rotation-farm-card-header">
+                        <div class="rotation-farm-identity">
+                            <div class="rotation-farm-icon">🏡</div>
+                            <div>
+                                <h4 class="rotation-farm-title">${farmName}</h4>
+                                ${farmLocation ? `<span class="rotation-farm-location">📍 ${farmLocation}</span>` : ""}
+                            </div>
+                        </div>
+                        <div class="rotation-score-container">
+                            <span class="rotation-score-pill ${scoreBadgeClass}">
+                                ${scoreBadgeText}
+                            </span>
+                        </div>
+                    </div>
+            `;
+
+            // If insufficient history (< 2 crops)
+            if (!hasHistory) {
+                const reason = farmAnalysis.insufficient_reason || t("insufficient_rotation_reason", "At least 2 sequential crop records (past harvests or seasonal crop plans) are required to evaluate rotation health.");
+                html += `
+                    <div class="rotation-insufficient-card">
+                        <div class="rotation-insufficient-icon">⏳</div>
+                        <h5 class="rotation-insufficient-title">${t("insufficient_history_title", "Need More Crop History for Rotation Analysis")}</h5>
+                        <p class="rotation-insufficient-msg">${escapeHtml(reason)}</p>
+                        
+                        <div class="rotation-general-advice">
+                            <h5>💡 ${t("rotation_best_practices_title", "Standard Legume Rotation Best Practices")}</h5>
+                            <p>${t("rotation_best_practices_desc", "In Indian agriculture, alternating heavy cereal or nightshade crops with leguminous pulses (such as Chickpea, Soybean, or Moong) biologically fixes atmospheric nitrogen, enhances soil organic humus, and breaks consecutive fungal and nematode pest cycles.")}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Unified timeline
+                const timeline = farmAnalysis.timeline || [];
+                if (timeline.length > 0) {
+                    html += `
+                        <div class="rotation-timeline-strip">
+                            ${timeline.map(item => {
+                                const isLeg = item.is_legume;
+                                const famClass = isLeg ? "timeline-crop-family family-legume" : "timeline-crop-family";
+                                const sourceTag = item.source === "history" ? t("harvested_crop", "Harvested") : t("planned_crop", "Planned");
+                                return `
+                                    <div class="rotation-timeline-item">
+                                        <div class="timeline-crop-name">
+                                            <span>${isLeg ? "🫘" : "🌾"}</span>
+                                            <strong>${escapeHtml(item.crop_name)}</strong>
+                                        </div>
+                                        <div class="timeline-crop-date">${item.date ? item.date.slice(0, 10) : t("date_unspecified", "Date unset")}</div>
+                                        <span class="${famClass}">${escapeHtml(item.family)}</span>
+                                        <span class="timeline-crop-source">${sourceTag}</span>
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    `;
+                }
+
+                // Issues & Risk Alerts
+                const issues = farmAnalysis.issues || [];
+                if (issues.length > 0) {
+                    html += `
+                        <div class="rotation-issues-section">
+                            <h5 class="rotation-subhead">⚠️ ${t("detected_rotation_hazards", "Detected Agronomic Issues & Hazards")} (${issues.length})</h5>
+                            ${issues.map(iss => {
+                                const sevClass = `severity-${(iss.severity || "high").toLowerCase()}`;
+                                const risksList = Array.isArray(iss.risks) && iss.risks.length > 0 ? `
+                                    <ul class="rotation-risks-list">
+                                        ${iss.risks.map(r => `<li>${escapeHtml(r)}</li>`).join("")}
+                                    </ul>
+                                ` : "";
+                                return `
+                                    <div class="rotation-issue-card ${sevClass}">
+                                        <div class="rotation-issue-header">
+                                            <span class="rotation-issue-title">${escapeHtml(iss.title)}</span>
+                                            <span class="rotation-severity-tag">${escapeHtml(iss.severity)}</span>
+                                        </div>
+                                        <p class="rotation-issue-desc">${escapeHtml(iss.description)}</p>
+                                        ${risksList}
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    `;
+                }
+
+                // Positive Patterns (Beneficial Legume Rotation)
+                const positives = farmAnalysis.positive_patterns || [];
+                if (positives.length > 0) {
+                    html += `
+                        <div class="rotation-positive-section">
+                            <h5 class="rotation-subhead">✅ ${t("healthy_rotation_practices", "Beneficial Rotation Practices Detected")}</h5>
+                            ${positives.map(pos => `
+                                <div class="rotation-positive-card">
+                                    <div class="rotation-positive-title">🌱 ${escapeHtml(pos.title)}</div>
+                                    <p class="rotation-positive-desc">${escapeHtml(pos.description)}</p>
+                                    ${pos.benefits ? `
+                                        <ul class="rotation-risks-list" style="color: #15803d;">
+                                            ${pos.benefits.map(b => `<li>${escapeHtml(b)}</li>`).join("")}
+                                        </ul>
+                                    ` : ""}
+                                </div>
+                            `).join("")}
+                        </div>
+                    `;
+                }
+
+                // Legume & Crop Rotation Recommendations
+                const suggestions = farmAnalysis.suggestions || [];
+                if (suggestions.length > 0) {
+                    html += `
+                        <div class="rotation-suggestions-section">
+                            <h5 class="rotation-subhead">💡 ${t("rotation_recommendations_title", "Agronomic Rotation Suggestions & Legume Alternatives")}</h5>
+                            ${suggestions.map(sugg => {
+                                const cropsChips = Array.isArray(sugg.suitable_crops) ? `
+                                    <div class="rotation-sugg-crops">
+                                        ${sugg.suitable_crops.map(c => `<span class="rotation-crop-chip">🫘 ${escapeHtml(c)}</span>`).join("")}
+                                    </div>
+                                ` : "";
+                                const benefitsList = Array.isArray(sugg.benefits) ? `
+                                    <ul class="rotation-benefits-list">
+                                        ${sugg.benefits.map(b => `<li>${escapeHtml(b)}</li>`).join("")}
+                                    </ul>
+                                ` : "";
+                                return `
+                                    <div class="rotation-suggestion-card">
+                                        <div class="rotation-sugg-target">
+                                            <span>🎯</span>
+                                            <strong>${escapeHtml(sugg.context || sugg.target_family)}</strong>
+                                        </div>
+                                        ${cropsChips}
+                                        <p class="rotation-sugg-reason">${escapeHtml(sugg.agronomic_reason)}</p>
+                                        ${benefitsList}
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    `;
+                }
+            }
+
+            html += `</div>`; // Close rotation-farm-card
+        });
+
+        container.innerHTML = html;
     }
 
     /**
@@ -704,11 +939,29 @@
         const form = document.getElementById("cropPlanForm");
         if (form) form.addEventListener("submit", handleFormSubmit);
 
+        // Rotation Farm Select
+        const rotFarmSelect = document.getElementById("rotationFarmSelect");
+        if (rotFarmSelect) {
+            rotFarmSelect.addEventListener("change", (e) => {
+                loadRotationAnalysis(e.target.value);
+            });
+        }
+
+        // Refresh Rotation Button
+        const btnRefreshRotation = document.getElementById("btnRefreshRotation");
+        if (btnRefreshRotation) {
+            btnRefreshRotation.addEventListener("click", () => {
+                const currentFarmId = document.getElementById("rotationFarmSelect")?.value || "all";
+                loadRotationAnalysis(currentFarmId);
+            });
+        }
+
         // Language changed event
         window.addEventListener("languageChanged", () => {
             renderSummaryUI(summaryData);
             renderUpcomingDashboardUI(upcomingPlans);
             renderCropPlansUI(cropPlans);
+            renderRotationUI(rotationAnalyses);
         });
     }
 
@@ -721,7 +974,8 @@
             loadFormContext(),
             loadSummary(),
             loadUpcomingPlans(),
-            loadCropPlans()
+            loadCropPlans(),
+            loadRotationAnalysis()
         ]);
     }
 
@@ -731,6 +985,8 @@
         loadCropPlans,
         loadUpcomingPlans,
         loadSummary,
+        loadRotationAnalysis,
+        renderRotationUI,
         openCreateModal,
         openEditModal,
         confirmDeletePlan,

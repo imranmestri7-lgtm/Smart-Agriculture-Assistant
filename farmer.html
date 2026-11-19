@@ -2758,6 +2758,34 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 <!-- Dynamically populated by js/crop_planning.js -->
             </div>
 
+            <!-- CROP ROTATION ANALYSIS SECTION (FEATURE UPGRADE 9 - PHASE 2 PART 1) -->
+            <div class="crop-rotation-wrapper" id="cropRotationContainer">
+                <div class="crop-rotation-header">
+                    <div class="rotation-header-title">
+                        <span class="rotation-badge" data-i18n="badge_crop_rotation">AGRONOMIC INTELLIGENCE</span>
+                        <h3 data-i18n="crop_rotation_title">🔄 Crop Rotation &amp; Soil Health Analysis</h3>
+                        <p data-i18n="crop_rotation_subtitle">
+                            Automated botanical family tracking, monoculture hazard detection, and scientifically backed legume rotation advice.
+                        </p>
+                    </div>
+                    <div class="rotation-header-actions">
+                        <div class="filter-item-inline">
+                            <label for="rotationFarmSelect" data-i18n="lbl_rotation_farm">Farm:</label>
+                            <select id="rotationFarmSelect" class="form-control-sm">
+                                <option value="all" data-i18n="lbl_all_farms">All Farms / Fields</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-farm-action btn-refresh-rotation" id="btnRefreshRotation" title="Refresh Rotation Analysis">
+                            <span class="btn-icon">🔄</span> <span data-i18n="btn_refresh_analysis">Analyze Rotation</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crop-rotation-content" id="cropRotationContent">
+                    <!-- Populated dynamically by js/crop_planning.js -->
+                </div>
+            </div>
+
         </section>
 
 
