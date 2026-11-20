@@ -14,6 +14,7 @@ from flask import Blueprint, jsonify, request
 from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
 from utils.crop_rotation_engine import analyze_all_farmer_farms
+from utils.seasonal_crop_advisor import generate_seasonal_crop_recommendations
 
 crop_plan_bp = Blueprint("crop_plans", __name__, url_prefix="/api/crop-plans")
 
@@ -503,6 +504,36 @@ def get_crop_rotation_analysis():
     except Exception as e:
         print(f"Error analyzing crop rotation: {e}")
         return jsonify({"status": "error", "message": "Failed to analyze crop rotation patterns."}), 500
+
+
+@crop_plan_bp.route("/recommendations", methods=["GET"])
+def get_crop_recommendations():
+    """Retrieve seasonal and soil-aware crop recommendations for authenticated farmer."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    farm_id_param = request.args.get("farm_id")
+    farm_id = int(farm_id_param.strip()) if farm_id_param and farm_id_param.strip().isdigit() else None
+    season_param = request.args.get("season")
+    soil_override = request.args.get("soil_type")
+    limit_param = request.args.get("limit", "15")
+    limit = int(limit_param.strip()) if limit_param and limit_param.strip().isdigit() else 15
+
+    try:
+        rec_data = generate_seasonal_crop_recommendations(
+            user_id=user_id,
+            farm_id=farm_id,
+            season=season_param,
+            soil_override=soil_override,
+            limit=limit
+        )
+        if rec_data.get("status") == "error":
+            return jsonify(rec_data), rec_data.get("code", 400)
+        return jsonify(rec_data), 200
+    except Exception as e:
+        print(f"Error generating crop recommendations: {e}")
+        return jsonify({"status": "error", "message": "Failed to generate seasonal crop recommendations."}), 500
 
 
 @crop_plan_bp.route("/<int:plan_id>", methods=["GET"])
