@@ -894,6 +894,516 @@
     }
 
     /**
+     * Smart Crop Recommendations (Feature Upgrade 9 - Phase 2 Part 3)
+     */
+    function getCropVisualIcon(cropName) {
+        if (!cropName) return "🌿";
+        const name = cropName.toLowerCase();
+        if (name.includes("cotton")) return "☁️";
+        if (name.includes("soybean") || name.includes("soya")) return "🌱";
+        if (name.includes("onion")) return "🧅";
+        if (name.includes("wheat")) return "🌾";
+        if (name.includes("chickpea") || name.includes("gram") || name.includes("harbara") || name.includes("chana")) return "🫘";
+        if (name.includes("tomato")) return "🍅";
+        if (name.includes("groundnut") || name.includes("peanut")) return "🥜";
+        if (name.includes("sugarcane")) return "🎋";
+        if (name.includes("maize") || name.includes("corn")) return "🌽";
+        if (name.includes("tur") || name.includes("pigeon")) return "🫘";
+        if (name.includes("mustard") || name.includes("sarson") || name.includes("rai")) return "🌼";
+        if (name.includes("turmeric") || name.includes("haldi")) return "🪴";
+        if (name.includes("green gram") || name.includes("moong")) return "🫘";
+        if (name.includes("watermelon")) return "🍉";
+        if (name.includes("okra") || name.includes("bhendi")) return "🥬";
+        if (name.includes("chilli") || name.includes("mirchi")) return "🌶️";
+        if (name.includes("sorghum") || name.includes("jowar")) return "🌾";
+        if (name.includes("sunflower")) return "🌻";
+        return "🌿";
+    }
+
+    async function loadRecommendations(farmId, season, compatibility) {
+        if (farmId !== undefined) selectedRecFarm = farmId;
+        if (season !== undefined) selectedRecSeason = season;
+        if (compatibility !== undefined) selectedRecCompatibility = compatibility;
+
+        const listContainer = document.getElementById("cropRecommendationsList");
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div class="crop-rec-loading" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+                    <div class="spinner" style="margin: 0 auto 12px auto;"></div>
+                    <p data-i18n="loading_recommendations">${t("loading_recommendations", "Analyzing soil and season for crop recommendations...")}</p>
+                </div>
+            `;
+        }
+
+        const token = getAuthToken();
+        if (!token) return;
+
+        const params = new URLSearchParams();
+        if (selectedRecFarm && selectedRecFarm !== "all") {
+            params.append("farm_id", selectedRecFarm);
+        }
+        if (selectedRecSeason && selectedRecSeason !== "all") {
+            params.append("season", selectedRecSeason);
+        }
+        params.append("limit", "20");
+
+        try {
+            const res = await fetch(`/api/crop-plans/recommendations?${params.toString()}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.status === 401) {
+                console.warn("Session expired fetching recommendations");
+                return;
+            }
+            const data = await res.json();
+            if (data.status === "success") {
+                recommendationContext = data.farm_context || null;
+                allRecommendations = data.recommendations || [];
+                renderRecommendationsUI();
+            } else {
+                renderRecommendationsError(data.message || t("error_loading_recommendations", "Failed to load crop recommendations."));
+            }
+        } catch (err) {
+            console.error("Error loading crop recommendations:", err);
+            renderRecommendationsError(t("error_loading_recommendations", "Failed to load crop recommendations. Please check your connection and try again."));
+        }
+    }
+
+    function renderRecommendationsError(msg) {
+        const listContainer = document.getElementById("cropRecommendationsList");
+        if (!listContainer) return;
+        listContainer.innerHTML = `
+            <div class="rec-empty-state" style="border-color:#fca5a5; background:#fef2f2;">
+                <div class="rec-empty-icon">⚠️</div>
+                <h4 class="rec-empty-title" style="color:#991b1b;">${t("error_loading_recommendations", "Unable to Load Recommendations")}</h4>
+                <p class="rec-empty-msg" style="color:#b91c1c;">${escapeHtml(msg)}</p>
+                <button type="button" class="btn-farm-action btn-refresh-rec" onclick="CropPlanning.loadRecommendations()">
+                    🔄 ${t("btn_retry", "Retry")}
+                </button>
+            </div>
+        `;
+    }
+
+    function renderRecommendationsUI() {
+        const contextStrip = document.getElementById("recContextStrip");
+        const listContainer = document.getElementById("cropRecommendationsList");
+        if (!listContainer) return;
+
+        const currentLang = getCurrentLang();
+
+        // 1. Render Farm & Soil Context Strip
+        if (contextStrip && recommendationContext) {
+            contextStrip.style.display = "flex";
+            const isMissingSoil = !recommendationContext.soil_known;
+            if (isMissingSoil) {
+                contextStrip.classList.add("notice-missing-soil");
+            } else {
+                contextStrip.classList.remove("notice-missing-soil");
+            }
+
+            const soilLabel = isMissingSoil
+                ? `<span class="rec-context-tag" style="background:#fef3c7; border-color:#fcd34d; color:#b45309;">⚠️ ${t("soil_unknown", "Soil Type Unspecified")}</span>`
+                : `<span class="rec-context-tag">🌱 ${t("registered_farm_soil_lbl", "Registered Soil")}: <strong>${escapeHtml(recommendationContext.soil_display_name || recommendationContext.soil_type)}</strong></span>`;
+
+            const prevCropInfo = recommendationContext.previous_crop
+                ? `<span class="rec-context-tag">🌾 ${t("previous_crop_lbl", "Preceding Crop")}: <strong>${escapeHtml(recommendationContext.previous_crop.crop_name)}</strong></span>`
+                : "";
+
+            const limitationMsg = recommendationContext.soil_limitation_notice
+                ? `<div style="width: 100%; font-size: 12px; margin-top: 6px; line-height: 1.45; color: #92400e;">⚠️ ${escapeHtml(t("soil_limitation_notice", recommendationContext.soil_limitation_notice))}</div>`
+                : "";
+
+            contextStrip.innerHTML = `
+                <div class="rec-context-main">
+                    <span class="rec-context-tag">🏡 ${escapeHtml(recommendationContext.farm_name || "General Farm")}</span>
+                    ${soilLabel}
+                    ${prevCropInfo}
+                </div>
+                ${limitationMsg}
+            `;
+        } else if (contextStrip) {
+            contextStrip.style.display = "none";
+        }
+
+        // 2. Filter Recommendations by Soil Compatibility
+        let filtered = allRecommendations || [];
+        if (selectedRecCompatibility && selectedRecCompatibility !== "all") {
+            filtered = filtered.filter(r => {
+                if (selectedRecCompatibility === "Optimal") return r.soil_compatibility === "Optimal";
+                if (selectedRecCompatibility === "Compatible") return r.soil_compatibility === "Compatible";
+                if (selectedRecCompatibility === "Moderate") return r.soil_compatibility === "Moderate";
+                if (selectedRecCompatibility === "Unsuitable") return r.soil_compatibility === "Unsuitable";
+                return true;
+            });
+        }
+
+        // 3. Render Empty State if No Matches
+        if (!filtered || filtered.length === 0) {
+            listContainer.innerHTML = `
+                <div class="rec-empty-state">
+                    <div class="rec-empty-icon">🌾</div>
+                    <h4 class="rec-empty-title" data-i18n="no_recommendations_found">${t("no_recommendations_found", "No matching crop recommendations found for the selected season and soil.")}</h4>
+                    <p class="rec-empty-msg" data-i18n="no_rec_filter_match">${t("no_rec_filter_match", "No crop recommendations match your selected filters. Try switching the season tab or resetting the soil compatibility filter.")}</p>
+                    <button type="button" class="btn-farm-action btn-refresh-rec" onclick="CropPlanning.resetRecommendationFilters()">
+                        ${t("btn_reset_filters", "↺ Reset Filters")}
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        // 4. Render Recommendation Cards
+        let html = "";
+        filtered.forEach((item) => {
+            const globalIdx = allRecommendations.indexOf(item);
+
+            // Soil card theme
+            let cardModClass = "rec-card-compatible";
+            let soilBadgeClass = "badge-compatible";
+            let soilText = t("soil_compatible", "Compatible");
+
+            if (item.soil_compatibility === "Optimal") {
+                cardModClass = "rec-card-optimal";
+                soilBadgeClass = "badge-optimal";
+                soilText = `⭐ ${t("soil_optimal", "Optimal Match")}`;
+            } else if (item.soil_compatibility === "Moderate") {
+                cardModClass = "rec-card-moderate";
+                soilBadgeClass = "badge-moderate";
+                soilText = `⚖️ ${t("soil_moderate", "Moderate")}`;
+            } else if (item.soil_compatibility === "Unsuitable") {
+                cardModClass = "rec-card-unsuitable";
+                soilBadgeClass = "badge-unsuitable";
+                soilText = `⚠️ ${t("soil_unsuitable", "Unsuitable")}`;
+            } else if (item.soil_compatibility && item.soil_compatibility.includes("General")) {
+                cardModClass = "rec-card-compatible";
+                soilBadgeClass = "badge-general";
+                soilText = `ℹ️ ${t("soil_unknown", "General Guidance")}`;
+            }
+
+            // Localized name
+            const localName = (item.local_names && item.local_names[currentLang]) ? item.local_names[currentLang] : item.crop_name;
+            const icon = getCropVisualIcon(item.crop_name);
+
+            // Rotation status badge
+            let rotationBadgeHtml = "";
+            if (item.is_rotation_benefit || item.rotation_risk_level === "benefit") {
+                rotationBadgeHtml = `<span class="rec-rotation-badge badge-rot-benefit" title="${escapeHtml(item.rotation_notes || '')}">🫘 ${escapeHtml(item.rotation_status)}</span>`;
+            } else if (item.is_rotation_hazard || item.rotation_risk_level === "warning" || item.rotation_risk_level === "high") {
+                rotationBadgeHtml = `<span class="rec-rotation-badge badge-rot-hazard" title="${escapeHtml(item.rotation_notes || '')}">⚠️ ${escapeHtml(item.rotation_status)}</span>`;
+            } else if (item.rotation_status) {
+                rotationBadgeHtml = `<span class="rec-rotation-badge badge-rot-neutral">🔄 ${escapeHtml(item.rotation_status)}</span>`;
+            }
+
+            // Season pill
+            let seasonIcon = "🌱";
+            if (item.season === "Kharif") seasonIcon = "🌧️";
+            else if (item.season === "Rabi") seasonIcon = "❄️";
+            else if (item.season === "Zaid") seasonIcon = "☀️";
+
+            // Top reason
+            const primaryReason = (Array.isArray(item.recommendation_reasons) && item.recommendation_reasons.length > 0)
+                ? item.recommendation_reasons[0]
+                : (item.soil_compatibility_reason || "");
+
+            // Hazard callout if rotation hazard
+            let hazardCalloutHtml = "";
+            if (item.is_rotation_hazard && item.rotation_notes) {
+                const altChips = (Array.isArray(item.alternatives) && item.alternatives.length > 0)
+                    ? `<div class="rec-alternatives-row">
+                        <span style="font-size:10px; font-weight:700;">${t("alternatives_lbl", "Alternative Crops")}:</span>
+                        ${item.alternatives.slice(0, 3).map(a => `<span class="rec-alt-chip">${escapeHtml(a)}</span>`).join("")}
+                       </div>`
+                    : "";
+                hazardCalloutHtml = `
+                    <div class="rec-hazard-callout">
+                        <strong>⚠️ ${t("rotation_hazard_warning", "Consecutive Family Planting Hazard")}:</strong> ${escapeHtml(item.rotation_notes)}
+                        ${altChips}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="crop-rec-card ${cardModClass}" data-rec-index="${globalIdx}">
+                    <div>
+                        <div class="rec-card-header">
+                            <div class="rec-crop-identity">
+                                <div class="rec-crop-icon">${icon}</div>
+                                <div class="rec-crop-titles">
+                                    <h4 class="rec-crop-name">${escapeHtml(item.crop_name)}</h4>
+                                    ${localName !== item.crop_name ? `<span style="font-size:12px; font-weight:600; color:#059669;">${escapeHtml(localName)}</span>` : ""}
+                                    <span class="rec-sci-name">${escapeHtml(item.scientific_name)} (${escapeHtml(item.family)})</span>
+                                </div>
+                            </div>
+                            <span class="rec-season-pill">${seasonIcon} ${escapeHtml(item.season)}</span>
+                        </div>
+
+                        <div class="rec-badge-row">
+                            <span class="rec-soil-badge ${soilBadgeClass}">${soilText}</span>
+                            ${rotationBadgeHtml}
+                        </div>
+
+                        <div class="rec-metrics-grid">
+                            <div class="rec-metric-item">
+                                <span class="rec-metric-label" data-i18n="sowing_window_lbl">${t("sowing_window_lbl", "Sowing Period")}</span>
+                                <span class="rec-metric-val">📅 ${escapeHtml(item.sowing_window)}</span>
+                            </div>
+                            <div class="rec-metric-item">
+                                <span class="rec-metric-label" data-i18n="crop_duration_lbl">${t("crop_duration_lbl", "Crop Duration")}</span>
+                                <span class="rec-metric-val">⏱️ ${escapeHtml(item.crop_duration)}</span>
+                            </div>
+                            <div class="rec-metric-item">
+                                <span class="rec-metric-label" data-i18n="harvest_window_lbl">${t("harvest_window_lbl", "Harvest Period")}</span>
+                                <span class="rec-metric-val">🌾 ${escapeHtml(item.expected_harvest_window)}</span>
+                            </div>
+                            <div class="rec-metric-item">
+                                <span class="rec-metric-label" data-i18n="soil_score_lbl">${t("soil_score_lbl", "Suitability Score")}</span>
+                                <span class="rec-metric-val" style="color:#059669;">📊 ${item.soil_suitability_score}%</span>
+                            </div>
+                        </div>
+
+                        <div class="rec-reason-box">
+                            ${escapeHtml(primaryReason)}
+                        </div>
+
+                        ${hazardCalloutHtml}
+                    </div>
+
+                    <div class="rec-card-actions">
+                        <button type="button" class="btn-rec-details" onclick="CropPlanning.openRecommendationDetailsModal(${globalIdx})" data-i18n="btn_view_details">
+                            ${t("btn_view_details", "View Details")}
+                        </button>
+                        <button type="button" class="btn-rec-add-plan" onclick="CropPlanning.openCreateModalFromRecommendation(${globalIdx})" data-i18n="btn_add_to_plan">
+                            ${t("btn_add_to_plan", "➕ Add to Crop Plan")}
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+    }
+
+    function openRecommendationDetailsModal(idx) {
+        const item = allRecommendations[idx];
+        if (!item) return;
+
+        currentDetailCrop = item;
+        const currentLang = getCurrentLang();
+        const modal = document.getElementById("recDetailsModal");
+        const titleElem = document.getElementById("recModalTitle");
+        const scopeBadge = document.getElementById("recModalScopeBadge");
+        const bodyElem = document.getElementById("recModalBody");
+
+        // Set Scope Badge
+        if (scopeBadge) {
+            if (item.advice_scope === "location_specific") {
+                scopeBadge.className = "rec-scope-pill";
+                scopeBadge.textContent = "📍 " + t("location_specific_advice", "Field-Specific Advice");
+            } else {
+                scopeBadge.className = "rec-scope-pill scope-general";
+                scopeBadge.textContent = "🌐 " + t("general_guidance_advice", "General Regional Guidance");
+            }
+        }
+
+        // Set Title
+        const localName = (item.local_names && item.local_names[currentLang]) ? item.local_names[currentLang] : item.crop_name;
+        if (titleElem) {
+            titleElem.textContent = `${item.crop_name} ${localName !== item.crop_name ? `(${localName})` : ""}`;
+        }
+
+        // Build Body HTML
+        if (bodyElem) {
+            const icon = getCropVisualIcon(item.crop_name);
+            const soilBarWidth = Math.max(10, Math.min(100, item.soil_suitability_score || 50));
+            const soilScoreColor = item.soil_suitability_score >= 80 ? "#10b981" : (item.soil_suitability_score >= 60 ? "#0284c7" : (item.soil_suitability_score >= 40 ? "#f59e0b" : "#ef4444"));
+
+            let highlightsHtml = "";
+            if (Array.isArray(item.recommendation_reasons) && item.recommendation_reasons.length > 0) {
+                highlightsHtml = `
+                    <div class="rec-detail-section">
+                        <h4>💡 <span data-i18n="reasons_benefits_lbl">${t("reasons_benefits_lbl", "Agronomic Highlights & Reasons")}</span></h4>
+                        <ul class="rec-detail-list">
+                            ${item.recommendation_reasons.map(r => `<li>${escapeHtml(r)}</li>`).join("")}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            let alternativesHtml = "";
+            if (Array.isArray(item.alternatives) && item.alternatives.length > 0) {
+                alternativesHtml = `
+                    <div class="rec-detail-section">
+                        <h4>🔄 <span data-i18n="alternatives_lbl">${t("alternatives_lbl", "Alternative Crops")}</span></h4>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                            ${item.alternatives.map(a => `<span class="rec-alt-chip" style="font-size:12px; padding:4px 10px; border-color:#cbd5e1; color:#334155; background:#f8fafc;">🌿 ${escapeHtml(a)}</span>`).join("")}
+                        </div>
+                    </div>
+                `;
+            }
+
+            bodyElem.innerHTML = `
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #f1f5f9;">
+                    <div class="rec-crop-icon" style="font-size:32px; width:52px; height:52px;">${icon}</div>
+                    <div>
+                        <div style="font-size:18px; font-weight:700; color:#0f172a;">${escapeHtml(item.crop_name)}</div>
+                        <div style="font-size:13px; color:#64748b; font-style:italic;">${escapeHtml(item.scientific_name)} — <span style="font-style:normal; font-weight:600;">Family: ${escapeHtml(item.family)}</span></div>
+                        <div style="font-size:12px; color:#059669; font-weight:600; margin-top:2px;">Season: ${escapeHtml(item.season)} | Sowing: ${escapeHtml(item.sowing_window)}</div>
+                    </div>
+                </div>
+
+                <!-- Soil Suitability Section -->
+                <div class="rec-detail-section" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <h4>🌱 <span data-i18n="soil_compatibility_lbl">${t("soil_compatibility_lbl", "Soil Compatibility")}</span> — <strong style="color:${soilScoreColor};">${escapeHtml(item.soil_compatibility)} (${item.soil_suitability_score}%)</strong></h4>
+                    <div style="background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden; margin:8px 0 10px 0;">
+                        <div style="background:${soilScoreColor}; width:${soilBarWidth}%; height:100%; border-radius:4px;"></div>
+                    </div>
+                    <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">${escapeHtml(item.soil_compatibility_reason || "")}</p>
+                </div>
+
+                <!-- Crop Rotation & Health Section -->
+                <div class="rec-detail-section" style="background:${item.is_rotation_hazard ? '#fff1f2' : '#f0fdf4'}; border:1px solid ${item.is_rotation_hazard ? '#fecdd3' : '#bbf7d0'}; border-radius:10px; padding:14px; margin-bottom:16px;">
+                    <h4 style="color:${item.is_rotation_hazard ? '#9f1239' : '#166534'};">🔄 <span data-i18n="rotational_context_lbl">${t("rotational_context_lbl", "Crop Rotation Context")}</span> — <span>${escapeHtml(item.rotation_status)}</span></h4>
+                    <p style="margin:0; font-size:12px; color:${item.is_rotation_hazard ? '#881337' : '#14532d'}; line-height:1.5;">
+                        ${escapeHtml(item.rotation_notes || (item.is_legume ? "Nitrogen-fixing legume pulse crop enriching soil fertility." : "Standard rotation crop pattern."))}
+                    </p>
+                </div>
+
+                <!-- Agronomic Highlights & Best Practices -->
+                ${highlightsHtml}
+
+                <!-- Alternative Crops -->
+                ${alternativesHtml}
+            `;
+        }
+
+        // Connect modal add to plan button
+        const btnModalAddToPlan = document.getElementById("btnModalAddToPlan");
+        if (btnModalAddToPlan) {
+            btnModalAddToPlan.onclick = () => {
+                openCreateModalFromRecommendation(idx);
+            };
+        }
+
+        if (modal) modal.classList.add("open");
+    }
+
+    function closeRecommendationDetailsModal() {
+        const modal = document.getElementById("recDetailsModal");
+        if (modal) modal.classList.remove("open");
+        currentDetailCrop = null;
+    }
+
+    function calculateSuggestedDates(crop) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        let sowingYear = currentYear;
+        let sowingMonth = 6;
+        let sowingDay = 20;
+
+        if (crop.season === "Kharif") {
+            sowingMonth = 6;
+            sowingDay = 20;
+            if (currentMonth > 8) sowingYear += 1;
+        } else if (crop.season === "Rabi") {
+            sowingMonth = 10;
+            sowingDay = 25;
+            if (currentMonth > 12 || (currentMonth >= 1 && currentMonth < 6)) {
+                if (currentMonth >= 1 && currentMonth < 6) sowingYear = currentYear - 1;
+            }
+        } else if (crop.season === "Zaid") {
+            sowingMonth = 2;
+            sowingDay = 15;
+            if (currentMonth > 4) sowingYear += 1;
+        }
+
+        const pad = (n) => String(n).padStart(2, "0");
+        const sowingDateStr = `${sowingYear}-${pad(sowingMonth)}-${pad(sowingDay)}`;
+
+        const sowingObj = new Date(sowingYear, sowingMonth - 1, sowingDay);
+        const durationDays = crop.duration_days_min || 90;
+        const harvestObj = new Date(sowingObj.getTime() + durationDays * 24 * 60 * 60 * 1000);
+        const harvestDateStr = `${harvestObj.getFullYear()}-${pad(harvestObj.getMonth() + 1)}-${pad(harvestObj.getDate())}`;
+
+        return { sowingDateStr, harvestDateStr, sowingYear };
+    }
+
+    function openCreateModalFromRecommendation(idxOrCrop) {
+        const crop = typeof idxOrCrop === "number" ? allRecommendations[idxOrCrop] : idxOrCrop;
+        if (!crop) return;
+
+        const confirmMsg = t("confirm_add_rec_to_plan", "Pre-fill new crop plan with this recommended crop? You can review and adjust all dates, land area, and field details before saving.");
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        // Close details modal if open
+        closeRecommendationDetailsModal();
+
+        const form = document.getElementById("cropPlanForm");
+        if (form) form.reset();
+
+        document.getElementById("cropPlanId").value = "";
+        document.getElementById("cropPlanModalTitle").textContent = t("title_create_from_rec", "Create Crop Plan (From Recommendation)");
+
+        const { sowingDateStr, harvestDateStr, sowingYear } = calculateSuggestedDates(crop);
+
+        document.getElementById("planCropName").value = crop.crop_name || "";
+        document.getElementById("planVariety").value = crop.variety || "";
+        document.getElementById("planSeason").value = crop.season || "Kharif";
+        document.getElementById("planYear").value = sowingYear;
+        document.getElementById("planStatus").value = "Planned";
+
+        // Assign farm if available
+        const planFarmSelect = document.getElementById("planFarmSelect");
+        if (planFarmSelect) {
+            if (recommendationContext && recommendationContext.farm_id) {
+                planFarmSelect.value = recommendationContext.farm_id;
+            } else if (contextFarms.length > 0) {
+                planFarmSelect.value = contextFarms[0].id;
+            }
+        }
+
+        // Land Area default
+        const targetFarm = contextFarms.find(f => String(f.id) === String(planFarmSelect?.value));
+        if (targetFarm) {
+            document.getElementById("planLandArea").value = targetFarm.total_area || "";
+            document.getElementById("planAreaUnit").value = targetFarm.area_unit || "Acres";
+            document.getElementById("planFieldLocation").value = targetFarm.location || "";
+        }
+
+        document.getElementById("planSowingDate").value = sowingDateStr;
+        document.getElementById("planHarvestDate").value = harvestDateStr;
+
+        document.getElementById("planNotes").value = `Recommended based on ${crop.season} season and ${crop.soil_compatibility} soil match (${crop.soil_suitability_score}% suitability). Botanical Family: ${crop.family}.`;
+
+        const modal = document.getElementById("cropPlanModal");
+        if (modal) modal.classList.add("open");
+
+        showToast(t("rec_added_prefill_toast", "Crop plan pre-filled with recommended crop details. Please customize land area and dates, then click Save."), "info");
+    }
+
+    function resetRecommendationFilters() {
+        selectedRecSeason = "all";
+        selectedRecCompatibility = "all";
+
+        const seasonBtns = document.querySelectorAll("#recSeasonTabs .rec-season-btn");
+        seasonBtns.forEach(btn => {
+            if (btn.dataset.season === "all") {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+
+        const filterCompat = document.getElementById("recFilterCompatibility");
+        if (filterCompat) filterCompat.value = "all";
+
+        loadRecommendations();
+    }
+
+    /**
      * Bind Event Listeners
      */
     function bindEvents() {
@@ -971,12 +1481,70 @@
             });
         }
 
+        // Recommendation Season Tabs
+        const recSeasonTabs = document.querySelectorAll("#recSeasonTabs .rec-season-btn");
+        recSeasonTabs.forEach(btn => {
+            btn.addEventListener("click", () => {
+                recSeasonTabs.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                selectedRecSeason = btn.dataset.season || "all";
+                loadRecommendations();
+            });
+        });
+
+        // Recommendation Farm Filter
+        const recFilterFarm = document.getElementById("recFilterFarm");
+        if (recFilterFarm) {
+            recFilterFarm.addEventListener("change", (e) => {
+                selectedRecFarm = e.target.value;
+                loadRecommendations();
+            });
+        }
+
+        // Recommendation Compatibility Filter
+        const recFilterCompat = document.getElementById("recFilterCompatibility");
+        if (recFilterCompat) {
+            recFilterCompat.addEventListener("change", (e) => {
+                selectedRecCompatibility = e.target.value;
+                renderRecommendationsUI();
+            });
+        }
+
+        // Refresh Recommendations Button
+        const btnRefreshRec = document.getElementById("btnRefreshRecommendations");
+        if (btnRefreshRec) {
+            btnRefreshRec.addEventListener("click", () => {
+                loadRecommendations();
+            });
+        }
+
+        // Recommendation Details Modal Close
+        const btnCloseRecDetail = document.getElementById("btnCloseRecDetail");
+        if (btnCloseRecDetail) {
+            btnCloseRecDetail.addEventListener("click", closeRecommendationDetailsModal);
+        }
+        const btnDismissRecDetail = document.getElementById("btnDismissRecDetail");
+        if (btnDismissRecDetail) {
+            btnDismissRecDetail.addEventListener("click", closeRecommendationDetailsModal);
+        }
+
+        // Modal backdrop click to close
+        const recModal = document.getElementById("recDetailsModal");
+        if (recModal) {
+            recModal.addEventListener("click", (e) => {
+                if (e.target === recModal) {
+                    closeRecommendationDetailsModal();
+                }
+            });
+        }
+
         // Language changed event
         window.addEventListener("languageChanged", () => {
             renderSummaryUI(summaryData);
             renderUpcomingDashboardUI(upcomingPlans);
             renderCropPlansUI(cropPlans);
             renderRotationUI(rotationAnalyses);
+            renderRecommendationsUI();
         });
     }
 
@@ -990,7 +1558,8 @@
             loadSummary(),
             loadUpcomingPlans(),
             loadCropPlans(),
-            loadRotationAnalysis()
+            loadRotationAnalysis(),
+            loadRecommendations()
         ]);
     }
 
@@ -1002,6 +1571,12 @@
         loadSummary,
         loadRotationAnalysis,
         renderRotationUI,
+        loadRecommendations,
+        renderRecommendationsUI,
+        openRecommendationDetailsModal,
+        closeRecommendationDetailsModal,
+        openCreateModalFromRecommendation,
+        resetRecommendationFilters,
         openCreateModal,
         openEditModal,
         confirmDeletePlan,

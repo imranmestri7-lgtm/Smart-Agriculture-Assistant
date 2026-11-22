@@ -1412,7 +1412,31 @@ const translations = {
   "general_guidance_advice": "General Regional Guidance",
   "btn_get_recommendations": "Get Recommendations",
   "loading_recommendations": "Analyzing soil and season for crop recommendations...",
-  "no_recommendations_found": "No matching crop recommendations found for the selected season and soil."
+  "no_recommendations_found": "No matching crop recommendations found for the selected season and soil.",
+
+  // Feature Upgrade 9 - Phase 2 Part 3: Smart Crop Recommendation Dashboard
+  "btn_refresh_recommendations": "Refresh Suggestions",
+  "lbl_rec_compatibility": "Soil Compatibility:",
+  "opt_all_compatibilities": "All Ratings",
+  "btn_add_to_plan": "➕ Add to Crop Plan",
+  "modal_rec_details_title": "Crop Recommendation Details",
+  "confirm_add_rec_to_plan": "Pre-fill new crop plan with this recommended crop? You can review and adjust all dates, land area, and field details before saving.",
+  "rec_added_prefill_toast": "Crop plan pre-filled with recommended crop details. Please customize land area and dates, then click Save.",
+  "title_create_from_rec": "Create Crop Plan (From Recommendation)",
+  "botanical_family_lbl": "Botanical Family",
+  "scientific_name_lbl": "Scientific Name",
+  "alternatives_lbl": "Alternative Crops",
+  "reasons_benefits_lbl": "Agronomic Highlights & Reasons",
+  "rotational_context_lbl": "Crop Rotation Context",
+  "registered_farm_soil_lbl": "Registered Soil",
+  "previous_crop_lbl": "Preceding Crop",
+  "error_loading_recommendations": "Failed to load crop recommendations. Please check your connection and try again.",
+  "no_rec_filter_match": "No crop recommendations match your selected filters.",
+  "soil_score_lbl": "Suitability Score",
+  "btn_close": "Close",
+  "btn_retry": "Retry",
+  "rotation_hazard_warning": "Consecutive Family Planting Hazard",
+  "rotation_benefit_detected": "Beneficial Nitrogen-Fixing Legume"
 },
 mr: {
   "choose_language": "तुमची भाषा निवडा",
@@ -2825,7 +2849,31 @@ mr: {
   "general_guidance_advice": "सामान्य प्रादेशिक मार्गदर्शन",
   "btn_get_recommendations": "शिफारसी मिळवा",
   "loading_recommendations": "पीक शिफारसींसाठी जमीन व हंगामाचे विश्लेषण सुरू आहे...",
-  "no_recommendations_found": "निवडलेला हंगाम आणि जमिनीसाठी कोणतीही पीक शिफारस आढळली नाही."
+  "no_recommendations_found": "निवडलेला हंगाम आणि जमिनीसाठी कोणतीही पीक शिफारस आढळली नाही.",
+
+  // Feature Upgrade 9 - Phase 2 Part 3: Smart Crop Recommendation Dashboard
+  "btn_refresh_recommendations": "शिफारसी पुन्हा लोड करा",
+  "lbl_rec_compatibility": "जमीन सुसंगतता:",
+  "opt_all_compatibilities": "सर्व श्रेणी",
+  "btn_add_to_plan": "➕ पीक आराखड्यात जोडा",
+  "modal_rec_details_title": "पीक शिफारस तपशील",
+  "confirm_add_rec_to_plan": "या शिफारस केलेल्या पिकासह नवीन पीक आराखडा तयार करायचा का? जतन करण्यापूर्वी तुम्ही सर्व तारखा, क्षेत्र आणि तपशील तपासू शकता.",
+  "rec_added_prefill_toast": "शिफारस केलेल्या पिकाच्या तपशिलासहित पीक आराखडा भरला आहे. कृपया क्षेत्र व तारखा तपासा आणि जतन करा.",
+  "title_create_from_rec": "नवीन पीक आराखडा (शिफारसीनुसार)",
+  "botanical_family_lbl": "वनस्पती कुल",
+  "scientific_name_lbl": "शास्त्रीय नाव",
+  "alternatives_lbl": "पर्यायी पिके",
+  "reasons_benefits_lbl": "कृषी वैशिष्ट्ये आणि कारणे",
+  "rotational_context_lbl": "पीक फेरपालट संदर्भ",
+  "registered_farm_soil_lbl": "नोंदवलेली माती",
+  "previous_crop_lbl": "मागील पीक",
+  "error_loading_recommendations": "पीक शिफारसी लोड करण्यात अयशस्वी. कृपया इंटरनेट तपासा आणि पुन्हा प्रयत्न करा.",
+  "no_rec_filter_match": "निवडलेल्या फिल्टरनुसार कोणतीही पीक शिफारस आढळली नाही.",
+  "soil_score_lbl": "सुसंगतता गुण",
+  "btn_close": "बंद करा",
+  "btn_retry": "पुन्हा प्रयत्न करा",
+  "rotation_hazard_warning": "एकाच कुलाच्या पिकांचा सलग धोका",
+  "rotation_benefit_detected": "फायदेकारक नत्र-स्थिरीकरण कडधान्य"
 },
 hi: {
   "choose_language": "अपनी भाषा चुनें",
@@ -4236,7 +4284,31 @@ hi: {
   "general_guidance_advice": "सामान्य क्षेत्रीय मार्गदर्शन",
   "btn_get_recommendations": "सिफारिशें प्राप्त करें",
   "loading_recommendations": "फसल सिफारिशों के लिए मिट्टी और मौसम का विश्लेषण किया जा रहा है...",
-  "no_recommendations_found": "चयनित मौसम और मिट्टी के लिए कोई फसल सिफारिश नहीं मिली।"
+  "no_recommendations_found": "चयनित मौसम और मिट्टी के लिए कोई फसल सिफारिश नहीं मिली।",
+
+  // Feature Upgrade 9 - Phase 2 Part 3: Smart Crop Recommendation Dashboard
+  "btn_refresh_recommendations": "सिफारिशें रीफ्रेश करें",
+  "lbl_rec_compatibility": "मिट्टी अनुकूलता:",
+  "opt_all_compatibilities": "सभी श्रेणियां",
+  "btn_add_to_plan": "➕ फसल योजना में जोड़ें",
+  "modal_rec_details_title": "फसल सिफारिश विवरण",
+  "confirm_add_rec_to_plan": "इस अनुशंसित फसल के साथ नई फसल योजना तैयार करें? सहेजने से पहले आप सभी तिथियों, भूमि क्षेत्र और विवरण की समीक्षा कर सकते हैं।",
+  "rec_added_prefill_toast": "अनुशंसित फसल विवरण के साथ फसल योजना भरी गई है। कृपया क्षेत्र और तिथियों की जांच करें और सहेजें।",
+  "title_create_from_rec": "नई फसल योजना (सिफारिश से)",
+  "botanical_family_lbl": "वानस्पतिक कुल",
+  "scientific_name_lbl": "वैज्ञानिक नाम",
+  "alternatives_lbl": "वैकल्पिक फसलें",
+  "reasons_benefits_lbl": "कृषि विशेषताएं और कारण",
+  "rotational_context_lbl": "फसल चक्र संदर्भ",
+  "registered_farm_soil_lbl": "पंजीकृत मिट्टी",
+  "previous_crop_lbl": "पिछली फसल",
+  "error_loading_recommendations": "फसल सिफारिशें लोड करने में विफल। कृपया अपना इंटरनेट जांचें और पुनः प्रयास करें।",
+  "no_rec_filter_match": "चयनित फ़िल्टर के अनुसार कोई फसल सिफारिश नहीं मिली।",
+  "soil_score_lbl": "अनुकूलता स्कोर",
+  "btn_close": "बंद करें",
+  "btn_retry": "पुनः प्रयास करें",
+  "rotation_hazard_warning": "समान कुल की फसलों का लगातार रोपण जोखिम",
+  "rotation_benefit_detected": "लाभकारी नाइट्रोजन-स्थिरीकरण दलहन"
 }
 };
 
