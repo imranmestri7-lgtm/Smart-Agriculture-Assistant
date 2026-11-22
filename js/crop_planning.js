@@ -14,6 +14,12 @@
     let contextCrops = [];
     let isSubmitting = false;
     let rotationAnalyses = [];
+    let allRecommendations = [];
+    let recommendationContext = null;
+    let selectedRecSeason = "all";
+    let selectedRecFarm = "";
+    let selectedRecCompatibility = "all";
+    let currentDetailCrop = null;
 
     // Filters
     const filters = {
@@ -121,6 +127,15 @@
             rotFarmSelect.innerHTML = `<option value="all">${t("lbl_all_farms", "All Farms / Fields")}</option>` +
                 contextFarms.map(f => `<option value="${f.id}">${escapeHtml(f.farm_name)} (${f.total_area} ${escapeHtml(f.area_unit)})</option>`).join("");
             rotFarmSelect.value = currentRotVal || "all";
+        }
+
+        // Populate Farm Select in Recommendations Filter
+        const recFarmSelect = document.getElementById("recFilterFarm");
+        if (recFarmSelect) {
+            const currentRecVal = recFarmSelect.value;
+            recFarmSelect.innerHTML = `<option value="">${t("lbl_all_farms", "All Farms / Primary Farm")}</option>` +
+                contextFarms.map(f => `<option value="${f.id}">${escapeHtml(f.farm_name)} (${f.total_area} ${escapeHtml(f.area_unit)})</option>`).join("");
+            recFarmSelect.value = currentRecVal || "";
         }
 
         // Populate Common Crops Datalist
@@ -607,7 +622,7 @@
             if (res.ok && data.status === "success") {
                 showToast(isEdit ? t("plan_updated_success", "Crop plan updated successfully!") : t("plan_created_success", "Crop plan created successfully!"), "success");
                 closeModal();
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations()]);
             } else {
                 console.error("Save plan failed with response:", data);
                 showToast(data.error || "Failed to save crop plan", "error");
@@ -643,7 +658,7 @@
             const data = await res.json();
             if (res.ok && data.status === "success") {
                 showToast(t("plan_deleted_success", "Crop plan deleted successfully!"), "success");
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations()]);
             } else {
                 showToast(data.error || "Failed to delete crop plan", "error");
             }

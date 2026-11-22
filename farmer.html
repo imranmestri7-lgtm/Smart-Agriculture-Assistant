@@ -2786,6 +2786,63 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </div>
             </div>
 
+            <!-- SMART CROP RECOMMENDATION DASHBOARD (FEATURE UPGRADE 9 - PHASE 2 PART 3) -->
+            <div class="crop-recommendations-wrapper" id="cropRecommendationsContainer">
+                <div class="crop-recommendations-header">
+                    <div class="rec-header-title">
+                        <span class="rec-badge" data-i18n="badge_seasonal_recommendations">SEASONAL ADVISORY</span>
+                        <h3 data-i18n="seasonal_crop_recommendations_title">🌾 Smart Crop Recommendations</h3>
+                        <p data-i18n="seasonal_recommendations_desc">
+                            Agronomic recommendations based on seasonal sowing windows, registered soil compatibility, and rotational history.
+                        </p>
+                    </div>
+                    <div class="rec-header-actions">
+                        <button type="button" class="btn-farm-action btn-refresh-rec" id="btnRefreshRecommendations" title="Refresh Recommendations">
+                            <span class="btn-icon">🔄</span> <span data-i18n="btn_refresh_recommendations">Refresh Suggestions</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RECOMMENDATION FILTERS TOOLBAR -->
+                <div class="rec-toolbar">
+                    <div class="rec-season-tabs" id="recSeasonTabs">
+                        <button type="button" class="rec-season-btn active" data-season="all" data-i18n="tab_all_seasons">🌱 All Seasons</button>
+                        <button type="button" class="rec-season-btn" data-season="Kharif" data-i18n="tab_kharif">🌧️ Kharif</button>
+                        <button type="button" class="rec-season-btn" data-season="Rabi" data-i18n="tab_rabi">❄️ Rabi</button>
+                        <button type="button" class="rec-season-btn" data-season="Zaid" data-i18n="tab_zaid">☀️ Zaid</button>
+                    </div>
+
+                    <div class="rec-dropdown-filters">
+                        <div class="filter-item-inline">
+                            <label for="recFilterFarm" data-i18n="lbl_rec_farm">Farm:</label>
+                            <select id="recFilterFarm" class="form-control-sm">
+                                <option value="" data-i18n="lbl_all_farms">All Farms / Primary Farm</option>
+                            </select>
+                        </div>
+                        <div class="filter-item-inline">
+                            <label for="recFilterCompatibility" data-i18n="lbl_rec_compatibility">Soil Compatibility:</label>
+                            <select id="recFilterCompatibility" class="form-control-sm">
+                                <option value="all" data-i18n="opt_all_compatibilities">All Ratings</option>
+                                <option value="Optimal" data-i18n="soil_optimal">Optimal Match</option>
+                                <option value="Compatible" data-i18n="soil_compatible">Compatible</option>
+                                <option value="Moderate" data-i18n="soil_moderate">Moderate</option>
+                                <option value="Unsuitable" data-i18n="soil_unsuitable">Unsuitable</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FARM & SOIL CONTEXT STRIP -->
+                <div class="rec-context-strip" id="recContextStrip" style="display:none;">
+                    <!-- Populated dynamically with farm name, soil type, limitation notice or previous crop info -->
+                </div>
+
+                <!-- RECOMMENDATIONS GRID -->
+                <div class="crop-recommendations-grid" id="cropRecommendationsList">
+                    <!-- Populated dynamically by js/crop_planning.js -->
+                </div>
+            </div>
+
         </section>
 
 
@@ -4194,6 +4251,26 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                         <button type="submit" class="btn-primary" id="btnSaveCropPlan" data-i18n="btn_save_crop_plan">Save Crop Plan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- 6. SMART CROP RECOMMENDATION DETAILS MODAL (FEATURE UPGRADE 9 - PART 3) -->
+        <div class="farm-modal-backdrop" id="recDetailsModal">
+            <div class="farm-modal-dialog" style="max-width:680px;">
+                <div class="modal-header">
+                    <div class="rec-modal-title-wrap">
+                        <span class="rec-scope-pill" id="recModalScopeBadge">Field-Specific</span>
+                        <h3 id="recModalTitle" data-i18n="modal_rec_details_title">Crop Recommendation Details</h3>
+                    </div>
+                    <button type="button" class="modal-close-btn" id="btnCloseRecDetail" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" id="recModalBody" style="padding:20px; max-height:75vh; overflow-y:auto;">
+                    <!-- Dynamically populated by js/crop_planning.js -->
+                </div>
+                <div class="modal-actions" style="border-top:1px solid #e2e8f0; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" class="btn-secondary modal-close-btn" id="btnDismissRecDetail" data-i18n="btn_close">Close</button>
+                    <button type="button" class="btn-primary" id="btnModalAddToPlan" data-i18n="btn_add_to_plan">➕ Add to Crop Plan</button>
+                </div>
             </div>
         </div>
 
