@@ -2843,6 +2843,84 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </div>
             </div>
 
+            <!-- CROP CALENDAR SECTION (FEATURE UPGRADE 9 - PHASE 3 PART 1) -->
+            <div class="crop-calendar-wrapper" id="cropCalendarContainer">
+                <div class="crop-calendar-header">
+                    <div class="cal-header-title">
+                        <span class="cal-badge" data-i18n="badge_crop_calendar">SEASONAL TIMELINE</span>
+                        <h3 data-i18n="crop_calendar_title">📅 Crop Planning Calendar</h3>
+                        <p data-i18n="crop_calendar_subtitle">
+                            Interactive timeline tracking planned sowing dates, active growing periods, and expected harvest dates across all fields.
+                        </p>
+                    </div>
+                    <div class="cal-header-actions">
+                        <!-- View Mode Switcher -->
+                        <div class="cal-view-switcher">
+                            <button type="button" class="btn-cal-view active" id="btnCalViewMonth" data-view="month" data-i18n="btn_view_month">📅 Monthly</button>
+                            <button type="button" class="btn-cal-view" id="btnCalViewWeek" data-view="week" data-i18n="btn_view_week">📆 Weekly</button>
+                        </div>
+                        <button type="button" class="btn-farm-action btn-refresh-cal" id="btnRefreshCropCalendar" title="Refresh Calendar">
+                            <span class="btn-icon">🔄</span> <span data-i18n="btn_refresh_calendar">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CALENDAR TOOLBAR & CONTROLS -->
+                <div class="crop-cal-toolbar">
+                    <!-- Date Navigation -->
+                    <div class="cal-nav-group">
+                        <button type="button" class="btn-cal-nav" id="btnCalPrev" aria-label="Previous">◀</button>
+                        <button type="button" class="btn-cal-today" id="btnCalToday" data-i18n="btn_cal_today">Today</button>
+                        <button type="button" class="btn-cal-nav" id="btnCalNext" aria-label="Next">▶</button>
+                        <h4 class="cal-current-label" id="cropCalPeriodLabel">November 2026</h4>
+                    </div>
+
+                    <!-- Filters: Farm, Season, Crop -->
+                    <div class="cal-filters-group">
+                        <div class="filter-item-inline">
+                            <label for="calFilterFarm" data-i18n="lbl_filter_farm">Farm:</label>
+                            <select id="calFilterFarm" class="form-control-sm">
+                                <option value="all" data-i18n="lbl_all_farms">All Farms / Fields</option>
+                            </select>
+                        </div>
+                        <div class="filter-item-inline">
+                            <label for="calFilterSeason" data-i18n="lbl_filter_season">Season:</label>
+                            <select id="calFilterSeason" class="form-control-sm">
+                                <option value="all" data-i18n="tab_all_seasons">All Seasons</option>
+                                <option value="Kharif" data-i18n="tab_kharif">Kharif</option>
+                                <option value="Rabi" data-i18n="tab_rabi">Rabi</option>
+                                <option value="Zaid" data-i18n="tab_zaid">Zaid</option>
+                                <option value="Year-round" data-i18n="tab_year_round">Year-round</option>
+                            </select>
+                        </div>
+                        <div class="filter-item-inline">
+                            <label for="calFilterCrop" data-i18n="lbl_filter_crop">Crop:</label>
+                            <select id="calFilterCrop" class="form-control-sm">
+                                <option value="all" data-i18n="opt_all_crops">All Crops</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CALENDAR LEGEND -->
+                <div class="crop-cal-legend">
+                    <span class="legend-item"><span class="legend-dot dot-sowing"></span> <strong data-i18n="legend_sowing">🌱 Sowing Date</strong></span>
+                    <span class="legend-item"><span class="legend-dot dot-growing"></span> <strong data-i18n="legend_growing">🌿 Growing Period</strong></span>
+                    <span class="legend-item"><span class="legend-dot dot-harvest"></span> <strong data-i18n="legend_harvest">🌾 Expected Harvest</strong></span>
+                    <span class="legend-item legend-today-tip"><span class="legend-dot dot-today"></span> <span data-i18n="legend_today">Today's Date</span></span>
+                </div>
+
+                <!-- CALENDAR MAIN BODY -->
+                <div class="crop-cal-body" id="cropCalBody">
+                    <!-- Populated dynamically by js/crop_planning.js -->
+                </div>
+
+                <!-- SELECTED DAY AGENDA / DRILLDOWN (For Month view selection) -->
+                <div class="crop-cal-day-detail" id="cropCalDayDetail" style="display: none;">
+                    <!-- Day summary with cards -->
+                </div>
+            </div>
+
         </section>
 
 
@@ -4270,6 +4348,26 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 <div class="modal-actions" style="border-top:1px solid #e2e8f0; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
                     <button type="button" class="btn-secondary modal-close-btn" id="btnDismissRecDetail" data-i18n="btn_close">Close</button>
                     <button type="button" class="btn-primary" id="btnModalAddToPlan" data-i18n="btn_add_to_plan">➕ Add to Crop Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. CROP PLAN DETAILS MODAL (FEATURE UPGRADE 9 - PHASE 3 PART 1) -->
+        <div class="farm-modal-backdrop" id="cropPlanDetailModal">
+            <div class="farm-modal-dialog" style="max-width: 600px;">
+                <div class="modal-header">
+                    <div class="plan-detail-title-wrap">
+                        <span class="plan-status-pill" id="planDetailStatusBadge">Planned</span>
+                        <h3 id="planDetailCropTitle" data-i18n="modal_plan_details_title">Crop Plan Details</h3>
+                    </div>
+                    <button type="button" class="modal-close-btn" id="btnClosePlanDetail" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" id="planDetailModalBody" style="padding: 20px; max-height: 75vh; overflow-y: auto;">
+                    <!-- Populated dynamically by js/crop_planning.js -->
+                </div>
+                <div class="modal-actions" style="border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <button type="button" class="btn-secondary modal-close-btn" id="btnDismissPlanDetail" data-i18n="btn_close">Close</button>
+                    <button type="button" class="btn-primary" id="btnEditPlanFromDetail" data-i18n="btn_edit_plan">✏️ Edit Crop Plan</button>
                 </div>
             </div>
         </div>

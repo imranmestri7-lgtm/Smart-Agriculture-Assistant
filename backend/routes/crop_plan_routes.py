@@ -8,7 +8,8 @@ Provides secure, parameterized CRUD operations and dashboards for seasonal crop 
 - Form Context for Farm and Crop Dropdowns
 """
 
-from datetime import date, datetime
+import calendar
+from datetime import date, datetime, timedelta
 from flask import Blueprint, jsonify, request
 
 from config import get_db_connection
@@ -534,6 +535,246 @@ def get_crop_recommendations():
     except Exception as e:
         print(f"Error generating crop recommendations: {e}")
         return jsonify({"status": "error", "message": "Failed to generate seasonal crop recommendations."}), 500
+
+
+@crop_plan_bp.route("/calendar", methods=["GET"])
+def get_crop_calendar():
+    """
+    Retrieve crop calendar events and plans grouped by day for month or week views.
+    Supports date-range filtering, farm_id, season, crop, and status filters with JWT tenant isolation.
+    """
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    today = date.today()
+    view = request.args.get("view", "month").strip().lower()
+    if view not in ("month", "week"):
+        view = "month"
+
+    start_date_str = request.args.get("start_date", "").strip()
+    end_date_str = request.args.get("end_date", "").strip()
+
+    start_dt = None
+    end_dt = None
+    year = today.year
+    month = today.month
+
+    if start_date_str and end_date_str:
+        try:
+            start_dt = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_dt = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            if start_dt > end_dt:
+                return jsonify({"status": "error", "message": "start_date cannot be after end_date."}), 400
+            # Safety limit: max 366 days
+            if (end_dt - start_dt).days > 366:
+                return jsonify({"status": "error", "message": "Date range cannot exceed 366 days."}), 400
+            year = start_dt.year
+            month = start_dt.month
+        except ValueError:
+            return jsonify({"status": "error", "message": "Invalid date format. Expected YYYY-MM-DD."}), 400
+    else:
+        # Determine year and month from query or default
+        try:
+            year = int(request.args.get("year", today.year))
+            month = int(request.args.get("month", today.month))
+            if month < 1 or month > 12:
+                month = today.month
+        except (ValueError, TypeError):
+            year = today.year
+            month = today.month
+
+        if view == "week":
+            # Week view based on reference date
+            ref_date_param = request.args.get("date", "").strip()
+            if ref_date_param:
+                try:
+                    ref_dt = datetime.strptime(ref_date_param, "%Y-%m-%d").date()
+                except ValueError:
+                    ref_dt = today
+            else:
+                try:
+                    day_param = int(request.args.get("day", today.day if (year == today.year and month == today.month) else 1))
+                    num_days_in_month = calendar.monthrange(year, month)[1]
+                    day_param = max(1, min(num_days_in_month, day_param))
+                    ref_dt = date(year, month, day_param)
+                except (ValueError, TypeError):
+                    ref_dt = today
+
+            # Monday as start of week (weekday() 0=Mon, 6=Sun)
+            start_dt = ref_dt - timedelta(days=ref_dt.weekday())
+            end_dt = start_dt + timedelta(days=6)
+        else:
+            # Month view
+            num_days = calendar.monthrange(year, month)[1]
+            start_dt = date(year, month, 1)
+            end_dt = date(year, month, num_days)
+
+    farm_id_filter = request.args.get("farm_id", "").strip()
+    season_filter = request.args.get("season", "").strip()
+    crop_filter = request.args.get("crop", "").strip()
+    status_filter = request.args.get("status", "").strip()
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT cp.*, f.farm_name, f.location AS farm_location
+            FROM crop_plans cp
+            LEFT JOIN farms f ON cp.farm_id = f.id
+            WHERE cp.user_id = %s
+              AND cp.planned_sowing_date <= %s
+              AND cp.expected_harvest_date >= %s
+        """
+        params = [user_id, end_dt.strftime("%Y-%m-%d"), start_dt.strftime("%Y-%m-%d")]
+
+        if farm_id_filter and farm_id_filter.lower() != "all" and farm_id_filter.isdigit():
+            query += " AND cp.farm_id = %s"
+            params.append(int(farm_id_filter))
+
+        if season_filter and season_filter.lower() != "all":
+            norm_season = SEASON_LOOKUP.get(season_filter.lower(), season_filter)
+            query += " AND cp.season = %s"
+            params.append(norm_season)
+
+        if crop_filter and crop_filter.lower() != "all":
+            query += " AND (cp.crop_name LIKE %s OR cp.variety LIKE %s)"
+            params.extend([f"%{crop_filter}%", f"%{crop_filter}%"])
+
+        if status_filter and status_filter.lower() != "all":
+            norm_status = STATUS_LOOKUP.get(status_filter.lower(), status_filter)
+            query += " AND cp.status = %s"
+            params.append(norm_status)
+
+        query += " ORDER BY cp.planned_sowing_date ASC, cp.id ASC"
+
+        cursor.execute(query, tuple(params))
+        rows = cursor.fetchall() or []
+
+        plans = [_format_plan_row(r) for r in rows]
+
+        # Build day map for every date in [start_dt, end_dt]
+        days_list = []
+        cur = start_dt
+        total_sowing_events = 0
+        total_harvest_events = 0
+        active_growing_plans = set()
+
+        while cur <= end_dt:
+            cur_str = cur.strftime("%Y-%m-%d")
+            sowing_items = []
+            harvest_items = []
+            growing_items = []
+
+            for p in plans:
+                p_sow = datetime.strptime(p["planned_sowing_date"], "%Y-%m-%d").date() if p.get("planned_sowing_date") else None
+                p_har = datetime.strptime(p["expected_harvest_date"], "%Y-%m-%d").date() if p.get("expected_harvest_date") else None
+
+                if not p_sow or not p_har:
+                    continue
+
+                if cur == p_sow:
+                    sowing_items.append({
+                        "plan_id": p["id"],
+                        "crop_name": p["crop_name"],
+                        "variety": p.get("variety"),
+                        "season": p["season"],
+                        "status": p["status"],
+                        "farm_name": p.get("farm_name"),
+                        "land_area": p.get("land_area"),
+                        "area_unit": p.get("area_unit"),
+                        "event_type": "sowing",
+                        "date": cur_str,
+                        "label": f"Sowing: {p['crop_name']}",
+                        "icon": "🌱"
+                    })
+                    total_sowing_events += 1
+
+                if cur == p_har:
+                    harvest_items.append({
+                        "plan_id": p["id"],
+                        "crop_name": p["crop_name"],
+                        "variety": p.get("variety"),
+                        "season": p["season"],
+                        "status": p["status"],
+                        "farm_name": p.get("farm_name"),
+                        "land_area": p.get("land_area"),
+                        "area_unit": p.get("area_unit"),
+                        "event_type": "harvest",
+                        "date": cur_str,
+                        "label": f"Harvest: {p['crop_name']}",
+                        "icon": "🌾"
+                    })
+                    total_harvest_events += 1
+
+                if p_sow < cur < p_har:
+                    growing_items.append({
+                        "plan_id": p["id"],
+                        "crop_name": p["crop_name"],
+                        "variety": p.get("variety"),
+                        "season": p["season"],
+                        "status": p["status"],
+                        "farm_name": p.get("farm_name"),
+                        "land_area": p.get("land_area"),
+                        "area_unit": p.get("area_unit"),
+                        "event_type": "growing",
+                        "date": cur_str,
+                        "sowing_date": p["planned_sowing_date"],
+                        "harvest_date": p["expected_harvest_date"],
+                        "days_growing": (cur - p_sow).days,
+                        "total_duration": (p_har - p_sow).days,
+                        "progress_pct": round(((cur - p_sow).days / max(1, (p_har - p_sow).days)) * 100),
+                        "label": f"Growing: {p['crop_name']}",
+                        "icon": "🌿"
+                    })
+                    active_growing_plans.add(p["id"])
+
+            days_list.append({
+                "date": cur_str,
+                "day": cur.day,
+                "month": cur.month,
+                "year": cur.year,
+                "weekday": cur.weekday(),  # 0=Monday, 6=Sunday
+                "is_today": (cur == today),
+                "is_current_month": (cur.month == month),
+                "sowing_events": sowing_items,
+                "harvest_events": harvest_items,
+                "growing_crops": growing_items,
+                "total_events": len(sowing_items) + len(harvest_items),
+                "total_active": len(sowing_items) + len(harvest_items) + len(growing_items)
+            })
+
+            cur += timedelta(days=1)
+
+        month_name = calendar.month_name[month] if (1 <= month <= 12) else ""
+
+        return jsonify({
+            "status": "success",
+            "view": view,
+            "start_date": start_dt.strftime("%Y-%m-%d"),
+            "end_date": end_dt.strftime("%Y-%m-%d"),
+            "year": year,
+            "month": month,
+            "month_name": month_name,
+            "total_plans": len(plans),
+            "plans": plans,
+            "days": days_list,
+            "summary": {
+                "total_plans": len(plans),
+                "sowing_events": total_sowing_events,
+                "harvest_events": total_harvest_events,
+                "growing_crops": len(active_growing_plans)
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching crop calendar: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch crop calendar."}), 500
+    finally:
+        if conn:
+            conn.close()
 
 
 @crop_plan_bp.route("/<int:plan_id>", methods=["GET"])
