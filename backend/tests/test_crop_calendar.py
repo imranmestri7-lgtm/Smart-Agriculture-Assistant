@@ -44,8 +44,8 @@ class TestCropCalendarAPI(unittest.TestCase):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Clean prior test plans
-        cur.execute("DELETE FROM crop_plans WHERE notes LIKE '%__CAL_TEST__%'")
+        # Clean prior test plans for test users
+        cur.execute("DELETE FROM crop_plans WHERE user_id IN (%s, %s)", (cls.user_id, cls.other_user_id))
 
         # Plan 1 for User 1: Kharif Soybean (Sowing: 2026-06-20, Harvest: 2026-10-05)
         cur.execute("""
@@ -107,7 +107,7 @@ class TestCropCalendarAPI(unittest.TestCase):
     def _cleanup_test_plans(cls):
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("DELETE FROM crop_plans WHERE notes LIKE '%__CAL_TEST__%'")
+        cur.execute("DELETE FROM crop_plans WHERE user_id IN (%s, %s)", (cls.user_id, cls.other_user_id))
         conn.commit()
         cur.close()
         conn.close()

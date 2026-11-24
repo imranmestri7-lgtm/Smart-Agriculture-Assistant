@@ -21,6 +21,18 @@
     let selectedRecCompatibility = "all";
     let currentDetailCrop = null;
 
+    // Crop Calendar State (Phase 3 Part 1)
+    let calView = "month"; // 'month' | 'week'
+    const todayObj = new Date();
+    let calYear = todayObj.getFullYear();
+    let calMonth = todayObj.getMonth() + 1; // 1-12
+    let calRefDate = new Date();
+    let calFilterFarm = "all";
+    let calFilterSeason = "all";
+    let calFilterCrop = "all";
+    let calData = null;
+    let selectedCalDay = null;
+
     // Filters
     const filters = {
         season: "all",
@@ -140,12 +152,31 @@
 
         // Populate Common Crops Datalist
         const cropDatalist = document.getElementById("commonCropsList");
-        if (cropDatalist && data.common_crops) {
-            const allCrops = Array.from(new Set([
-                ...contextCrops.map(c => c.crop_name),
-                ...data.common_crops
-            ])).sort();
-            cropDatalist.innerHTML = allCrops.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+        const cropsList = Array.isArray(data.crops)
+            ? data.crops.map(c => typeof c === "string" ? c : (c.crop_name || String(c)))
+            : (data.common_crops || []);
+        const allUniqueCrops = Array.from(new Set(cropsList.filter(Boolean))).sort();
+
+        if (cropDatalist) {
+            cropDatalist.innerHTML = allUniqueCrops.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+        }
+
+        // Populate Farm Select in Calendar Filter
+        const calFarmSelect = document.getElementById("calFilterFarm");
+        if (calFarmSelect) {
+            const currentCalFarm = calFarmSelect.value;
+            calFarmSelect.innerHTML = `<option value="all">${t("lbl_all_farms", "All Farms / Fields")}</option>` +
+                contextFarms.map(f => `<option value="${f.id}">${escapeHtml(f.farm_name)} (${f.total_area} ${escapeHtml(f.area_unit)})</option>`).join("");
+            calFarmSelect.value = currentCalFarm || "all";
+        }
+
+        // Populate Crop Select in Calendar Filter
+        const calCropSelect = document.getElementById("calFilterCrop");
+        if (calCropSelect) {
+            const currentCalCrop = calCropSelect.value;
+            calCropSelect.innerHTML = `<option value="all">${t("opt_all_crops", "All Crops")}</option>` +
+                allUniqueCrops.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+            calCropSelect.value = currentCalCrop || "all";
         }
     }
 
@@ -622,7 +653,7 @@
             if (res.ok && data.status === "success") {
                 showToast(isEdit ? t("plan_updated_success", "Crop plan updated successfully!") : t("plan_created_success", "Crop plan created successfully!"), "success");
                 closeModal();
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar()]);
             } else {
                 console.error("Save plan failed with response:", data);
                 showToast(data.error || "Failed to save crop plan", "error");
@@ -658,7 +689,7 @@
             const data = await res.json();
             if (res.ok && data.status === "success") {
                 showToast(t("plan_deleted_success", "Crop plan deleted successfully!"), "success");
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar()]);
             } else {
                 showToast(data.error || "Failed to delete crop plan", "error");
             }
@@ -1404,6 +1435,541 @@
     }
 
     /**
+     * Crop Planning Calendar (Feature Upgrade 9 - Phase 3 Part 1)
+     */
+    function formatDateIso(d) {
+        if (!d) return "";
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    async function loadCropCalendar() {
+        const bodyEl = document.getElementById("cropCalBody");
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <div class="crop-cal-loading" style="padding: 40px 20px; text-align: center;">
+                    <div class="spinner" style="margin: 0 auto 12px auto;"></div>
+                    <p data-i18n="loading_crop_calendar">${t("loading_crop_calendar", "Loading crop planning calendar...")}</p>
+                </div>
+            `;
+        }
+
+        const token = getAuthToken();
+        if (!token) return;
+
+        const params = new URLSearchParams();
+        params.append("view", calView);
+
+        if (calView === "week") {
+            params.append("date", formatDateIso(calRefDate));
+        } else {
+            params.append("year", calYear);
+            params.append("month", calMonth);
+        }
+
+        if (calFilterFarm && calFilterFarm !== "all") {
+            params.append("farm_id", calFilterFarm);
+        }
+        if (calFilterSeason && calFilterSeason !== "all") {
+            params.append("season", calFilterSeason);
+        }
+        if (calFilterCrop && calFilterCrop !== "all") {
+            params.append("crop", calFilterCrop);
+        }
+
+        try {
+            const res = await fetch(`/api/crop-plans/calendar?${params.toString()}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.status === 401) {
+                console.warn("Session expired fetching crop calendar");
+                return;
+            }
+            const data = await res.json();
+            if (data.status === "success") {
+                calData = data;
+                renderCropCalendarUI();
+            } else {
+                renderCalendarError(data.message || t("error_loading_calendar", "Failed to load crop calendar."));
+            }
+        } catch (err) {
+            console.error("Error loading crop calendar:", err);
+            renderCalendarError(t("error_loading_calendar", "Failed to load crop calendar. Please check your connection and try again."));
+        }
+    }
+
+    function renderCalendarError(msg) {
+        const bodyEl = document.getElementById("cropCalBody");
+        if (!bodyEl) return;
+        bodyEl.innerHTML = `
+            <div class="rec-empty-state" style="border-color:#fca5a5; background:#fef2f2; margin: 20px 0;">
+                <div class="rec-empty-icon">⚠️</div>
+                <h4 class="rec-empty-title" style="color:#991b1b;">${t("error_loading_calendar", "Unable to Load Calendar")}</h4>
+                <p class="rec-empty-msg" style="color:#b91c1c;">${escapeHtml(msg)}</p>
+                <button type="button" class="btn-farm-action btn-refresh-cal" onclick="CropPlanning.loadCropCalendar()">
+                    🔄 ${t("btn_retry", "Retry")}
+                </button>
+            </div>
+        `;
+    }
+
+    function renderCropCalendarUI() {
+        if (!calData) return;
+
+        // 1. Update Navigation Period Label
+        const periodLabel = document.getElementById("cropCalPeriodLabel");
+        if (periodLabel) {
+            if (calView === "week") {
+                const startD = calData.start_date;
+                const endD = calData.end_date;
+                periodLabel.textContent = `${startD}  ➔  ${endD}`;
+            } else {
+                const monthKeys = [
+                    "month_jan", "month_feb", "month_mar", "month_apr", "month_may", "month_jun",
+                    "month_jul", "month_aug", "month_sep", "month_oct", "month_nov", "month_dec"
+                ];
+                const localizedMonth = t(monthKeys[calMonth - 1], calData.month_name || "Month");
+                periodLabel.textContent = `${localizedMonth} ${calYear}`;
+            }
+        }
+
+        // 2. Render Month or Week View
+        if (calView === "week") {
+            renderWeekCalendar();
+        } else {
+            renderMonthCalendar();
+        }
+
+        // 3. Render Selected Day Detail if active
+        if (selectedCalDay) {
+            const dayObj = (calData.days || []).find(d => d.date === selectedCalDay);
+            if (dayObj) {
+                renderDayDetailDrawer(dayObj);
+            } else {
+                const detailEl = document.getElementById("cropCalDayDetail");
+                if (detailEl) detailEl.style.display = "none";
+            }
+        } else {
+            const detailEl = document.getElementById("cropCalDayDetail");
+            if (detailEl) detailEl.style.display = "none";
+        }
+    }
+
+    function renderMonthCalendar() {
+        const bodyEl = document.getElementById("cropCalBody");
+        if (!bodyEl) return;
+
+        const weekdayKeys = ["weekday_sun", "weekday_mon", "weekday_tue", "weekday_wed", "weekday_thu", "weekday_fri", "weekday_sat"];
+        const weekdayDefaults = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        let html = `<div class="crop-month-grid">`;
+
+        // Weekday Headers
+        weekdayDefaults.forEach((wDef, idx) => {
+            html += `<div class="cal-weekday-header">${escapeHtml(t(weekdayKeys[idx], wDef))}</div>`;
+        });
+
+        // Compute day of week for the 1st day of the month
+        const firstDayObj = new Date(calYear, calMonth - 1, 1);
+        const startDayOfWeek = firstDayObj.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+
+        // Padding cells for previous month
+        const prevMonthLastDate = new Date(calYear, calMonth - 1, 0).getDate();
+        for (let i = startDayOfWeek - 1; i >= 0; i--) {
+            html += `
+                <div class="crop-cal-day-cell other-month">
+                    <div class="day-cell-top">
+                        <span class="day-cell-num">${prevMonthLastDate - i}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Days of current month
+        (calData.days || []).forEach(day => {
+            const isToday = day.is_today;
+            const isSelected = (day.date === selectedCalDay);
+            let cellClasses = "crop-cal-day-cell";
+            if (isToday) cellClasses += " is-today";
+            if (isSelected) cellClasses += " selected";
+
+            let eventsHtml = "";
+
+            // Sowing events
+            (day.sowing_events || []).forEach(e => {
+                eventsHtml += `
+                    <span class="cal-event-pill event-sowing" title="${escapeHtml(e.label)} (${escapeHtml(e.farm_name || '')})" onclick="event.stopPropagation(); CropPlanning.openPlanDetailModal(${e.plan_id});">
+                        🌱 ${escapeHtml(e.crop_name)}
+                    </span>
+                `;
+            });
+
+            // Harvest events
+            (day.harvest_events || []).forEach(e => {
+                eventsHtml += `
+                    <span class="cal-event-pill event-harvest" title="${escapeHtml(e.label)} (${escapeHtml(e.farm_name || '')})" onclick="event.stopPropagation(); CropPlanning.openPlanDetailModal(${e.plan_id});">
+                        🌾 ${escapeHtml(e.crop_name)}
+                    </span>
+                `;
+            });
+
+            // Active growing crops chip
+            const growingCount = (day.growing_crops || []).length;
+            if (growingCount > 0) {
+                eventsHtml += `
+                    <span class="cal-event-pill event-growing-chip" title="${growingCount} active growing crops">
+                        🌿 ${growingCount} ${t("cal_growing_status", "Growing")}
+                    </span>
+                `;
+            }
+
+            html += `
+                <div class="${cellClasses}" data-date="${day.date}" onclick="CropPlanning.selectCalendarDay('${day.date}')">
+                    <div class="day-cell-top">
+                        <span class="day-cell-num">${day.day}</span>
+                    </div>
+                    <div class="day-cell-chips">
+                        ${eventsHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        // Padding cells for next month to complete the row
+        const totalRendered = startDayOfWeek + (calData.days || []).length;
+        const remainder = (7 - (totalRendered % 7)) % 7;
+        for (let i = 1; i <= remainder; i++) {
+            html += `
+                <div class="crop-cal-day-cell other-month">
+                    <div class="day-cell-top">
+                        <span class="day-cell-num">${i}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+        bodyEl.innerHTML = html;
+    }
+
+    function renderWeekCalendar() {
+        const bodyEl = document.getElementById("cropCalBody");
+        if (!bodyEl) return;
+
+        const weekdayKeys = ["weekday_mon", "weekday_tue", "weekday_wed", "weekday_thu", "weekday_fri", "weekday_sat", "weekday_sun"];
+        const weekdayDefaults = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+        let html = `<div class="crop-week-grid">`;
+
+        (calData.days || []).forEach((day, idx) => {
+            const isToday = day.is_today;
+            let colClasses = "crop-week-col";
+            if (isToday) colClasses += " is-today";
+
+            const dayName = t(weekdayKeys[day.weekday !== undefined ? day.weekday : idx], weekdayDefaults[day.weekday !== undefined ? day.weekday : idx]);
+
+            let eventsHtml = "";
+
+            // Sowing Cards
+            (day.sowing_events || []).forEach(e => {
+                eventsHtml += `
+                    <div class="week-event-card card-sowing" onclick="CropPlanning.openPlanDetailModal(${e.plan_id})">
+                        <div class="week-card-title">🌱 ${escapeHtml(e.crop_name)} ${e.variety ? `<small>(${escapeHtml(e.variety)})</small>` : ""}</div>
+                        <div class="week-card-farm">🏡 ${escapeHtml(e.farm_name || "General Farm")} • ${escapeHtml(e.season)}</div>
+                        <div style="font-size:10px; font-weight:700; margin-top:3px; color:#065f46;">${t("sowing_milestone_lbl", "Planned Sowing")}</div>
+                    </div>
+                `;
+            });
+
+            // Harvest Cards
+            (day.harvest_events || []).forEach(e => {
+                eventsHtml += `
+                    <div class="week-event-card card-harvest" onclick="CropPlanning.openPlanDetailModal(${e.plan_id})">
+                        <div class="week-card-title">🌾 ${escapeHtml(e.crop_name)} ${e.variety ? `<small>(${escapeHtml(e.variety)})</small>` : ""}</div>
+                        <div class="week-card-farm">🏡 ${escapeHtml(e.farm_name || "General Farm")} • ${escapeHtml(e.season)}</div>
+                        <div style="font-size:10px; font-weight:700; margin-top:3px; color:#92400e;">${t("harvest_milestone_lbl", "Expected Harvest")}</div>
+                    </div>
+                `;
+            });
+
+            // Growing Cards
+            (day.growing_crops || []).forEach(g => {
+                eventsHtml += `
+                    <div class="week-event-card card-growing" onclick="CropPlanning.openPlanDetailModal(${g.plan_id})">
+                        <div class="week-card-title">🌿 ${escapeHtml(g.crop_name)}</div>
+                        <div class="week-card-farm">🏡 ${escapeHtml(g.farm_name || "General Farm")}</div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:3px;">
+                            <span>Day ${g.days_growing} of ${g.total_duration}</span>
+                            <span style="font-weight:700;">${g.progress_pct}%</span>
+                        </div>
+                        <div class="crop-growing-bar-wrap">
+                            <div class="crop-growing-bar-fill" style="width: ${g.progress_pct}%;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if ((day.sowing_events || []).length === 0 && (day.harvest_events || []).length === 0 && (day.growing_crops || []).length === 0) {
+                eventsHtml = `<div style="font-size:11px; color:#94a3b8; text-align:center; padding:18px 4px;">—</div>`;
+            }
+
+            html += `
+                <div class="${colClasses}">
+                    <div class="week-col-header">
+                        <div class="week-col-dayname">${escapeHtml(dayName)}</div>
+                        <div class="week-col-date">${day.date.split("-")[2]}</div>
+                    </div>
+                    <div class="week-col-events">
+                        ${eventsHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        bodyEl.innerHTML = html;
+    }
+
+    function selectCalendarDay(dateStr) {
+        selectedCalDay = (selectedCalDay === dateStr) ? null : dateStr;
+        renderCropCalendarUI();
+    }
+
+    function renderDayDetailDrawer(dayData) {
+        const detailEl = document.getElementById("cropCalDayDetail");
+        if (!detailEl) return;
+
+        detailEl.style.display = "block";
+
+        const sowingList = dayData.sowing_events || [];
+        const harvestList = dayData.harvest_events || [];
+        const growingList = dayData.growing_crops || [];
+
+        let sectionsHtml = "";
+
+        if (sowingList.length > 0) {
+            sectionsHtml += `
+                <div class="day-detail-box" style="border-left: 3px solid #10b981;">
+                    <h5 style="color:#065f46;">🌱 ${t("sowing_milestone_lbl", "Planned Sowing Milestones")}</h5>
+                    <div class="day-detail-list">
+                        ${sowingList.map(s => `
+                            <div class="day-detail-item">
+                                <div>
+                                    <div class="day-detail-item-title">${escapeHtml(s.crop_name)} ${s.variety ? `<small>(${escapeHtml(s.variety)})</small>` : ""}</div>
+                                    <div class="day-detail-item-sub">🏡 ${escapeHtml(s.farm_name || "General Farm")} • ${escapeHtml(s.season)} • ${s.land_area} ${escapeHtml(s.area_unit || "Acres")}</div>
+                                </div>
+                                <button type="button" class="btn-view-plan-pill" onclick="CropPlanning.openPlanDetailModal(${s.plan_id})">
+                                    ${t("view_details", "Details")}
+                                </button>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (harvestList.length > 0) {
+            sectionsHtml += `
+                <div class="day-detail-box" style="border-left: 3px solid #f59e0b;">
+                    <h5 style="color:#92400e;">🌾 ${t("harvest_milestone_lbl", "Expected Harvest Milestones")}</h5>
+                    <div class="day-detail-list">
+                        ${harvestList.map(h => `
+                            <div class="day-detail-item">
+                                <div>
+                                    <div class="day-detail-item-title">${escapeHtml(h.crop_name)} ${h.variety ? `<small>(${escapeHtml(h.variety)})</small>` : ""}</div>
+                                    <div class="day-detail-item-sub">🏡 ${escapeHtml(h.farm_name || "General Farm")} • ${escapeHtml(h.season)} • ${h.land_area} ${escapeHtml(h.area_unit || "Acres")}</div>
+                                </div>
+                                <button type="button" class="btn-view-plan-pill" onclick="CropPlanning.openPlanDetailModal(${h.plan_id})">
+                                    ${t("view_details", "Details")}
+                                </button>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (growingList.length > 0) {
+            sectionsHtml += `
+                <div class="day-detail-box" style="border-left: 3px solid #0284c7;">
+                    <h5 style="color:#075985;">🌿 ${t("active_growing_crops_lbl", "Active Growing Crops in Field")}</h5>
+                    <div class="day-detail-list">
+                        ${growingList.map(g => `
+                            <div class="day-detail-item">
+                                <div>
+                                    <div class="day-detail-item-title">${escapeHtml(g.crop_name)}</div>
+                                    <div class="day-detail-item-sub">🏡 ${escapeHtml(g.farm_name || "General Farm")} • Sown ${escapeHtml(g.sowing_date)} • ${g.days_growing} days in ground (${g.progress_pct}%)</div>
+                                </div>
+                                <button type="button" class="btn-view-plan-pill" onclick="CropPlanning.openPlanDetailModal(${g.plan_id})">
+                                    ${t("view_details", "Details")}
+                                </button>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (sowingList.length === 0 && harvestList.length === 0 && growingList.length === 0) {
+            sectionsHtml = `
+                <p style="margin:0; font-size:13px; color:#64748b;">
+                    ${t("no_events_on_day", "No planned sowing, harvest or active growing crops on this date.")}
+                </p>
+            `;
+        }
+
+        detailEl.innerHTML = `
+            <div class="cal-day-detail-header">
+                <h4>📅 ${t("selected_date_plans", "Crop Plans for")} ${dayData.date}</h4>
+                <button type="button" class="btn-close-day-detail" onclick="CropPlanning.selectCalendarDay(null)">✕</button>
+            </div>
+            <div class="day-detail-sections-grid">
+                ${sectionsHtml}
+            </div>
+        `;
+    }
+
+    async function openPlanDetailModal(planId) {
+        let plan = (calData && calData.plans) ? calData.plans.find(p => p.id === planId) : null;
+        if (!plan) {
+            plan = cropPlans.find(p => p.id === planId) || upcomingPlans.find(p => p.id === planId);
+        }
+
+        if (!plan) {
+            const token = getAuthToken();
+            if (!token) return;
+            try {
+                const res = await fetch(`/api/crop-plans/${planId}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.status === "success" && data.plan) {
+                        plan = data.plan;
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching plan detail:", e);
+            }
+        }
+
+        if (!plan) {
+            showToast("Failed to load plan details", "error");
+            return;
+        }
+
+        const modal = document.getElementById("cropPlanDetailModal");
+        const titleEl = document.getElementById("planDetailCropTitle");
+        const statusBadge = document.getElementById("planDetailStatusBadge");
+        const bodyEl = document.getElementById("planDetailModalBody");
+        const editBtn = document.getElementById("btnEditPlanFromDetail");
+
+        if (titleEl) {
+            titleEl.textContent = `${plan.crop_name} ${plan.variety ? `(${plan.variety})` : ""}`;
+        }
+        if (statusBadge) {
+            statusBadge.textContent = plan.status || "Planned";
+            const badgeClass = STATUS_BADGE_CLASS[plan.status] || "badge-status-planned";
+            statusBadge.className = `plan-status-pill ${badgeClass}`;
+        }
+
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <div class="plan-info-grid">
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="lbl_filter_farm">Farm / Field</span>
+                        <span class="plan-info-val">🏡 ${escapeHtml(plan.farm_name || "General Farm")}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="lbl_season">Season & Year</span>
+                        <span class="plan-info-val">${escapeHtml(plan.season)} (${plan.planning_year || ""})</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="sowing_milestone_lbl">Planned Sowing Date</span>
+                        <span class="plan-info-val" style="color:#059669;">🌱 ${escapeHtml(plan.planned_sowing_date || "—")}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="harvest_milestone_lbl">Expected Harvest Date</span>
+                        <span class="plan-info-val" style="color:#d97706;">🌾 ${escapeHtml(plan.expected_harvest_date || "—")}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="lbl_land_area">Land Area</span>
+                        <span class="plan-info-val">📐 ${plan.land_area} ${escapeHtml(plan.area_unit || "Acres")}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label" data-i18n="lbl_field_location">Field Location</span>
+                        <span class="plan-info-val">📍 ${escapeHtml(plan.field_location || plan.farm_location || "—")}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label">Target Yield</span>
+                        <span class="plan-info-val">${plan.target_yield ? `${plan.target_yield} ${escapeHtml(plan.yield_unit || "")}` : "—"}</span>
+                    </div>
+                    <div class="plan-info-item">
+                        <span class="plan-info-label">Estimated Budget</span>
+                        <span class="plan-info-val">${plan.estimated_budget ? `₹${Number(plan.estimated_budget).toLocaleString("en-IN")}` : "—"}</span>
+                    </div>
+                </div>
+
+                ${plan.notes ? `
+                    <div style="background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:10px 14px; margin-top:12px;">
+                        <span class="plan-info-label" style="display:block; margin-bottom:4px;">Notes</span>
+                        <p style="margin:0; font-size:12px; color:#334155; line-height:1.5;">${escapeHtml(plan.notes)}</p>
+                    </div>
+                ` : ""}
+            `;
+        }
+
+        if (editBtn) {
+            editBtn.onclick = () => {
+                closePlanDetailModal();
+                openEditModal(plan.id);
+            };
+        }
+
+        if (modal) modal.classList.add("open");
+    }
+
+    function closePlanDetailModal() {
+        const modal = document.getElementById("cropPlanDetailModal");
+        if (modal) modal.classList.remove("open");
+    }
+
+    function navigateCalendar(direction) {
+        if (calView === "week") {
+            if (direction === "prev") {
+                calRefDate = new Date(calRefDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+            } else if (direction === "next") {
+                calRefDate = new Date(calRefDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+            } else if (direction === "today") {
+                calRefDate = new Date();
+                calYear = calRefDate.getFullYear();
+                calMonth = calRefDate.getMonth() + 1;
+            }
+        } else {
+            if (direction === "prev") {
+                calMonth -= 1;
+                if (calMonth < 1) {
+                    calMonth = 12;
+                    calYear -= 1;
+                }
+            } else if (direction === "next") {
+                calMonth += 1;
+                if (calMonth > 12) {
+                    calMonth = 1;
+                    calYear += 1;
+                }
+            } else if (direction === "today") {
+                const now = new Date();
+                calYear = now.getFullYear();
+                calMonth = now.getMonth() + 1;
+                calRefDate = new Date();
+            }
+        }
+        selectedCalDay = null;
+        loadCropCalendar();
+    }
+
+    /**
      * Bind Event Listeners
      */
     function bindEvents() {
@@ -1538,6 +2104,86 @@
             });
         }
 
+        // Calendar View Switcher
+        const btnCalMonth = document.getElementById("btnCalViewMonth");
+        const btnCalWeek = document.getElementById("btnCalViewWeek");
+        if (btnCalMonth && btnCalWeek) {
+            btnCalMonth.addEventListener("click", () => {
+                btnCalMonth.classList.add("active");
+                btnCalWeek.classList.remove("active");
+                calView = "month";
+                selectedCalDay = null;
+                loadCropCalendar();
+            });
+            btnCalWeek.addEventListener("click", () => {
+                btnCalWeek.classList.add("active");
+                btnCalMonth.classList.remove("active");
+                calView = "week";
+                selectedCalDay = null;
+                loadCropCalendar();
+            });
+        }
+
+        // Calendar Navigation
+        const btnCalPrev = document.getElementById("btnCalPrev");
+        if (btnCalPrev) btnCalPrev.addEventListener("click", () => navigateCalendar("prev"));
+
+        const btnCalNext = document.getElementById("btnCalNext");
+        if (btnCalNext) btnCalNext.addEventListener("click", () => navigateCalendar("next"));
+
+        const btnCalToday = document.getElementById("btnCalToday");
+        if (btnCalToday) btnCalToday.addEventListener("click", () => navigateCalendar("today"));
+
+        // Calendar Filters
+        const calFarmSelect = document.getElementById("calFilterFarm");
+        if (calFarmSelect) {
+            calFarmSelect.addEventListener("change", (e) => {
+                calFilterFarm = e.target.value;
+                selectedCalDay = null;
+                loadCropCalendar();
+            });
+        }
+
+        const calSeasonSelect = document.getElementById("calFilterSeason");
+        if (calSeasonSelect) {
+            calSeasonSelect.addEventListener("change", (e) => {
+                calFilterSeason = e.target.value;
+                selectedCalDay = null;
+                loadCropCalendar();
+            });
+        }
+
+        const calCropSelect = document.getElementById("calFilterCrop");
+        if (calCropSelect) {
+            calCropSelect.addEventListener("change", (e) => {
+                calFilterCrop = e.target.value;
+                selectedCalDay = null;
+                loadCropCalendar();
+            });
+        }
+
+        // Calendar Refresh Button
+        const btnRefreshCal = document.getElementById("btnRefreshCropCalendar");
+        if (btnRefreshCal) {
+            btnRefreshCal.addEventListener("click", () => {
+                loadCropCalendar();
+            });
+        }
+
+        // Plan Detail Modal Close
+        const btnClosePlanDetail = document.getElementById("btnClosePlanDetail");
+        if (btnClosePlanDetail) btnClosePlanDetail.addEventListener("click", closePlanDetailModal);
+
+        const btnDismissPlanDetail = document.getElementById("btnDismissPlanDetail");
+        if (btnDismissPlanDetail) btnDismissPlanDetail.addEventListener("click", closePlanDetailModal);
+
+        const planDetailModal = document.getElementById("cropPlanDetailModal");
+        if (planDetailModal) {
+            planDetailModal.addEventListener("click", (e) => {
+                if (e.target === planDetailModal) closePlanDetailModal();
+            });
+        }
+
         // Language changed event
         window.addEventListener("languageChanged", () => {
             renderSummaryUI(summaryData);
@@ -1545,6 +2191,7 @@
             renderCropPlansUI(cropPlans);
             renderRotationUI(rotationAnalyses);
             renderRecommendationsUI();
+            renderCropCalendarUI();
         });
     }
 
@@ -1559,7 +2206,8 @@
             loadUpcomingPlans(),
             loadCropPlans(),
             loadRotationAnalysis(),
-            loadRecommendations()
+            loadRecommendations(),
+            loadCropCalendar()
         ]);
     }
 
@@ -1573,6 +2221,12 @@
         renderRotationUI,
         loadRecommendations,
         renderRecommendationsUI,
+        loadCropCalendar,
+        renderCropCalendarUI,
+        openPlanDetailModal,
+        closePlanDetailModal,
+        navigateCalendar,
+        selectCalendarDay,
         openRecommendationDetailsModal,
         closeRecommendationDetailsModal,
         openCreateModalFromRecommendation,
