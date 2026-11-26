@@ -8273,5 +8273,438 @@
     }
 }
 
+/* =============================================================================
+   SMART CROP REMINDERS (FEATURE UPGRADE 9 - PHASE 3 PART 2)
+   ============================================================================= */
+
+.crop-reminders-wrapper {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.crop-reminders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.reminders-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #7c3aed;
+    background: #f5f3ff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.reminders-header-title h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.reminders-header-title p {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.reminders-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Reminder KPI Grid */
+.reminder-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.rem-kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rem-kpi-card:hover, .rem-kpi-card.active {
+    background: #ffffff;
+    border-color: #8b5cf6;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.12);
+    transform: translateY(-1px);
+}
+
+.rem-kpi-icon {
+    font-size: 1.5rem;
+}
+
+.rem-kpi-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.rem-kpi-count {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.rem-kpi-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+
+/* Reminder Toolbar */
+.crop-reminder-toolbar {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+}
+
+.toolbar-filters-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Reminders List & Cards */
+.crop-reminders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.crop-reminder-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 5px solid #8b5cf6;
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.crop-reminder-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+}
+
+.crop-reminder-card.rem-overdue {
+    border-left-color: #ef4444;
+    background: #fffafa;
+}
+
+.crop-reminder-card.rem-today {
+    border-left-color: #f59e0b;
+    background: #fffdf5;
+}
+
+.crop-reminder-card.rem-upcoming {
+    border-left-color: #3b82f6;
+}
+
+.crop-reminder-card.rem-completed {
+    border-left-color: #10b981;
+    opacity: 0.85;
+}
+
+.crop-reminder-card.rem-dismissed {
+    border-left-color: #94a3b8;
+    opacity: 0.7;
+    background: #f8fafc;
+}
+
+.rem-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.rem-card-tags {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.rem-type-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.badge-sowing {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-harvest {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-vegetative {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.badge-flowering {
+    background: #fdf2f8;
+    color: #be185d;
+    border: 1px solid #fbcfe8;
+}
+
+.badge-fruit {
+    background: #faf5ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+
+.badge-estimated-stage {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px dashed #cbd5e1;
+}
+
+.rem-relative-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.rel-badge-overdue {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.rel-badge-today {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.rel-badge-upcoming {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.rel-badge-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.rel-badge-dismissed {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.rem-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.rem-card-meta {
+    font-size: 0.84rem;
+    color: #64748b;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.rem-card-desc {
+    font-size: 0.88rem;
+    color: #334155;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.reminder-guidance-box {
+    background: #f8fafc;
+    border-left: 3px solid #3b82f6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+    color: #1e293b;
+    line-height: 1.45;
+}
+
+.guidance-box-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #2563eb;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rem-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-rem-action {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-rem-complete {
+    background: #10b981;
+    color: #ffffff;
+}
+.btn-rem-complete:hover {
+    background: #059669;
+}
+
+.btn-rem-dismiss {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+.btn-rem-dismiss:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-rem-activity {
+    background: #6366f1;
+    color: #ffffff;
+}
+.btn-rem-activity:hover {
+    background: #4f46e5;
+}
+
+.btn-rem-reopen {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+.btn-rem-reopen:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* Calendar Event Pill for Reminders */
+.event-reminder-chip {
+    background: #ede9fe;
+    color: #6d28d9;
+    border-left: 3px solid #8b5cf6;
+}
+.event-reminder-chip:hover {
+    background: #ddd6fe;
+}
+
+.card-reminder {
+    border-left-color: #8b5cf6;
+    background: #faf5ff;
+}
+
+.day-detail-reminders {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.day-detail-rem-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #4338ca;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.day-rem-card {
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 0.84rem;
+}
+
+/* Responsive adjustments for Reminders */
+@media (max-width: 768px) {
+    .crop-reminders-wrapper {
+        padding: 14px;
+    }
+    .reminder-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .toolbar-filters-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .rem-card-header {
+        flex-direction: column;
+    }
+    .rem-card-actions {
+        justify-content: stretch;
+    }
+    .btn-rem-action {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+
 
 

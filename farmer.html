@@ -116,9 +116,20 @@
                     <p data-i18n="upcoming_crop_plans_desc">Sowing scheduled in the coming weeks and months</p>
                 </div>
                 <div class="banner-actions">
+                    <a href="#cropRemindersContainer" class="btn-banner-view-all btn-banner-rem-link" id="btnBannerRemindersLink">
+                        <span class="btn-icon">⏰</span> <span data-i18n="btn_crop_reminders">Reminders</span>
+                        <span class="rem-badge-count" id="bannerRemindersCountBadge" style="display:none; background:#ef4444; color:#fff; font-size:0.75rem; padding:1px 7px; border-radius:10px; margin-left:4px;">0</span>
+                    </a>
                     <a href="#cropPlanningSection" class="btn-banner-view-all" data-i18n="btn_view_all_plans">View All Plans →</a>
                     <button type="button" class="btn-banner-add" id="btnOpenNewCropPlan" data-i18n="btn_new_crop_plan">➕ New Plan</button>
                 </div>
+            </div>
+            <!-- DASHBOARD REMINDER NOTICE STRIP (Shown when upcoming/due reminders exist) -->
+            <div class="dashboard-reminder-strip" id="dashboardReminderStrip" style="display:none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #92400e;">
+                    <span>🔔</span> <span id="dashboardReminderStripText">Upcoming crop reminders</span>
+                </div>
+                <a href="#cropRemindersContainer" style="color: #b45309; font-weight: 600; text-decoration: underline;" data-i18n="link_view_reminders">View Reminders →</a>
             </div>
             <div class="upcoming-plans-row" id="dashboardUpcomingPlansContainer">
                 <!-- Dynamically populated by js/crop_planning.js -->
@@ -2921,6 +2932,102 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 </div>
             </div>
 
+            <!-- SMART CROP REMINDERS SECTION (FEATURE UPGRADE 9 - PHASE 3 PART 2) -->
+            <div class="crop-reminders-wrapper" id="cropRemindersContainer">
+                <div class="crop-reminders-header">
+                    <div class="reminders-header-title">
+                        <span class="reminders-badge" data-i18n="badge_crop_reminders">SMART ALERTS</span>
+                        <h3 data-i18n="crop_reminders_title">⏰ Smart Crop Reminders</h3>
+                        <p data-i18n="crop_reminders_subtitle">
+                            Automated milestone, sowing, harvest, and growth-stage alerts tailored to your crop plans.
+                        </p>
+                    </div>
+                    <div class="reminders-header-actions">
+                        <button type="button" class="btn-farm-action btn-settings-rem" id="btnReminderSettings" title="Reminder Settings">
+                            <span class="btn-icon">⚙️</span> <span data-i18n="btn_reminder_settings">Settings</span>
+                        </button>
+                        <button type="button" class="btn-farm-action btn-refresh-rem" id="btnRefreshCropReminders" title="Refresh Reminders">
+                            <span class="btn-icon">🔄</span> <span data-i18n="btn_refresh_reminders">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- REMINDERS KPI SUMMARY GRID -->
+                <div class="reminder-kpi-grid">
+                    <div class="rem-kpi-card" data-filter="all">
+                        <div class="rem-kpi-icon icon-total-rem">🔔</div>
+                        <div class="rem-kpi-info">
+                            <span class="rem-kpi-count" id="kpiTotalReminders">0</span>
+                            <span class="rem-kpi-label" data-i18n="kpi_total_reminders">Total Reminders</span>
+                        </div>
+                    </div>
+                    <div class="rem-kpi-card" data-filter="upcoming">
+                        <div class="rem-kpi-icon icon-upcoming-rem">⏳</div>
+                        <div class="rem-kpi-info">
+                            <span class="rem-kpi-count" id="kpiUpcomingReminders">0</span>
+                            <span class="rem-kpi-label" data-i18n="kpi_upcoming_reminders">Upcoming</span>
+                        </div>
+                    </div>
+                    <div class="rem-kpi-card" data-filter="today">
+                        <div class="rem-kpi-icon icon-today-rem">⚠️</div>
+                        <div class="rem-kpi-info">
+                            <span class="rem-kpi-count" id="kpiTodayReminders">0</span>
+                            <span class="rem-kpi-label" data-i18n="kpi_today_reminders">Due Today</span>
+                        </div>
+                    </div>
+                    <div class="rem-kpi-card" data-filter="overdue">
+                        <div class="rem-kpi-icon icon-overdue-rem">🔴</div>
+                        <div class="rem-kpi-info">
+                            <span class="rem-kpi-count" id="kpiOverdueReminders">0</span>
+                            <span class="rem-kpi-label" data-i18n="kpi_overdue_reminders">Overdue</span>
+                        </div>
+                    </div>
+                    <div class="rem-kpi-card" data-filter="completed">
+                        <div class="rem-kpi-icon icon-completed-rem">✅</div>
+                        <div class="rem-kpi-info">
+                            <span class="rem-kpi-count" id="kpiCompletedReminders">0</span>
+                            <span class="rem-kpi-label" data-i18n="kpi_completed_reminders">Completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REMINDER TOOLBAR & FILTERS -->
+                <div class="crop-reminder-toolbar">
+                    <div class="toolbar-filters-group">
+                        <div class="filter-item-inline">
+                            <label for="remFilterStatus" data-i18n="lbl_filter_status">Status:</label>
+                            <select id="remFilterStatus" class="form-control-sm">
+                                <option value="all" data-i18n="opt_all_statuses">All Statuses</option>
+                                <option value="upcoming" data-i18n="opt_rem_upcoming">Upcoming</option>
+                                <option value="today" data-i18n="opt_rem_today">Due Today</option>
+                                <option value="overdue" data-i18n="opt_rem_overdue">Overdue</option>
+                                <option value="completed" data-i18n="opt_rem_completed">Completed</option>
+                                <option value="dismissed" data-i18n="opt_rem_dismissed">Dismissed</option>
+                            </select>
+                        </div>
+                        <div class="filter-item-inline">
+                            <label for="remFilterType" data-i18n="lbl_filter_type">Type:</label>
+                            <select id="remFilterType" class="form-control-sm">
+                                <option value="all" data-i18n="opt_all_types">All Types</option>
+                                <option value="milestone" data-i18n="opt_rem_milestones">Milestone Alerts</option>
+                                <option value="growth_stage" data-i18n="opt_rem_growth_stages">Growth Stage Care</option>
+                            </select>
+                        </div>
+                        <div class="filter-item-inline">
+                            <label for="remFilterPlan" data-i18n="lbl_filter_crop_plan">Crop Plan:</label>
+                            <select id="remFilterPlan" class="form-control-sm">
+                                <option value="all" data-i18n="opt_all_plans">All Crop Plans</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REMINDERS LIST CONTAINER -->
+                <div class="crop-reminders-list" id="cropRemindersList">
+                    <!-- Populated dynamically by js/crop_planning.js -->
+                </div>
+            </div>
+
         </section>
 
 
@@ -4368,6 +4475,66 @@ X-Device-Key: &lt;YOUR_SECRET_DEVICE_KEY&gt;</pre>
                 <div class="modal-actions" style="border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
                     <button type="button" class="btn-secondary modal-close-btn" id="btnDismissPlanDetail" data-i18n="btn_close">Close</button>
                     <button type="button" class="btn-primary" id="btnEditPlanFromDetail" data-i18n="btn_edit_plan">✏️ Edit Crop Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. CROP REMINDER SETTINGS MODAL (FEATURE UPGRADE 9 - PHASE 3 PART 2) -->
+        <div class="farm-modal-backdrop" id="cropReminderSettingsModal">
+            <div class="farm-modal-dialog" style="max-width: 540px;">
+                <div class="modal-header">
+                    <div class="settings-modal-title-wrap">
+                        <span class="plan-status-pill" style="background:#e0f2fe; color:#0369a1;" data-i18n="badge_settings">CONFIGURATION</span>
+                        <h3 data-i18n="modal_reminder_settings_title">⚙️ Crop Reminder Settings</h3>
+                    </div>
+                    <button type="button" class="modal-close-btn" id="btnCloseReminderSettings" aria-label="Close modal">✕</button>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 18px;" data-i18n="modal_reminder_settings_desc">
+                        Customize advance notification lead times and automated growth stage advisories.
+                    </p>
+
+                    <!-- SOWING REMINDERS GROUP -->
+                    <div class="settings-group" style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;" data-i18n="lbl_sowing_lead_times">
+                            🌱 Sowing Date Reminders (Days Before)
+                        </label>
+                        <div class="checkbox-row" style="display: flex; gap: 14px; flex-wrap: wrap;">
+                            <label class="check-label"><input type="checkbox" class="cb-sow-lead" value="7" checked> <span data-i18n="lead_7_days">7 Days Before</span></label>
+                            <label class="check-label"><input type="checkbox" class="cb-sow-lead" value="3"> <span data-i18n="lead_3_days">3 Days Before</span></label>
+                            <label class="check-label"><input type="checkbox" class="cb-sow-lead" value="1" checked> <span data-i18n="lead_1_day">1 Day Before</span></label>
+                            <label class="check-label"><input type="checkbox" class="cb-sow-lead" value="0" checked> <span data-i18n="lead_day_of">On Sowing Day</span></label>
+                        </div>
+                    </div>
+
+                    <!-- HARVEST REMINDERS GROUP -->
+                    <div class="settings-group" style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;" data-i18n="lbl_harvest_lead_times">
+                            🌾 Expected Harvest Reminders (Days Before)
+                        </label>
+                        <div class="checkbox-row" style="display: flex; gap: 14px; flex-wrap: wrap;">
+                            <label class="check-label"><input type="checkbox" class="cb-har-lead" value="14" checked> <span data-i18n="lead_14_days">14 Days Before</span></label>
+                            <label class="check-label"><input type="checkbox" class="cb-har-lead" value="7" checked> <span data-i18n="lead_7_days">7 Days Before</span></label>
+                            <label class="check-label"><input type="checkbox" class="cb-har-lead" value="0" checked> <span data-i18n="lead_day_of_harvest">On Harvest Day</span></label>
+                        </div>
+                    </div>
+
+                    <!-- GROWTH STAGES TOGGLE -->
+                    <div class="settings-group" style="margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label class="check-label" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="cbEnableGrowthStages" checked style="margin-top: 3px;">
+                            <div>
+                                <strong style="color: #0f172a;" data-i18n="lbl_enable_growth_stages">Enable Growth Stage Advisories</strong>
+                                <p style="margin: 3px 0 0; color: #64748b; font-size: 0.82rem;" data-i18n="desc_enable_growth_stages">
+                                    Generates estimated care checkpoints for vegetative, flowering, and grain/fruit development phases.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions" style="border-top: 1px solid #e2e8f0; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-secondary modal-close-btn" id="btnCancelReminderSettings" data-i18n="btn_cancel">Cancel</button>
+                    <button type="button" class="btn-primary" id="btnSaveReminderSettings" data-i18n="btn_save_settings">💾 Save Settings</button>
                 </div>
             </div>
         </div>

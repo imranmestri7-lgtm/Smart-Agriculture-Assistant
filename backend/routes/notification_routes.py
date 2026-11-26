@@ -150,6 +150,49 @@ def _generate_notifications(connection, cursor, user_id):
                 msg = f"Tender {crop_name} seedlings at {farm_name} require light, frequent watering and crust prevention. Check germination progress."
                 _insert_notification_if_new(connection, cursor, user_id, "crop", title, msg, "info", "#farmCropSection", unique_key, related_id=crop_id)
 
+        # E. Smart Crop Plan Reminders (Feature Upgrade 9 - Phase 3 Part 2)
+        try:
+            cursor.execute("""
+                SELECT r.id, r.crop_plan_id, r.reminder_type, r.milestone_type,
+                       r.title, r.description, r.due_date, r.is_estimated,
+                       p.crop_name, p.variety, f.farm_name
+                FROM crop_plan_reminders r
+                JOIN crop_plans p ON p.id = r.crop_plan_id
+                LEFT JOIN farms f ON f.id = r.farm_id
+                WHERE r.user_id = %s
+                  AND r.status = 'pending'
+                  AND r.due_date <= DATE_ADD(%s, INTERVAL 7 DAY)
+                  AND r.due_date >= DATE_SUB(%s, INTERVAL 14 DAY)
+                ORDER BY r.due_date ASC
+            """, (user_id, today, today))
+            plan_rem_rows = cursor.fetchall() or []
+            for pr in plan_rem_rows:
+                pr_id = pr["id"]
+                pr_due = pr["due_date"]
+                pr_due_dt = pr_due if isinstance(pr_due, date) else datetime.strptime(str(pr_due)[:10], "%Y-%m-%d").date()
+                days_diff = (pr_due_dt - today).days
+
+                if days_diff < 0:
+                    sev = "warning"
+                    notif_title = f"Overdue Crop Reminder: {pr['title']}"
+                    notif_msg = f"{pr['crop_name']} plan alert was due on {pr_due_dt} ({abs(days_diff)} days overdue). Please review and update."
+                elif days_diff == 0:
+                    sev = "warning"
+                    notif_title = f"Today's Crop Reminder: {pr['title']}"
+                    notif_msg = f"{pr['crop_name']} milestone is due today ({pr_due_dt}). Tap to view guidance and manage."
+                else:
+                    sev = "info"
+                    notif_title = f"Upcoming Reminder: {pr['title']}"
+                    notif_msg = f"{pr['crop_name']} milestone coming up in {days_diff} days on {pr_due_dt}."
+
+                unique_key = f"cprem_{pr_id}_{pr_due_dt}"
+                _insert_notification_if_new(
+                    connection, cursor, user_id, "crop", notif_title, notif_msg,
+                    sev, "#cropPlanningSection", unique_key, related_id=pr.get("crop_plan_id")
+                )
+        except Exception as e:
+            print(f"Warning: could not generate crop plan reminder notifications: {e}")
+
     # =========================================================================
     # 2. IRRIGATION ALERTS (Feature Upgrade 3 Integration)
     # =========================================================================

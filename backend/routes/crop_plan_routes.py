@@ -16,6 +16,15 @@ from config import get_db_connection
 from utils.auth_tokens import get_user_id_from_token
 from utils.crop_rotation_engine import analyze_all_farmer_farms
 from utils.seasonal_crop_advisor import generate_seasonal_crop_recommendations
+from utils.crop_reminder_engine import (
+    generate_reminders_for_plan,
+    generate_reminders_for_all_plans,
+    get_farmer_reminders,
+    update_reminder_status,
+    add_reminder_to_farm_activities,
+    get_or_create_reminder_settings,
+    update_reminder_settings
+)
 
 crop_plan_bp = Blueprint("crop_plans", __name__, url_prefix="/api/crop-plans")
 
@@ -655,6 +664,51 @@ def get_crop_calendar():
 
         plans = [_format_plan_row(r) for r in rows]
 
+        # Fetch reminders in date range
+        reminders_by_date = {}
+        total_reminders_count = 0
+        pending_reminders_count = 0
+        try:
+            cursor.execute("""
+                SELECT r.id, r.crop_plan_id, r.farm_id, r.reminder_type, r.milestone_type,
+                       r.title, r.description, r.guidance, r.due_date, r.days_offset,
+                       r.status, r.is_estimated,
+                       p.crop_name, p.variety, p.season, f.farm_name
+                FROM crop_plan_reminders r
+                JOIN crop_plans p ON p.id = r.crop_plan_id
+                LEFT JOIN farms f ON f.id = r.farm_id
+                WHERE r.user_id = %s AND r.due_date BETWEEN %s AND %s
+                ORDER BY r.due_date ASC, r.id ASC
+            """, (user_id, start_dt.strftime("%Y-%m-%d"), end_dt.strftime("%Y-%m-%d")))
+            rem_rows = cursor.fetchall() or []
+            for rr in rem_rows:
+                d_str = rr["due_date"].strftime("%Y-%m-%d") if isinstance(rr["due_date"], date) else str(rr["due_date"])[:10]
+                if d_str not in reminders_by_date:
+                    reminders_by_date[d_str] = []
+                icon = "🌱" if rr["milestone_type"] == "sowing" else ("🌾" if rr["milestone_type"] == "harvest" else "⏰")
+                reminders_by_date[d_str].append({
+                    "id": rr["id"],
+                    "plan_id": rr["crop_plan_id"],
+                    "crop_name": rr["crop_name"],
+                    "variety": rr.get("variety"),
+                    "season": rr.get("season"),
+                    "farm_name": rr.get("farm_name"),
+                    "title": rr["title"],
+                    "description": rr.get("description"),
+                    "guidance": rr.get("guidance"),
+                    "milestone_type": rr["milestone_type"],
+                    "reminder_type": rr["reminder_type"],
+                    "status": rr["status"],
+                    "is_estimated": bool(rr.get("is_estimated")),
+                    "due_date": d_str,
+                    "icon": icon
+                })
+                total_reminders_count += 1
+                if rr["status"] == "pending":
+                    pending_reminders_count += 1
+        except Exception as rem_err:
+            print(f"Warning: could not fetch calendar reminders: {rem_err}")
+
         # Build day map for every date in [start_dt, end_dt]
         days_list = []
         cur = start_dt
@@ -731,6 +785,8 @@ def get_crop_calendar():
                     })
                     active_growing_plans.add(p["id"])
 
+            day_rems = reminders_by_date.get(cur_str, [])
+
             days_list.append({
                 "date": cur_str,
                 "day": cur.day,
@@ -742,6 +798,9 @@ def get_crop_calendar():
                 "sowing_events": sowing_items,
                 "harvest_events": harvest_items,
                 "growing_crops": growing_items,
+                "reminders": day_rems,
+                "reminder_count": len(day_rems),
+                "has_pending_reminders": any(r["status"] == "pending" for r in day_rems),
                 "total_events": len(sowing_items) + len(harvest_items),
                 "total_active": len(sowing_items) + len(harvest_items) + len(growing_items)
             })
@@ -765,13 +824,193 @@ def get_crop_calendar():
                 "total_plans": len(plans),
                 "sowing_events": total_sowing_events,
                 "harvest_events": total_harvest_events,
-                "growing_crops": len(active_growing_plans)
+                "growing_crops": len(active_growing_plans),
+                "total_reminders": total_reminders_count,
+                "pending_reminders": pending_reminders_count
             }
         }), 200
 
     except Exception as e:
         print(f"Error fetching crop calendar: {e}")
         return jsonify({"status": "error", "message": "Failed to fetch crop calendar."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+# =============================================================================
+# SMART CROP REMINDER ROUTES (Feature Upgrade 9 - Phase 3 Part 2)
+# =============================================================================
+
+@crop_plan_bp.route("/reminders", methods=["GET"])
+def get_crop_reminders():
+    """
+    Retrieve reminders for the authenticated farmer with multi-factor filtering:
+    - status: 'all', 'upcoming', 'today', 'overdue', 'pending', 'completed', 'dismissed'
+    - type: 'all', 'milestone', 'growth_stage'
+    - plan_id, farm_id, limit, start_date, end_date
+    Automatically ensures reminders are generated/synced for all active plans.
+    """
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        # Automatically synchronize reminders for user's plans
+        generate_reminders_for_all_plans(user_id, conn)
+
+        filters = {
+            "status": request.args.get("status", "all"),
+            "type": request.args.get("type", "all"),
+            "plan_id": request.args.get("plan_id"),
+            "farm_id": request.args.get("farm_id"),
+            "limit": request.args.get("limit"),
+            "start_date": request.args.get("start_date"),
+            "end_date": request.args.get("end_date")
+        }
+
+        res = get_farmer_reminders(user_id, conn, filters)
+        return jsonify({
+            "status": "success",
+            "reminders": res["reminders"],
+            "counts": res["counts"],
+            "total_returned": res["total_returned"]
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching crop reminders: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch crop reminders."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@crop_plan_bp.route("/reminders/settings", methods=["GET"])
+def get_reminder_settings():
+    """Retrieve farmer's reminder configuration."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        settings = get_or_create_reminder_settings(user_id, conn)
+        return jsonify({"status": "success", "settings": settings}), 200
+    except Exception as e:
+        print(f"Error fetching reminder settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch reminder settings."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@crop_plan_bp.route("/reminders/settings", methods=["PUT"])
+def save_reminder_settings():
+    """Update farmer's reminder configuration and synchronize plan reminders."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    payload = request.get_json(silent=True) or {}
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        updated = update_reminder_settings(user_id, payload, conn)
+        # Re-generate reminders with new configuration
+        gen_res = generate_reminders_for_all_plans(user_id, conn)
+        return jsonify({
+            "status": "success",
+            "message": "Reminder settings updated successfully.",
+            "settings": updated,
+            "regenerated": gen_res
+        }), 200
+    except Exception as e:
+        print(f"Error updating reminder settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to update reminder settings."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@crop_plan_bp.route("/<int:plan_id>/generate-reminders", methods=["POST"])
+def trigger_plan_reminders(plan_id):
+    """Force generate or refresh reminders for a specific plan."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    payload = request.get_json(silent=True) or {}
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        custom_settings = None
+        if payload:
+            custom_settings = {
+                "sowing_lead_days": payload.get("sowing_lead_days", [7, 1, 0]),
+                "harvest_lead_days": payload.get("harvest_lead_days", [14, 7, 0]),
+                "enable_growth_stages": payload.get("enable_growth_stages", True)
+            }
+        res = generate_reminders_for_plan(user_id, plan_id, conn, custom_settings)
+        return jsonify({
+            "status": "success",
+            "message": f"Reminders processed for crop plan #{plan_id}.",
+            "result": res
+        }), 200
+    except Exception as e:
+        print(f"Error generating reminders for plan #{plan_id}: {e}")
+        return jsonify({"status": "error", "message": "Failed to generate reminders."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@crop_plan_bp.route("/reminders/<int:reminder_id>/status", methods=["PATCH"])
+def patch_reminder_status(reminder_id):
+    """Update status of a reminder ('completed', 'dismissed', 'pending')."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    payload = request.get_json(silent=True) or {}
+    new_status = payload.get("status")
+    if not new_status:
+        return jsonify({"status": "error", "message": "Missing 'status' in request body."}), 400
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        res = update_reminder_status(user_id, reminder_id, new_status, conn)
+        status_code = res.get("code", 200 if res["status"] == "success" else 400)
+        return jsonify(res), status_code
+    except Exception as e:
+        print(f"Error updating reminder status: {e}")
+        return jsonify({"status": "error", "message": "Failed to update reminder status."}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@crop_plan_bp.route("/reminders/<int:reminder_id>/add-to-activity", methods=["POST"])
+def add_reminder_activity(reminder_id):
+    """Convert a crop reminder into a Farm Activity."""
+    user_id, err = _authenticate()
+    if err:
+        return err
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        res = add_reminder_to_farm_activities(user_id, reminder_id, conn)
+        status_code = res.get("code", 201 if (res["status"] == "success" and not res.get("already_existed")) else 200)
+        return jsonify(res), status_code
+    except Exception as e:
+        print(f"Error adding reminder to farm activities: {e}")
+        return jsonify({"status": "error", "message": "Failed to convert reminder to activity."}), 500
     finally:
         if conn:
             conn.close()
@@ -909,6 +1148,12 @@ def create_crop_plan():
         """, (plan_id,))
         created_row = cursor.fetchone()
 
+        # Auto-generate milestone and growth reminders for the new plan
+        try:
+            generate_reminders_for_plan(user_id, plan_id, conn)
+        except Exception as rem_gen_err:
+            print(f"Warning: could not auto-generate reminders on plan creation: {rem_gen_err}")
+
         return jsonify({
             "status": "success",
             "message": "Crop plan created successfully.",
@@ -1039,6 +1284,12 @@ def update_crop_plan(plan_id):
             WHERE cp.id = %s
         """, (plan_id,))
         updated_row = cursor.fetchone()
+
+        # Synchronize milestone and growth reminders for the updated plan
+        try:
+            generate_reminders_for_plan(user_id, plan_id, conn)
+        except Exception as rem_sync_err:
+            print(f"Warning: could not synchronize reminders on plan update: {rem_sync_err}")
 
         return jsonify({
             "status": "success",
