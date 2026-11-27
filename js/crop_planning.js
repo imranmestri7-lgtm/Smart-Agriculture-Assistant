@@ -389,6 +389,20 @@
             );
         }
 
+        // Populate Reminder plan filter if present
+        const remPlanSelect = document.getElementById("remFilterPlan");
+        if (remPlanSelect && plans && plans.length > 0) {
+            const currentVal = remPlanSelect.value;
+            let optionsHtml = `<option value="all">${t("opt_all_plans", "All Crop Plans")}</option>`;
+            plans.forEach(p => {
+                optionsHtml += `<option value="${p.id}">${escapeHtml(p.crop_name)} (${escapeHtml(p.season)} ${p.planning_year || ""})</option>`;
+            });
+            remPlanSelect.innerHTML = optionsHtml;
+            if (currentVal && remPlanSelect.querySelector(`option[value="${currentVal}"]`)) {
+                remPlanSelect.value = currentVal;
+            }
+        }
+
         if (filtered.length === 0) {
             container.innerHTML = `
                 <div class="crop-plans-empty">
@@ -653,7 +667,7 @@
             if (res.ok && data.status === "success") {
                 showToast(isEdit ? t("plan_updated_success", "Crop plan updated successfully!") : t("plan_created_success", "Crop plan created successfully!"), "success");
                 closeModal();
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar(), loadCropReminders()]);
             } else {
                 console.error("Save plan failed with response:", data);
                 showToast(data.error || "Failed to save crop plan", "error");
@@ -689,7 +703,7 @@
             const data = await res.json();
             if (res.ok && data.status === "success") {
                 showToast(t("plan_deleted_success", "Crop plan deleted successfully!"), "success");
-                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar()]);
+                await Promise.all([loadCropPlans(), loadUpcomingPlans(), loadSummary(), loadRotationAnalysis(), loadRecommendations(), loadCropCalendar(), loadCropReminders()]);
             } else {
                 showToast(data.error || "Failed to delete crop plan", "error");
             }
@@ -1623,6 +1637,19 @@
                 `;
             }
 
+            // Reminders pill if day has reminders
+            const dayReminders = day.reminders || [];
+            if (dayReminders.length > 0) {
+                const remCount = dayReminders.length;
+                const remTitles = dayReminders.map(r => r.title).join(" | ");
+                const hasPending = day.has_pending_reminders;
+                eventsHtml += `
+                    <span class="cal-event-pill event-reminder-chip ${hasPending ? 'has-pending' : 'all-done'}" title="${escapeHtml(remTitles)}">
+                        ${hasPending ? '⏰' : '✅'} ${remCount} ${remCount > 1 ? t("lbl_reminders_plural", "Reminders") : t("lbl_reminder_singular", "Reminder")}
+                    </span>
+                `;
+            }
+
             html += `
                 <div class="${cellClasses}" data-date="${day.date}" onclick="CropPlanning.selectCalendarDay('${day.date}')">
                     <div class="day-cell-top">
@@ -1709,7 +1736,21 @@
                 `;
             });
 
-            if ((day.sowing_events || []).length === 0 && (day.harvest_events || []).length === 0 && (day.growing_crops || []).length === 0) {
+            // Reminder Cards in Week View
+            (day.reminders || []).forEach(r => {
+                const isPending = (r.status === "pending");
+                eventsHtml += `
+                    <div class="week-event-card card-reminder ${isPending ? 'rem-pending' : 'rem-done'}" onclick="CropPlanning.filterRemindersByPlan(${r.plan_id})">
+                        <div class="week-card-title">${isPending ? '⏰' : '✅'} ${escapeHtml(r.title)}</div>
+                        <div class="week-card-farm">🏡 ${escapeHtml(r.farm_name || "General Farm")} • ${escapeHtml(r.crop_name)}</div>
+                        <div style="font-size:10px; font-weight:700; margin-top:3px; color:#6d28d9;">
+                            ${r.is_estimated ? '📅 ' + t("lbl_estimated_stage", "Estimated Stage") : t("lbl_milestone", "Milestone")} (${escapeHtml(r.status)})
+                        </div>
+                    </div>
+                `;
+            });
+
+            if ((day.sowing_events || []).length === 0 && (day.harvest_events || []).length === 0 && (day.growing_crops || []).length === 0 && (day.reminders || []).length === 0) {
                 eventsHtml = `<div style="font-size:11px; color:#94a3b8; text-align:center; padding:18px 4px;">—</div>`;
             }
 
@@ -1810,10 +1851,52 @@
             `;
         }
 
-        if (sowingList.length === 0 && harvestList.length === 0 && growingList.length === 0) {
+        const remindersList = dayData.reminders || [];
+        if (remindersList.length > 0) {
+            sectionsHtml += `
+                <div class="day-detail-box" style="border-left: 3px solid #8b5cf6;">
+                    <h5 style="color:#6d28d9;">⏰ ${t("crop_reminders_title", "Crop Reminders & Advisories")}</h5>
+                    <div class="day-detail-list">
+                        ${remindersList.map(r => {
+                            const isPending = (r.status === "pending");
+                            const badgeClass = r.status === "completed" ? "rel-badge-completed" : (r.status === "dismissed" ? "rel-badge-dismissed" : "rel-badge-today");
+                            return `
+                                <div class="day-detail-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                        <div class="day-detail-item-title">${escapeHtml(r.title)}</div>
+                                        <span class="rem-relative-badge ${badgeClass}">${escapeHtml(r.status)}</span>
+                                    </div>
+                                    <div class="day-detail-item-sub">🏡 ${escapeHtml(r.farm_name || "General Farm")} • ${escapeHtml(r.crop_name)} ${r.variety ? `(${escapeHtml(r.variety)})` : ""}</div>
+                                    ${r.guidance ? `<div class="reminder-guidance-box" style="width:100%; font-size:11px; margin-top:4px;">${escapeHtml(r.guidance)}</div>` : ""}
+                                    <div style="display:flex; gap:6px; margin-top:4px; align-self:flex-end;">
+                                        ${isPending ? `
+                                            <button type="button" class="btn-rem-action btn-rem-complete" style="font-size:11px; padding:3px 8px;" onclick="CropPlanning.updateReminderStatus(${r.id}, 'completed')">
+                                                ✓ ${t("btn_mark_completed", "Complete")}
+                                            </button>
+                                            <button type="button" class="btn-rem-action btn-rem-dismiss" style="font-size:11px; padding:3px 8px;" onclick="CropPlanning.updateReminderStatus(${r.id}, 'dismissed')">
+                                                ✕ ${t("btn_dismiss", "Dismiss")}
+                                            </button>
+                                            <button type="button" class="btn-rem-action btn-rem-activity" style="font-size:11px; padding:3px 8px;" onclick="CropPlanning.addReminderToActivity(${r.id})">
+                                                📋 ${t("btn_add_to_activity", "Add to Tasks")}
+                                            </button>
+                                        ` : `
+                                            <button type="button" class="btn-rem-action btn-rem-reopen" style="font-size:11px; padding:3px 8px;" onclick="CropPlanning.updateReminderStatus(${r.id}, 'pending')">
+                                                ↺ ${t("btn_reopen", "Reopen")}
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (sowingList.length === 0 && harvestList.length === 0 && growingList.length === 0 && remindersList.length === 0) {
             sectionsHtml = `
                 <p style="margin:0; font-size:13px; color:#64748b;">
-                    ${t("no_events_on_day", "No planned sowing, harvest or active growing crops on this date.")}
+                    ${t("no_events_on_day", "No planned sowing, harvest, active growing crops or reminders on this date.")}
                 </p>
             `;
         }
@@ -1967,6 +2050,367 @@
         }
         selectedCalDay = null;
         loadCropCalendar();
+    }
+
+    /**
+     * Smart Crop Reminders Controller (Feature Upgrade 9 - Phase 3 Parts 2 & 3)
+     */
+    let remindersData = [];
+    let reminderCounts = { total: 0, upcoming: 0, today: 0, overdue: 0, completed: 0, dismissed: 0 };
+    let remFilterStatus = "all";
+    let remFilterType = "all";
+    let remFilterPlan = "all";
+
+    async function loadCropReminders() {
+        const listContainer = document.getElementById("cropRemindersList");
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div class="plans-loading-state" style="padding: 24px; text-align: center;">
+                    <div class="smart-spinner"></div>
+                    <p>${t("loading_crop_reminders", "Loading crop reminders...")}</p>
+                </div>
+            `;
+        }
+
+        const token = getAuthToken();
+        if (!token) return;
+
+        const params = new URLSearchParams();
+        if (remFilterStatus && remFilterStatus !== "all") params.append("status", remFilterStatus);
+        if (remFilterType && remFilterType !== "all") params.append("type", remFilterType);
+        if (remFilterPlan && remFilterPlan !== "all") params.append("plan_id", remFilterPlan);
+
+        try {
+            const res = await fetch(`/api/crop-plans/reminders?${params.toString()}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status === "success") {
+                    remindersData = data.reminders || [];
+                    reminderCounts = data.counts || reminderCounts;
+                    updateRemindersKPIs();
+                    renderCropRemindersUI();
+                    updateDashboardReminderWidgets();
+                }
+            } else {
+                if (listContainer) {
+                    listContainer.innerHTML = `<div class="plan-error-state"><p>⚠️ Failed to load crop reminders.</p></div>`;
+                }
+            }
+        } catch (err) {
+            console.error("Error loading crop reminders:", err);
+            if (listContainer) {
+                listContainer.innerHTML = `<div class="plan-error-state"><p>⚠️ Network error loading reminders.</p></div>`;
+            }
+        }
+    }
+
+    function updateRemindersKPIs() {
+        const kTotal = document.getElementById("kpiTotalReminders");
+        const kUpcoming = document.getElementById("kpiUpcomingReminders");
+        const kToday = document.getElementById("kpiTodayReminders");
+        const kOverdue = document.getElementById("kpiOverdueReminders");
+        const kCompleted = document.getElementById("kpiCompletedReminders");
+
+        if (kTotal) kTotal.textContent = reminderCounts.total || 0;
+        if (kUpcoming) kUpcoming.textContent = reminderCounts.upcoming || 0;
+        if (kToday) kToday.textContent = reminderCounts.today || 0;
+        if (kOverdue) kOverdue.textContent = reminderCounts.overdue || 0;
+        if (kCompleted) kCompleted.textContent = reminderCounts.completed || 0;
+    }
+
+    function updateDashboardReminderWidgets() {
+        const bannerBadge = document.getElementById("bannerRemindersCountBadge");
+        const activeCount = (reminderCounts.today || 0) + (reminderCounts.overdue || 0) + (reminderCounts.upcoming || 0);
+        if (bannerBadge) {
+            if (activeCount > 0) {
+                bannerBadge.textContent = activeCount;
+                bannerBadge.style.display = "inline-block";
+            } else {
+                bannerBadge.style.display = "none";
+            }
+        }
+
+        const strip = document.getElementById("dashboardReminderStrip");
+        const stripText = document.getElementById("dashboardReminderStripText");
+        if (strip && stripText) {
+            const urgentCount = (reminderCounts.today || 0) + (reminderCounts.overdue || 0);
+            if (urgentCount > 0) {
+                stripText.textContent = `${urgentCount} crop milestone reminder${urgentCount > 1 ? 's' : ''} require attention (due today or overdue).`;
+                strip.style.display = "flex";
+            } else if (activeCount > 0) {
+                stripText.textContent = `${activeCount} upcoming crop milestone reminders scheduled.`;
+                strip.style.display = "flex";
+            } else {
+                strip.style.display = "none";
+            }
+        }
+    }
+
+    function renderCropRemindersUI() {
+        const container = document.getElementById("cropRemindersList");
+        if (!container) return;
+
+        if (remindersData.length === 0) {
+            container.innerHTML = `
+                <div class="crop-plans-empty" style="padding: 24px;">
+                    <div class="empty-illustration">⏰</div>
+                    <h4>${t("no_crop_reminders_found", "No crop reminders found for the selected filters.")}</h4>
+                    <p style="color:#64748b; font-size:0.88rem;">Create crop plans or adjust your filters to view scheduled sowing, harvest and growth stage reminders.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = remindersData.map(r => {
+            let cardStatusClass = "rem-upcoming";
+            let relBadgeClass = "rel-badge-upcoming";
+            if (r.status === "completed") {
+                cardStatusClass = "rem-completed";
+                relBadgeClass = "rel-badge-completed";
+            } else if (r.status === "dismissed") {
+                cardStatusClass = "rem-dismissed";
+                relBadgeClass = "rel-badge-dismissed";
+            } else if (r.is_overdue) {
+                cardStatusClass = "rem-overdue";
+                relBadgeClass = "rel-badge-overdue";
+            } else if (r.is_today) {
+                cardStatusClass = "rem-today";
+                relBadgeClass = "rel-badge-today";
+            }
+
+            let typeBadgeClass = "badge-sowing";
+            let typeLabel = "🌱 Sowing Milestone";
+            if (r.milestone_type === "harvest") {
+                typeBadgeClass = "badge-harvest";
+                typeLabel = "🌾 Harvest Milestone";
+            } else if (r.milestone_type === "vegetative") {
+                typeBadgeClass = "badge-vegetative";
+                typeLabel = "🌿 Vegetative Growth";
+            } else if (r.milestone_type === "flowering") {
+                typeBadgeClass = "badge-flowering";
+                typeLabel = "🌸 Flowering Phase";
+            } else if (r.milestone_type === "fruit_development") {
+                typeBadgeClass = "badge-fruit";
+                typeLabel = "🍎 Grain / Fruit Filling";
+            }
+
+            const isPending = (r.status === "pending");
+
+            return `
+                <div class="crop-reminder-card ${cardStatusClass}" id="remCard-${r.id}">
+                    <div class="rem-card-header">
+                        <div class="rem-card-tags">
+                            <span class="rem-type-badge ${typeBadgeClass}">${typeLabel}</span>
+                            ${r.is_estimated ? `<span class="badge-estimated-stage">📅 ${t("lbl_estimated_stage", "Estimated Stage")}</span>` : ""}
+                        </div>
+                        <span class="rem-relative-badge ${relBadgeClass}">${escapeHtml(r.relative_label || r.status)}</span>
+                    </div>
+
+                    <h4 class="rem-card-title">${escapeHtml(r.title)}</h4>
+
+                    <div class="rem-card-meta">
+                        <span>📅 <strong>${escapeHtml(r.due_date)}</strong></span>
+                        <span>🏡 ${escapeHtml(r.farm_name || "General Farm")}</span>
+                        <span>🌱 ${escapeHtml(r.crop_name)} ${r.variety ? `(${escapeHtml(r.variety)})` : ""}</span>
+                        <span>🍂 ${escapeHtml(r.season)}</span>
+                    </div>
+
+                    ${r.description ? `<p class="rem-card-desc">${escapeHtml(r.description)}</p>` : ""}
+
+                    ${r.guidance ? `
+                        <div class="reminder-guidance-box">
+                            <div class="guidance-box-header">💡 ${t("guidance_header", "General Agronomic Advice")}</div>
+                            <div>${escapeHtml(r.guidance)}</div>
+                        </div>
+                    ` : ""}
+
+                    <div class="rem-card-actions">
+                        ${isPending ? `
+                            <button type="button" class="btn-rem-action btn-rem-complete" onclick="CropPlanning.updateReminderStatus(${r.id}, 'completed')">
+                                ✓ ${t("btn_mark_completed", "Complete")}
+                            </button>
+                            <button type="button" class="btn-rem-action btn-rem-dismiss" onclick="CropPlanning.updateReminderStatus(${r.id}, 'dismissed')">
+                                ✕ ${t("btn_dismiss", "Dismiss")}
+                            </button>
+                            <button type="button" class="btn-rem-action btn-rem-activity" onclick="CropPlanning.addReminderToActivity(${r.id})">
+                                📋 ${t("btn_add_to_activity", "Add to Tasks")}
+                            </button>
+                        ` : `
+                            <button type="button" class="btn-rem-action btn-rem-reopen" onclick="CropPlanning.updateReminderStatus(${r.id}, 'pending')">
+                                ↺ ${t("btn_reopen", "Reopen")}
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    async function updateReminderStatus(reminderId, newStatus) {
+        const token = getAuthToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/api/crop-plans/reminders/${reminderId}/status`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showToast(data.message || `Reminder marked as ${newStatus}.`, "success");
+                // Synchronize both reminders and calendar
+                await Promise.all([
+                    loadCropReminders(),
+                    loadCropCalendar()
+                ]);
+                // Refresh unread notifications count if available
+                if (window.Notifications && typeof window.Notifications.loadUnreadCount === "function") {
+                    window.Notifications.loadUnreadCount();
+                }
+            } else {
+                showToast("Failed to update reminder status", "error");
+            }
+        } catch (err) {
+            console.error("Error updating reminder status:", err);
+            showToast("Network error updating reminder", "error");
+        }
+    }
+
+    async function addReminderToActivity(reminderId) {
+        const token = getAuthToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/api/crop-plans/reminders/${reminderId}/add-to-activity`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showToast(data.message || "Added to Farm Activities!", "success");
+            } else {
+                showToast("Failed to add to activities", "error");
+            }
+        } catch (err) {
+            console.error("Error adding reminder to activity:", err);
+            showToast("Network error adding to activities", "error");
+        }
+    }
+
+    async function openReminderSettingsModal() {
+        const modal = document.getElementById("cropReminderSettingsModal");
+        if (!modal) return;
+
+        const token = getAuthToken();
+        if (token) {
+            try {
+                const res = await fetch("/api/crop-plans/reminders/settings", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.settings) {
+                        const s = data.settings;
+                        const sowDays = s.sowing_lead_days || [7, 1, 0];
+                        const harDays = s.harvest_lead_days || [14, 7, 0];
+
+                        document.querySelectorAll(".cb-sow-lead").forEach(cb => {
+                            cb.checked = sowDays.includes(parseInt(cb.value, 10));
+                        });
+                        document.querySelectorAll(".cb-har-lead").forEach(cb => {
+                            cb.checked = harDays.includes(parseInt(cb.value, 10));
+                        });
+                        const cbGrowth = document.getElementById("cbEnableGrowthStages");
+                        if (cbGrowth) cbGrowth.checked = !!s.enable_growth_stages;
+                        const cbRem = document.getElementById("cbEnableCropReminders");
+                        if (cbRem) cbRem.checked = (s.enable_crop_reminders !== false);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching reminder settings:", err);
+            }
+        }
+
+        modal.classList.add("open");
+    }
+
+    function closeReminderSettingsModal() {
+        const modal = document.getElementById("cropReminderSettingsModal");
+        if (modal) modal.classList.remove("open");
+    }
+
+    async function saveReminderSettings() {
+        const token = getAuthToken();
+        if (!token) return;
+
+        const sowDays = [];
+        document.querySelectorAll(".cb-sow-lead:checked").forEach(cb => {
+            sowDays.push(parseInt(cb.value, 10));
+        });
+
+        const harDays = [];
+        document.querySelectorAll(".cb-har-lead:checked").forEach(cb => {
+            harDays.push(parseInt(cb.value, 10));
+        });
+
+        const cbGrowth = document.getElementById("cbEnableGrowthStages");
+        const enableGrowth = cbGrowth ? cbGrowth.checked : true;
+        const cbRem = document.getElementById("cbEnableCropReminders");
+        const enableRem = cbRem ? cbRem.checked : true;
+
+        const payload = {
+            sowing_lead_days: sowDays,
+            harvest_lead_days: harDays,
+            enable_growth_stages: enableGrowth,
+            enable_crop_reminders: enableRem
+        };
+
+        try {
+            const res = await fetch("/api/crop-plans/reminders/settings", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                showToast("Reminder settings saved and milestones synchronized!", "success");
+                closeReminderSettingsModal();
+                await Promise.all([
+                    loadCropReminders(),
+                    loadCropCalendar()
+                ]);
+            } else {
+                showToast("Failed to save reminder settings", "error");
+            }
+        } catch (err) {
+            console.error("Error saving reminder settings:", err);
+            showToast("Network error saving settings", "error");
+        }
+    }
+
+    function filterRemindersByPlan(planId) {
+        remFilterPlan = String(planId);
+        const sel = document.getElementById("remFilterPlan");
+        if (sel) sel.value = remFilterPlan;
+        loadCropReminders();
+        const container = document.getElementById("cropRemindersContainer");
+        if (container) {
+            container.scrollIntoView({ behavior: "smooth" });
+        }
     }
 
     /**
@@ -2184,6 +2628,77 @@
             });
         }
 
+        // Reminders Filter Handlers
+        const remStatusSel = document.getElementById("remFilterStatus");
+        if (remStatusSel) {
+            remStatusSel.addEventListener("change", (e) => {
+                remFilterStatus = e.target.value;
+                loadCropReminders();
+            });
+        }
+
+        const remTypeSel = document.getElementById("remFilterType");
+        if (remTypeSel) {
+            remTypeSel.addEventListener("change", (e) => {
+                remFilterType = e.target.value;
+                loadCropReminders();
+            });
+        }
+
+        const remPlanSel = document.getElementById("remFilterPlan");
+        if (remPlanSel) {
+            remPlanSel.addEventListener("change", (e) => {
+                remFilterPlan = e.target.value;
+                loadCropReminders();
+            });
+        }
+
+        // Reminders Refresh & Settings
+        const btnRefreshRem = document.getElementById("btnRefreshCropReminders");
+        if (btnRefreshRem) {
+            btnRefreshRem.addEventListener("click", () => loadCropReminders());
+        }
+
+        const btnSettingsRem = document.getElementById("btnReminderSettings");
+        if (btnSettingsRem) {
+            btnSettingsRem.addEventListener("click", openReminderSettingsModal);
+        }
+
+        const btnCloseRemSettings = document.getElementById("btnCloseReminderSettings");
+        if (btnCloseRemSettings) {
+            btnCloseRemSettings.addEventListener("click", closeReminderSettingsModal);
+        }
+
+        const btnCancelRemSettings = document.getElementById("btnCancelReminderSettings");
+        if (btnCancelRemSettings) {
+            btnCancelRemSettings.addEventListener("click", closeReminderSettingsModal);
+        }
+
+        const btnSaveRemSettings = document.getElementById("btnSaveReminderSettings");
+        if (btnSaveRemSettings) {
+            btnSaveRemSettings.addEventListener("click", saveReminderSettings);
+        }
+
+        const remSettingsModal = document.getElementById("cropReminderSettingsModal");
+        if (remSettingsModal) {
+            remSettingsModal.addEventListener("click", (e) => {
+                if (e.target === remSettingsModal) closeReminderSettingsModal();
+            });
+        }
+
+        // Reminder KPI card click quick-filter
+        document.querySelectorAll(".rem-kpi-card").forEach(card => {
+            card.addEventListener("click", () => {
+                const f = card.dataset.filter || "all";
+                const sel = document.getElementById("remFilterStatus");
+                if (sel) {
+                    sel.value = f;
+                    remFilterStatus = f;
+                    loadCropReminders();
+                }
+            });
+        });
+
         // Language changed event
         window.addEventListener("languageChanged", () => {
             renderSummaryUI(summaryData);
@@ -2192,6 +2707,7 @@
             renderRotationUI(rotationAnalyses);
             renderRecommendationsUI();
             renderCropCalendarUI();
+            renderCropRemindersUI();
         });
     }
 
@@ -2207,7 +2723,8 @@
             loadCropPlans(),
             loadRotationAnalysis(),
             loadRecommendations(),
-            loadCropCalendar()
+            loadCropCalendar(),
+            loadCropReminders()
         ]);
     }
 
@@ -2235,7 +2752,15 @@
         openEditModal,
         confirmDeletePlan,
         closeModal,
-        handleFormSubmit
+        handleFormSubmit,
+        loadCropReminders,
+        renderCropRemindersUI,
+        updateReminderStatus,
+        addReminderToActivity,
+        openReminderSettingsModal,
+        closeReminderSettingsModal,
+        saveReminderSettings,
+        filterRemindersByPlan
     };
 
     // Auto-init when DOM is ready
