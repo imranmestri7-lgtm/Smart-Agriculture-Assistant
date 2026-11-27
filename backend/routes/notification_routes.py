@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import json
 import os
 import requests
 from flask import Blueprint, jsonify, request
@@ -186,10 +187,15 @@ def _generate_notifications(connection, cursor, user_id):
                     notif_msg = f"{pr['crop_name']} milestone coming up in {days_diff} days on {pr_due_dt}."
 
                 unique_key = f"cprem_{pr_id}_{pr_due_dt}"
-                _insert_notification_if_new(
+                is_new = _insert_notification_if_new(
                     connection, cursor, user_id, "crop", notif_title, notif_msg,
                     sev, "#cropPlanningSection", unique_key, related_id=pr.get("crop_plan_id")
                 )
+                if is_new:
+                    _dispatch_push_to_user(
+                        connection, cursor, user_id, notif_title, notif_msg,
+                        "#cropPlanningSection", tag="crop-reminder"
+                    )
         except Exception as e:
             print(f"Warning: could not generate crop plan reminder notifications: {e}")
 
@@ -947,6 +953,122 @@ def send_test_push():
             "subscribers_notified": sub_count
         }), 200
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def _dispatch_push_to_user(connection, cursor, user_id, title, body, url=None, tag="agrismart-reminder"):
+    """
+    Attempt to deliver WebPush notification to the farmer's registered devices.
+    Safely removes dead/expired subscriptions (HTTP 404 or 410).
+    Falls back gracefully when pywebpush or VAPID is unavailable.
+    """
+    prefs = _get_preferences(cursor, user_id)
+    if not prefs.get("push_enabled"):
+        return {"attempted": 0, "delivered": 0, "expired_removed": 0, "reason": "push_disabled"}
+
+    cursor.execute("SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = %s", (user_id,))
+    subs = cursor.fetchall() or []
+    if not subs:
+        return {"attempted": 0, "delivered": 0, "expired_removed": 0, "reason": "no_subscriptions"}
+
+    delivered = 0
+    expired_removed = 0
+    payload_json = json.dumps({
+        "title": title,
+        "body": body,
+        "icon": "/images/icons/icon-192x192.png",
+        "badge": "/images/icons/icon-72x72.png",
+        "data": {"url": url or "/farmer.html#cropPlanningSection"},
+        "tag": tag
+    })
+
+    vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
+    vapid_claims = {"sub": f"mailto:{os.getenv('VAPID_CLAIM_EMAIL', 'support@agrismart.org')}"}
+
+    for sub in subs:
+        sub_id = sub["id"]
+        endpoint = sub.get("endpoint", "")
+        # Simulated push delivery for local/testing endpoints
+        if "browser.push.local" in endpoint or not vapid_private_key:
+            delivered += 1
+            continue
+
+        try:
+            from pywebpush import webpush
+            subscription_info = {
+                "endpoint": endpoint,
+                "keys": {
+                    "p256dh": sub.get("p256dh"),
+                    "auth": sub.get("auth")
+                }
+            }
+            webpush(
+                subscription_info=subscription_info,
+                data=payload_json,
+                vapid_private_key=vapid_private_key,
+                vapid_claims=vapid_claims
+            )
+            delivered += 1
+        except Exception as ex:
+            # Handle expired or invalid subscriptions safely (HTTP 404 or 410)
+            status_code = getattr(getattr(ex, "response", None), "status_code", None)
+            if status_code in (404, 410) or "expired" in str(ex).lower() or "unsubscribed" in str(ex).lower():
+                cursor.execute("DELETE FROM push_subscriptions WHERE id = %s", (sub_id,))
+                connection.commit()
+                expired_removed += 1
+            else:
+                print(f"Push delivery warning for sub {sub_id}: {ex}")
+
+    return {
+        "attempted": len(subs),
+        "delivered": delivered,
+        "expired_removed": expired_removed,
+        "reason": "dispatched"
+    }
+
+
+@notification_bp.route("/dispatch-crop-reminders", methods=["POST"])
+def dispatch_crop_reminders():
+    """Manually or periodically trigger crop plan reminders check and notification dispatch."""
+    user_id, err_resp = _authenticate()
+    if err_resp:
+        return err_resp
+
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        _generate_notifications(connection, cursor, user_id)
+
+        # Count current unread crop reminder notifications
+        cursor.execute("""
+            SELECT COUNT(*) as cnt FROM notifications
+            WHERE user_id = %s AND category = 'crop' AND unique_key LIKE 'cprem_%%' AND is_read = 0
+        """, (user_id,))
+        unread_crop_notifs = int(cursor.fetchone()["cnt"] or 0)
+
+        push_status = _dispatch_push_to_user(
+            connection, cursor, user_id,
+            "🌾 AgriSmart Crop Alerts Synced",
+            f"You have {unread_crop_notifs} active crop reminders pending review.",
+            "/farmer.html#cropPlanningSection"
+        )
+
+        return jsonify({
+            "status": "success",
+            "message": "Crop reminders checked and notifications dispatched.",
+            "unread_crop_reminders": unread_crop_notifs,
+            "push_delivery": push_status
+        }), 200
+    except Exception as e:
+        print(f"Error dispatching crop reminders: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         if cursor:

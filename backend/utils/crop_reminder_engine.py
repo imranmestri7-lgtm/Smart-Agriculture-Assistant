@@ -109,11 +109,19 @@ def get_or_create_reminder_settings(user_id, conn=None):
         sowing_days = _parse_days_list(row.get("sowing_lead_days"), DEFAULT_SOWING_LEAD_DAYS)
         harvest_days = _parse_days_list(row.get("harvest_lead_days"), DEFAULT_HARVEST_LEAD_DAYS)
 
+        # Retrieve global notification preferences for crop_reminders
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT crop_reminders FROM notification_preferences WHERE user_id = %s", (user_id,))
+        pref_row = cur.fetchone()
+        cur.close()
+        enable_crop_rem = bool(pref_row.get("crop_reminders", 1)) if pref_row else True
+
         return {
             "user_id": user_id,
             "sowing_lead_days": sowing_days,
             "harvest_lead_days": harvest_days,
-            "enable_growth_stages": bool(row.get("enable_growth_stages", 1))
+            "enable_growth_stages": bool(row.get("enable_growth_stages", 1)),
+            "enable_crop_reminders": enable_crop_rem
         }
     finally:
         if close_conn and conn:
@@ -150,6 +158,18 @@ def update_reminder_settings(user_id, settings_dict, conn=None):
                 harvest_lead_days = VALUES(harvest_lead_days),
                 enable_growth_stages = VALUES(enable_growth_stages)
         """, (user_id, sowing_str, harvest_str, enable_growth))
+
+        # Synchronize global notification preference if passed
+        enable_crop_val = True
+        if "enable_crop_reminders" in settings_dict:
+            enable_crop_int = 1 if settings_dict.get("enable_crop_reminders") else 0
+            enable_crop_val = bool(enable_crop_int)
+            cur.execute("""
+                INSERT INTO notification_preferences (user_id, crop_reminders)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE crop_reminders = VALUES(crop_reminders)
+            """, (user_id, enable_crop_int))
+
         conn.commit()
         cur.close()
 
@@ -157,7 +177,8 @@ def update_reminder_settings(user_id, settings_dict, conn=None):
             "user_id": user_id,
             "sowing_lead_days": sowing_list,
             "harvest_lead_days": harvest_list,
-            "enable_growth_stages": bool(enable_growth)
+            "enable_growth_stages": bool(enable_growth),
+            "enable_crop_reminders": enable_crop_val
         }
     finally:
         if close_conn and conn:
@@ -691,6 +712,21 @@ def update_reminder_status(user_id, reminder_id, new_status, conn=None):
                 dismissed_at = %s
             WHERE id = %s AND user_id = %s
         """, (new_status, completed_at, dismissed_at, reminder_id, user_id))
+
+        # Synchronize matching in-app notifications
+        if new_status in ("completed", "dismissed"):
+            cur.execute("""
+                UPDATE notifications
+                SET is_read = 1
+                WHERE user_id = %s AND unique_key LIKE %s
+            """, (user_id, f"cprem_{reminder_id}_%"))
+        elif new_status == "pending":
+            cur.execute("""
+                UPDATE notifications
+                SET is_read = 0
+                WHERE user_id = %s AND unique_key LIKE %s
+            """, (user_id, f"cprem_{reminder_id}_%"))
+
         conn.commit()
         cur.close()
 
